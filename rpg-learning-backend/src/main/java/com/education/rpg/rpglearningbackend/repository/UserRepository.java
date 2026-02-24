@@ -11,12 +11,15 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Стандартні методи (вже були)
+    // --- СТАНДАРТНІ МЕТОДИ (АВТОРИЗАЦІЯ) ---
     Optional<User> findByUsername(String username);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
-    // --- НОВІ МЕТОДИ ---
+    // Метод, який ми додали спеціально для входу через Google!
+    Optional<User> findByEmail(String email);
+
+    // --- НОВІ МЕТОДИ (ІГРОВА МЕХАНІКА) ---
 
     // 1. Для таблиці лідерів (Топ гравців)
     // Spring сам зрозуміє, що треба відсортувати всіх за досвідом (XP) від найбільшого до найменшого
