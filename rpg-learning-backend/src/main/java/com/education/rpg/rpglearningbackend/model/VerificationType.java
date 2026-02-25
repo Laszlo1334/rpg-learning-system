@@ -1,6 +1,6 @@
 package com.education.rpg.rpglearningbackend.model;
 
 public enum VerificationType {
-    AUTO,   // Перевіряється автоматично (тест або точна відповідь)
-    MANUAL  // Перевіряється викладачем вручну
+    AUTO,   // Система сама перевіряє відповідь (якщо співпадає з correctAnswer)
+    MANUAL  // Вчитель повинен зайти і перевірити вручну
 }
