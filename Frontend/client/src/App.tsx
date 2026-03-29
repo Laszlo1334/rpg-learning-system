@@ -8,8 +8,9 @@ import { authService } from '@/services/authService';
 
 // Імпортуємо сторінки та Layout
 import { Login } from '@/pages/Login';
-import { StudentDashboard } from '@/pages/student/StudentDashboard';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { StudentDashboard } from '@/pages/student/StudentDashboard';
+import { CoursesPage } from '@/pages/student/CoursesPage';  // Наша нова сторінка окремого завдання
 
 // Налаштовуємо маршрути з використанням Layout
 const router = createBrowserRouter([
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
     element: <Login />, // Сторінка входу залишається на весь екран (без меню)
   },
   {
-    // Цей блок відповідає за всі сторінки, де потрібен Header
+    // Цей блок відповідає за всі сторінки, де потрібен Header / Sidebar
     path: '/',
     element: <MainLayout />, 
     children: [
@@ -26,7 +27,11 @@ const router = createBrowserRouter([
         path: 'dashboard',
         element: <StudentDashboard />, // Рендериться всередині <Outlet /> у MainLayout
       },
-      // У майбутньому ми просто додаватимемо сюди нові сторінки:
+      {
+        path: 'courses',
+        element: <CoursesPage />, // Сторінка Академії (всі курси)
+      },
+            // У майбутньому ми просто додаватимемо сюди нові сторінки:
       // { path: 'shop', element: <ShopPage /> },
       // { path: 'leaderboard', element: <LeaderboardPage /> }
     ],

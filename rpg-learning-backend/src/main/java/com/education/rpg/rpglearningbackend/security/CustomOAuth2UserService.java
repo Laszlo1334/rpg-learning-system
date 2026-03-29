@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -16,34 +17,44 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
 
-    // Пам'ятаєш, ми видалили Lombok? Тому пишемо конструктор вручну
     public CustomOAuth2UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // Отримуємо дані юзера від Google
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
 
-        // Шукаємо юзера в нашій БД
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
-            // Якщо це новий гравець - реєструємо його в нашій RPG-системі!
             User newUser = new User();
             newUser.setUsername(name);
             newUser.setEmail(email);
             newUser.setRole(Role.STUDENT);
-            newUser.setPassword(""); // Пароль не потрібен, бо вхід через Google
+            newUser.setPassword("");
+
+            // --- СТАРТОВИЙ НАБІР НОВАЧКА (Щоб база не падала через null) ---
+            newUser.setLevel(1);
+            newUser.setCurrentXp(0);
+            newUser.setGold(0);
+            newUser.setCrystals(0);
+            newUser.setCampfireLevel(1);
+            newUser.setEnergy(100);
+            newUser.setIsPublicProfile(true);
+            newUser.setLifetimeGold(0);
+            newUser.setLifetimeCrystals(0);
+            newUser.setTotalTasksCompleted(0);
+            newUser.setTotalFailures(0);
+            newUser.setLastLoginDate(LocalDateTime.now());
 
             userRepository.save(newUser);
-            System.out.println("New RPG Player created via Google: " + name);
+            System.out.println("✨ New RPG Player created via Google: " + name);
         } else {
-            System.out.println("Existing RPG Player logged in: " + name);
+            System.out.println("🔥 Existing RPG Player logged in: " + name);
         }
 
         return oAuth2User;

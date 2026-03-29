@@ -1,9 +1,10 @@
 package com.education.rpg.rpglearningbackend.service;
 
-import com.education.rpg.rpglearningbackend.dto.SubmissionRequest;
-import com.education.rpg.rpglearningbackend.dto.SubmissionReviewRequest;
-import com.education.rpg.rpglearningbackend.model.*;
-import com.education.rpg.rpglearningbackend.repository.SubmissionRepository;
+import com.education.rpg.rpglearningbackend.dto.RunCompletionRequest;
+import com.education.rpg.rpglearningbackend.model.CompletedTask;
+import com.education.rpg.rpglearningbackend.model.Task;
+import com.education.rpg.rpglearningbackend.model.User;
+import com.education.rpg.rpglearningbackend.repository.CompletedTaskRepository;
 import com.education.rpg.rpglearningbackend.repository.TaskRepository;
 import com.education.rpg.rpglearningbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,105 +12,106 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubmissionService {
 
-    private final SubmissionRepository submissionRepository;
-    private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
+    private final CompletedTaskRepository completedTaskRepository;
 
-    @Transactional // Гарантує, що у разі помилки дані не збережуться наполовину
-    public Submission processSubmission(String studentEmail, SubmissionRequest request) {
-
+    @Transactional
+    public void processRunCompletion(String studentEmail, RunCompletionRequest request) {
         User student = userRepository.findByEmail(studentEmail)
                 .orElseThrow(() -> new RuntimeException("Студента не знайдено"));
 
         Task task = taskRepository.findById(request.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Завдання не знайдено"));
 
-        Submission submission = new Submission();
-        submission.setStudent(student);
-        submission.setTask(task);
-        submission.setStudentAnswer(request.getAnswer());
-        submission.setAttemptNumber(1); // Для початку ставимо 1 спробу
+        boolean hasApproved = completedTaskRepository.existsByTaskIdAndUserId(task.getId(), student.getId());
+        LocalDateTime now = LocalDateTime.now();
 
-        if (task.getVerificationType() == VerificationType.MANUAL) {
-            submission.setStatus(SubmissionStatus.PENDING);
-            log.info("Квест {} відправлено на ручну перевірку студентом {}", task.getId(), studentEmail);
-        }
-        else if (task.getVerificationType() == VerificationType.AUTO) {
-            // Перевіряємо відповідь (ігноруючи регістр та зайві пробіли)
-            boolean isCorrect = task.getCorrectAnswer() != null &&
-                    task.getCorrectAnswer().trim().equalsIgnoreCase(request.getAnswer().trim());
+        if (request.isVictory()) {
+            if (!hasApproved) {
+                grantRewards(student, task, now);
+                completedTaskRepository.save(new CompletedTask(student, task));
 
-            if (isCorrect) {
-                submission.setStatus(SubmissionStatus.APPROVED);
-                grantRewards(student, task);
-                log.info("Квест {} успішно пройдено студентом {}!", task.getId(), studentEmail);
-            } else {
-                submission.setStatus(SubmissionStatus.REJECTED);
-                log.info("Студент {} дав неправильну відповідь на квест {}", studentEmail, task.getId());
+                LocalDate today = LocalDate.now();
+                LocalDate lastLogin = student.getLastLoginDate() != null ? student.getLastLoginDate().toLocalDate() : null;
+                if (lastLogin == null || lastLogin.isBefore(today)) {
+                    student.setCampfireLevel(Math.min(student.getCampfireLevel() + 1, 5));
+                }
+            }
+
+            // Знімаємо щит, якщо він був використаний для безпечного проходження
+            if (student.getHasActiveShield() != null && student.getHasActiveShield()) {
+                student.setHasActiveShield(false);
+            }
+
+            student.setLastLoginDate(now);
+        } else {
+            // Game Over
+            if (student.getHasActiveShield() != null && student.getHasActiveShield()) {
+                log.info("Щит поглинув Game Over гравця {} у завданні {}", student.getEmail(), task.getId());
+                student.setHasActiveShield(false); // Щит згорає, але помилка не йде в статистику
+            } else if (request.getFailedQuestionIds() != null && !request.getFailedQuestionIds().isEmpty()) {
+                handleProductiveFailure(student, request.getFailedQuestionIds());
             }
         }
 
         userRepository.save(student);
-        return submissionRepository.save(submission);
     }
 
-    // НОВИЙ МЕТОД: Перевірка завдання вчителем
-    @Transactional
-    public Submission reviewSubmission(Long submissionId, String reviewerEmail, SubmissionReviewRequest request) {
-        // 1. Знаходимо користувача, який робить запит (Вчителя)
-        User reviewer = userRepository.findByEmail(reviewerEmail)
-                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
+    // --- ТВОЇ ЗБЕРЕЖЕНІ ПРИВАТНІ МЕТОДИ ---
 
-        // 2. Перевіряємо, чи має він права вчителя (або адміна)
-        if (reviewer.getRole() != Role.TEACHER && reviewer.getRole() != Role.ADMIN) {
-            throw new RuntimeException("У вас немає прав для перевірки завдань!");
+    private void grantRewards(User student, Task task, LocalDateTime now) {
+        // Базова енергія дає x1.5
+        double energyMultiplier = (student.getEnergy() != null && student.getEnergy() > 0) ? 1.5 : 1.0;
+
+        // Перевіряємо активні бафи від зілля
+        boolean hasXpBuff = student.getXpBuffEndsAt() != null && now.isBefore(student.getXpBuffEndsAt());
+        boolean hasGoldBuff = student.getGoldBuffEndsAt() != null && now.isBefore(student.getGoldBuffEndsAt());
+        boolean hasEnergyStasis = student.getEnergyStasisEndsAt() != null && now.isBefore(student.getEnergyStasisEndsAt());
+
+        // Застосовуємо бафи (наприклад, ще +50% якщо випив Еліксир)
+        double finalXpMultiplier = hasXpBuff ? energyMultiplier + 0.5 : energyMultiplier;
+        double finalGoldMultiplier = hasGoldBuff ? energyMultiplier + 1.0 : energyMultiplier; // Подвійне золото
+
+        int finalXp = (int) (task.getRewardXp() * finalXpMultiplier);
+        int finalGold = (int) (task.getRewardGold() * finalGoldMultiplier);
+
+        student.setCurrentXp(student.getCurrentXp() + finalXp);
+        student.setGold(student.getGold() + finalGold);
+        student.setLifetimeGold(student.getLifetimeGold() + finalGold);
+        student.setTotalTasksCompleted(student.getTotalTasksCompleted() + 1);
+
+        // Якщо немає стазису кави — знімаємо енергію
+        if (student.getEnergy() != null && !hasEnergyStasis) {
+            student.setEnergy(Math.max(0, student.getEnergy() - 20));
         }
 
-        // 3. Знаходимо саму відповідь студента
-        Submission submission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new RuntimeException("Відповідь не знайдено"));
+        student.setLastTaskCompletionDate(now);
 
-        // 4. Перевіряємо, щоб не нарахувати нагороду двічі
-        if (submission.getStatus() == SubmissionStatus.APPROVED) {
-            throw new RuntimeException("Це завдання вже було перевірено та зараховано!");
-        }
-
-        // 5. Оновлюємо статус та коментар
-        submission.setStatus(request.getStatus());
-        submission.setTeacherComment(request.getTeacherComment());
-
-        // 6. Якщо вчитель схвалив завдання — видаємо нагороду студенту
-        if (request.getStatus() == SubmissionStatus.APPROVED) {
-            User student = submission.getStudent();
-            Task task = submission.getTask();
-
-            grantRewards(student, task); // Нараховуємо XP та монети
-            userRepository.save(student); // Зберігаємо оновленого студента
-
-            log.info("Вчитель {} схвалив завдання {} для студента {}", reviewerEmail, task.getId(), student.getEmail());
-        } else {
-            log.info("Вчитель {} відхилив завдання {} для студента {}", reviewerEmail, submission.getTask().getId(), submission.getStudent().getEmail());
-        }
-
-        return submissionRepository.save(submission);
-    }
-
-    private void grantRewards(User student, Task task) {
-        // Додаємо XP та монети (конвертуємо Integer з Task у Long для User)
-        student.setXp(student.getXp() + task.getRewardXp().longValue());
-        student.setCoins(student.getCoins() + task.getRewardCoins().longValue());
-
-        // Формула рівня: 1 рівень за кожні 100 XP
-        int calculatedLevel = (int) (student.getXp() / 100) + 1;
-
+        int calculatedLevel = (student.getCurrentXp() / 1000) + 1;
         if (calculatedLevel > student.getLevel()) {
             student.setLevel(calculatedLevel);
-            log.info("✨ Студент {} отримав новий рівень: {}!", student.getEmail(), student.getLevel());
         }
+    }
+
+    private void handleProductiveFailure(User student, List<Long> failedQuestionIds) {
+        // Використовуємо Set, щоб уникнути нарахування кристалів за ту саму помилку кілька разів у межах одного забігу
+        Set<Long> uniqueFails = new HashSet<>(failedQuestionIds);
+        int crystalReward = uniqueFails.size() * 5;
+
+        student.setCrystals(student.getCrystals() + crystalReward);
+        student.setLifetimeCrystals(student.getLifetimeCrystals() + crystalReward);
+        student.setTotalFailures(student.getTotalFailures() + uniqueFails.size());
     }
 }

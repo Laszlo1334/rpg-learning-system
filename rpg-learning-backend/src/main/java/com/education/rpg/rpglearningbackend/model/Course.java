@@ -1,5 +1,6 @@
 package com.education.rpg.rpglearningbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class Course {
 
     private String accessCode; // Код для входу студентів
 
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<Task> tasks; // Список квестів
 

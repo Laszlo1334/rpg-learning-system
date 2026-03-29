@@ -1,82 +1,79 @@
 package com.education.rpg.rpglearningbackend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
-    private String password;
-
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String email;
+
+    // --- ТВОРЇ СТАРІ БАЗОВІ ПОЛЯ (Повернули на місце) ---
+    private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private String avatarUrl; // Повернув, бо ти використовував це в DTO
+
+    // --- БАЗОВА ЕКОНОМІКА ТА ПРОГРЕС ---
     @Column(nullable = false)
     private Integer level = 1;
 
     @Column(nullable = false)
-    private Long xp = 0L;
+    private Integer currentXp = 0;
 
     @Column(nullable = false)
-    private Long coins = 0L;
+    private Integer gold = 0; // Поточний баланс монет (для Ачіверів)
 
-    private String avatarUrl;
+    @Column(nullable = false)
+    private Integer crystals = 0; // Валюта "Продуктивної невдачі"
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    // --- МЕХАНІКА "БАГАТТЯ ТАБОРУ" (Streak) ---
+    @Column(nullable = false)
+    private Integer campfireLevel = 1; // Від 1 до 5
 
-    // 1. Порожній конструктор (обов'язково для Hibernate)
-    public User() {}
+    private LocalDateTime lastLoginDate; // Для перевірки 48 годин бездіяльності
 
-    // 2. Метод перед збереженням
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.level == null) this.level = 1;
-        if (this.xp == null) this.xp = 0L;
-        if (this.coins == null) this.coins = 0L;
-    }
+    // --- МЕХАНІКА "ЕНЕРГІЯ ВІДПОЧИНКУ" (Когнітивне навантаження) ---
+    @Column(nullable = false)
+    private Integer energy = 100; // Максимум 100
 
-    // 3. ГЕТТЕРИ ТА СЕТТЕРИ (Те, що не бачила твоя IDE)
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    private LocalDateTime lastTaskCompletionDate; // Для розрахунку відновлення (+1 за 6 хв)
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    // --- ПРИВАТНІСТЬ (SDT: Автономія та Безпека) ---
+    @Column(nullable = false)
+    private Boolean isPublicProfile = true; // Opt-out система для Лідерборду
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    // --- АКТИВНІ БАФИ ВІД ПРЕДМЕТІВ ---
+    private LocalDateTime xpBuffEndsAt; // Еліксир Мудрості
+    private LocalDateTime goldBuffEndsAt; // Магніт Гобліна
+    private LocalDateTime energyStasisEndsAt; // Кава Магістра
+    private Boolean hasActiveShield = false; // Аура Безстрашності (діє на 1 рівень)
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    // --- ЛІТОПИС ГРАВЦЯ (Дані для дипломного дослідження) ---
+    @Column(nullable = false)
+    private Integer lifetimeGold = 0; // Все зароблене золото за весь час
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    @Column(nullable = false)
+    private Integer lifetimeCrystals = 0; // Всі отримані кристали
 
-    public Integer getLevel() { return level; }
-    public void setLevel(Integer level) { this.level = level; }
+    @Column(nullable = false)
+    private Integer totalTasksCompleted = 0;
 
-    public Long getXp() { return xp; }
-    public void setXp(Long xp) { this.xp = xp; }
-
-    public Long getCoins() { return coins; }
-    public void setCoins(Long coins) { this.coins = coins; }
-
-    public String getAvatarUrl() { return avatarUrl; }
-    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    @Column(nullable = false)
+    private Integer totalFailures = 0; // Ключова метрика для аналізу "Продуктивної невдачі"
 }

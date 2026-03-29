@@ -16,22 +16,26 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/items")
 @RequiredArgsConstructor
-@Tag(name = "Shop & Inventory", description = "Магазин та інвентар гравця")
+@Tag(name = "Shop & Inventory", description = "Крамниця Гільдії та інвентар гравця")
 public class ItemController {
 
     private final ItemService itemService;
 
     @GetMapping
-    @Operation(summary = "Переглянути всі товари в магазині")
+    @Operation(summary = "Переглянути всі товари в Крамниці", description = "Повертає список Косметики та Розхідників")
     public ResponseEntity<List<Item>> getShopItems() {
         return ResponseEntity.ok(itemService.getAllItems());
     }
 
     @PostMapping("/{id}/buy")
-    @Operation(summary = "Купити предмет за монети")
+    @Operation(summary = "Купити предмет", description = "Купує предмет за Золото 🪙 або Кристали Невдачі 💎")
     public ResponseEntity<?> buyItem(
             @PathVariable Long id,
             @AuthenticationPrincipal OAuth2User principal) {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).body("Увійдіть у систему!");
+        }
 
         try {
             String email = principal.getAttribute("email");

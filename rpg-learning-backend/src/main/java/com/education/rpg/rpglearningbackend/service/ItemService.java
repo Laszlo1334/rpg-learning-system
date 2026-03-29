@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -29,37 +30,57 @@ public class ItemService {
         User player = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
 
-        // 2. Знаходимо предмет, який він хоче купити
+        // 2. Знаходимо предмет
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Предмет не знайдено в магазині"));
 
-        // 3. Перевірка 1: Чи достатньо рівня?
-        if (item.getMinLevelReq() != null && player.getLevel() < item.getMinLevelReq()) {
-            throw new RuntimeException("Ваш рівень занадто низький для покупки цього предмета! Необхідний рівень: " + item.getMinLevelReq());
+        // 3. ПЕРЕВІРКА ВАЛЮТИ ТА СПИСАННЯ
+        if (item.getCurrencyType() == Item.CurrencyType.GOLD) {
+            if (player.getGold() < item.getPrice()) {
+                throw new RuntimeException("Недостатньо Золота! Вам потрібно ще " + (item.getPrice() - player.getGold()) + " 🪙");
+            }
+            player.setGold(player.getGold() - item.getPrice());
+
+        } else if (item.getCurrencyType() == Item.CurrencyType.CRYSTAL) {
+            if (player.getCrystals() < item.getPrice()) {
+                throw new RuntimeException("Недостатньо Кристалів Невдачі! Робіть більше спроб. Вам потрібно ще " + (item.getPrice() - player.getCrystals()) + " 💎");
+            }
+            player.setCrystals(player.getCrystals() - item.getPrice());
         }
 
-        // 4. Перевірка 2: Чи є гроші?
-        if (player.getCoins() < item.getPrice()) {
-            throw new RuntimeException("Недостатньо монет! Вам потрібно ще " + (item.getPrice() - player.getCoins()));
+        // 4. ЛОГІКА ІНВЕНТАРЮ (Косметика vs Розхідники)
+        Inventory inventoryEntry;
+
+        if (item.getCategory() == Item.ItemCategory.COSMETIC) {
+            // Косметику купуємо лише один раз
+            boolean alreadyOwns = inventoryRepository.existsByUserAndItem(player, item);
+            if (alreadyOwns) {
+                throw new RuntimeException("У вас вже є цей предмет гардеробу!");
+            }
+            inventoryEntry = new Inventory();
+            inventoryEntry.setUser(player);
+            inventoryEntry.setItem(item);
+            inventoryEntry.setIsEquipped(false);
+            inventoryEntry.setQuantity(1); // Навіть для косметики ставимо 1
+
+        } else {
+            // Розхідники (Consumables) - їх можна купувати багато разів (стакаються)
+            Optional<Inventory> existingItemOpt = inventoryRepository.findByUserAndItem(player, item);
+            if (existingItemOpt.isPresent()) {
+                inventoryEntry = existingItemOpt.get();
+                inventoryEntry.setQuantity(inventoryEntry.getQuantity() + 1); // Збільшуємо кількість на 1
+            } else {
+                inventoryEntry = new Inventory();
+                inventoryEntry.setUser(player);
+                inventoryEntry.setItem(item);
+                inventoryEntry.setIsEquipped(false);
+                inventoryEntry.setQuantity(1); // Перший такий предмет у рюкзаку
+            }
         }
 
-        // 5. Перевірка 3: Чи є вже такий предмет в інвентарі? (щоб не купувати дублікати)
-        boolean alreadyOwns = inventoryRepository.existsByUserAndItem(player, item);
-        if (alreadyOwns) {
-            throw new RuntimeException("У вас вже є цей предмет в інвентарі!");
-        }
-
-        // 6. Успішна покупка: Списуємо монети
-        player.setCoins(player.getCoins() - item.getPrice().longValue());
         userRepository.save(player);
-
-        // 7. Додаємо предмет в інвентар
-        Inventory inventoryEntry = new Inventory();
-        inventoryEntry.setUser(player);
-        inventoryEntry.setItem(item);
-        inventoryEntry.setIsEquipped(false); // За замовчуванням просто лежить у рюкзаку
-
-        log.info("Гравець {} успішно купив предмет: {}", player.getEmail(), item.getName());
+        log.info("Гравець {} успішно купив предмет: {} за {} {}",
+                player.getEmail(), item.getName(), item.getPrice(), item.getCurrencyType());
 
         return inventoryRepository.save(inventoryEntry);
     }
