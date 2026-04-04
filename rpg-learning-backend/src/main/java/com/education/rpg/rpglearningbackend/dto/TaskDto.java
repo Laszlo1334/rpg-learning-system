@@ -19,4 +19,16 @@ public class TaskDto {
     private List<Long> prerequisiteTaskIds;
 
     private List<QuestionDto> questions;
+
+    private String type; // Відправляємо як String (REGULAR, BOSS, MEMORY)
+    private BossMetadata bossMetadata;
+    private Integer dynamicQuestionCount;
+
+    // Вкладений клас для метаданих
+    @Data
+    public static class BossMetadata {
+        private String bossName;
+        private String bossAvatar;
+        private Integer timeLimitSeconds;
+    }
 }

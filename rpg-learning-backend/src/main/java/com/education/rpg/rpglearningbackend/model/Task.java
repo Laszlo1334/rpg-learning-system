@@ -50,4 +50,20 @@ public class Task {
     // Нагороди за весь забіг (видаються після успішного проходження всіх запитань)
     private Integer rewardXp;
     private Integer rewardGold;
+
+    public enum TaskType {
+        REGULAR, BOSS, MEMORY
+    }
+
+    @Column(nullable = false)
+    private Integer dynamicQuestionCount = 5; // Задаємо 5 як дефолтне значення
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskType type = TaskType.REGULAR;
+
+    // Метадані для Боса (можуть бути null для REGULAR)
+    private String bossName;
+    private String bossAvatarUrl;
+    private Integer timeLimitSeconds;
 }

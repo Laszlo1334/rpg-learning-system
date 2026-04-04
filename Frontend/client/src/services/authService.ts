@@ -1,21 +1,26 @@
 // src/services/authService.ts
 import { api } from './api';
-import type { User } from '../types';
+import type { User, UserStatsDto } from '../types';
 
 export const authService = {
-  // Функція для отримання поточного юзера
+  // Отримання поточного юзера
   getCurrentUser: async (): Promise<User> => {
-    // Звертаємося до ендпоінту бекенда. Axios автоматично підставить baseURL
-    const response = await api.get<User>('/users/me'); 
+    const response = await api.get<User>('/users/me');
     return response.data;
   },
 
-  // Функція для логіну (оскільки у нас Google OAuth2, ми просто робимо редірект на бекенд)
+  // Отримання детальної статистики для Літопису
+  getUserStats: async (): Promise<UserStatsDto> => {
+    const response = await api.get<UserStatsDto>('/users/me/stats');
+    return response.data;
+  },
+
+  // Логін через Google OAuth2
   loginWithGoogle: () => {
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   },
-  
-  // Функція для виходу (якщо на бекенді є такий ендпоінт, зазвичай /logout)
+
+  // Вихід з акаунту
   logout: async () => {
     await api.post('/logout');
   }

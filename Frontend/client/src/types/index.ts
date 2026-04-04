@@ -1,48 +1,156 @@
-// src/types/index.ts
-
 export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
-export type VerificationType = 'AUTO' | 'MANUAL';
+export type QuestionType = 'TEST' | 'TEXT';
+export type CurrencyType = 'GOLD' | 'CRYSTAL';
+export type ItemCategory = 'COSMETIC' | 'CONSUMABLE';
+export type ItemEffect =
+  | 'XP_BOOST_30_MIN'
+  | 'GOLD_BOOST_60_MIN'
+  | 'ENERGY_STASIS_30_MIN'
+  | 'SINGLE_RUN_SHIELD'
+  | 'NONE';
+export type SubmissionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
-// 1. Опис Користувача (GET /api/users/me)
 export interface User {
   id: number;
   username: string;
   email: string;
+  password?: string;
   role: Role;
-  level: number;
-  xp: number;
-  coins: number;
   avatarUrl: string | null;
-  createdAt: string; 
-  // Примітка: пароль ми ігноруємо на фронтенді заради безпеки
+
+  level: number;
+  currentXp: number;
+  gold: number;
+  crystals: number;
+
+  campfireLevel: number;
+  lastLoginDate: string | null;
+
+  energy: number;
+  lastTaskCompletionDate: string | null;
+
+  isPublicProfile: boolean;
+
+  xpBuffEndsAt: string | null;
+  goldBuffEndsAt: string | null;
+  energyStasisEndsAt: string | null;
+  hasActiveShield: boolean;
+
+  lifetimeGold: number;
+  lifetimeCrystals: number;
+  totalTasksCompleted: number;
+  totalFailures: number;
 }
 
-// 2. Опис Курсу (бо він приходить всередині Task)
-export interface Course {
+export interface UserStatsDto {
+  lifetimeGold: number;
+  lifetimeCrystals: number;
+  totalTasksCompleted: number;
+  totalFailures: number;
+}
+
+export interface CourseProgressDto {
   id: number;
   title: string;
   description: string;
-  accessCode: string;
-  createdAt: string;
+  totalTasks: number;
+  completedTasks: number;
+  progressPercentage: number;
 }
 
-// 3. Опис Квесту (GET /api/tasks)
-export interface Task {
+export interface QuestionDto {
+  id: number;
+  questionText: string;
+  type: QuestionType;
+  options: string[];
+}
+
+export interface TaskDto {
   id: number;
   title: string;
-  description: string;
-  course?: Course; // Зробили опціональним на випадок, якщо квест без курсу
+  theoryContent: string;
+  branchName: string;
+  orderIndex: number;
+  isTheoryHidden: boolean;
   rewardXp: number;
-  rewardCoins: number;
-  verificationType: VerificationType;
-  correctAnswer?: string; 
+  rewardGold: number;
+  isCompleted: boolean;
+  isLocked: boolean;
+  prerequisiteTaskIds: number[];
+  questions: QuestionDto[];
+  dynamicQuestionCount?: number;
+  type?: 'REGULAR' | 'BOSS' | 'MEMORY';
+  bossMetadata?: {
+    bossName: string;
+    bossAvatar: string;
+    timeLimitSeconds?: number;
+  };
 }
 
-// 4. Опис гравця в Лідерборді (GET /api/users/leaderboard)
-export interface LeaderboardEntry {
+export interface AnswerRequest {
+  questionId: number;
+  userAnswer: string;
+}
+
+export interface AnswerResponse {
+  isCorrect: boolean;
+  explanation: string | null;
+  crystalsAwarded: number | null;
+}
+
+export interface RunCompletionRequest {
+  taskId: number;
+  isVictory: boolean;
+  failedQuestionIds: number[];
+}
+
+export interface Item {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  currencyType: CurrencyType;
+  category: ItemCategory;
+  effect: ItemEffect;
+  assetUrl: string | null;
+}
+
+export interface InventoryEntry {
+  id: number;
+  item: Item;
+  isEquipped: boolean;
+  quantity: number;
+  purchasedAt: string;
+}
+
+export interface LeaderboardDto {
   id: number;
   username: string;
   level: number;
   xp: number;
   avatarUrl: string | null;
 }
+
+export interface CourseLeaderboardDto {
+  userId: number;
+  username: string;
+  courseXp: number;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  role: Role;
+}
+
+export interface CourseDto {
+  id: number;
+  title: string;
+  description: string;
+  totalTasks: number;
+  completedTasks: number;
+  status: 'new' | 'in_progress' | 'completed' | 'locked';
+  rewardIcon?: string; // Наприклад, 'sword', 'shield', 'scroll'
+}
+

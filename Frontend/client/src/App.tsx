@@ -10,7 +10,8 @@ import { authService } from '@/services/authService';
 import { Login } from '@/pages/Login';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
-import { CoursesPage } from '@/pages/student/CoursesPage';  // Наша нова сторінка окремого завдання
+import { CoursesPage } from '@/pages/student/CoursesPage';
+import { ArenaPage } from '@/pages/student/ArenaPage'; // Додали імпорт Арени
 
 // Налаштовуємо маршрути з використанням Layout
 const router = createBrowserRouter([
@@ -21,19 +22,20 @@ const router = createBrowserRouter([
   {
     // Цей блок відповідає за всі сторінки, де потрібен Header / Sidebar
     path: '/',
-    element: <MainLayout />, 
+    element: <MainLayout />,
     children: [
       {
         path: 'dashboard',
-        element: <StudentDashboard />, // Рендериться всередині <Outlet /> у MainLayout
+        element: <StudentDashboard />,
       },
       {
         path: 'courses',
-        element: <CoursesPage />, // Сторінка Академії (всі курси)
+        element: <CoursesPage />,
       },
-            // У майбутньому ми просто додаватимемо сюди нові сторінки:
-      // { path: 'shop', element: <ShopPage /> },
-      // { path: 'leaderboard', element: <LeaderboardPage /> }
+      {
+        path: 'tasks/:id',
+        element: <ArenaPage />, // Додали маршрут Арени
+      }
     ],
   }
 ]);

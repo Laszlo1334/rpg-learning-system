@@ -10,7 +10,8 @@ import com.education.rpg.rpglearningbackend.repository.TaskRepository;
 import com.education.rpg.rpglearningbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import com.education.rpg.rpglearningbackend.model.Question;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,16 +104,39 @@ public class TaskService {
         dto.setRewardXp(task.getRewardXp());
         dto.setRewardGold(task.getRewardGold());
         dto.setPrerequisiteTaskIds(task.getPrerequisiteTaskIds());
+        dto.setDynamicQuestionCount(task.getDynamicQuestionCount());
+        dto.setType(task.getType().name());
 
-        if (task.getQuestions() != null) {
-            List<QuestionDto> safeQuestions = task.getQuestions().stream().map(q -> {
-                QuestionDto qDto = new QuestionDto();
-                qDto.setId(q.getId());
-                qDto.setQuestionText(q.getQuestionText());
-                qDto.setType(q.getType());
-                qDto.setOptions(q.getOptions());
-                return qDto;
-            }).collect(Collectors.toList());
+        if (task.getType() == Task.TaskType.BOSS) {
+            TaskDto.BossMetadata meta = new TaskDto.BossMetadata();
+            meta.setBossName(task.getBossName());
+            meta.setBossAvatar(task.getBossAvatarUrl());
+            meta.setTimeLimitSeconds(task.getTimeLimitSeconds());
+            dto.setBossMetadata(meta);
+        }
+
+        if (task.getQuestions() != null && !task.getQuestions().isEmpty()) {
+            // 1. Створюємо копію списку, щоб не змінити оригінальні дані в кеші Hibernate
+            List<Question> allQuestions = new ArrayList<>(task.getQuestions());
+
+            // 2. Визначаємо, скільки питань треба взяти
+            int limit = task.getDynamicQuestionCount() != null ? task.getDynamicQuestionCount() : allQuestions.size();
+
+            // 3. Перемішуємо питання випадковим чином
+            java.util.Collections.shuffle(allQuestions);
+
+            // 4. Відрізаємо потрібну кількість і мапимо в безпечний DTO
+            List<QuestionDto> safeQuestions = allQuestions.stream()
+                    .limit(limit)
+                    .map(q -> {
+                        QuestionDto qDto = new QuestionDto();
+                        qDto.setId(q.getId());
+                        qDto.setQuestionText(q.getQuestionText());
+                        qDto.setType(q.getType());
+                        qDto.setOptions(q.getOptions());
+                        return qDto;
+                    }).collect(Collectors.toList());
+
             dto.setQuestions(safeQuestions);
         }
 

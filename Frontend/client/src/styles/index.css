@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+/* Кастомний скролбар для RPG-теми */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #09090b;
+    /* zinc-950, колір фону */
+    border-left: 1px solid #27272a;
+    /* zinc-800 */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    /* zinc-700 */
+    border-radius: 8px;
+    border: 2px solid #09090b;
+    /* створює ефект відступу від країв */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a855f7;
+    /* purple-500, магічне світіння при наведенні */
+}

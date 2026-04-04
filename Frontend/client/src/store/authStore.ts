@@ -1,24 +1,56 @@
-// src/store/authStore.ts
 import { create } from 'zustand';
-// ДОДАЛИ СЛОВО type ОСЬ ТУТ:
 import type { User } from '../types';
 
+// Описуємо, що саме буде зберігатися в нашому "сховищі"
 interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  
+  user: User | null;         // Дані поточного гравця (якщо null - гравець не авторизований)
+  isLoading: boolean;        // Статус завантаження даних
+
+  // Дії (Actions) для зміни стану
   setUser: (user: User | null) => void;
-  setLoading: (isLoading: boolean) => void;
-  logout: () => void;
+  setLoading: (status: boolean) => void;
+
+  // Спеціальні дії для Магазину
+  spendGold: (amount: number) => boolean;
+  spendCrystals: (amount: number) => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+// Створюємо саме сховище
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  isAuthenticated: false,
-  isLoading: true, 
+  isLoading: true,
 
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  setLoading: (isLoading) => set({ isLoading }),
-  logout: () => set({ user: null, isAuthenticated: false }),
+  setUser: (user) => set({ user }),
+  setLoading: (status) => set({ isLoading: status }),
+
+  // Логіка витрачання золота
+  spendGold: (amount) => {
+    const currentUser = get().user;
+    if (!currentUser) return false; // Якщо гравця немає, скасовуємо
+    if (currentUser.gold < amount) return false; // Якщо не вистачає грошей, скасовуємо
+
+    // Оновлюємо стан: віднімаємо золото
+    set({
+      user: {
+        ...currentUser,
+        gold: currentUser.gold - amount,
+      },
+    });
+    return true; // Покупка успішна
+  },
+
+  // Логіка витрачання кристалів
+  spendCrystals: (amount) => {
+    const currentUser = get().user;
+    if (!currentUser) return false;
+    if (currentUser.crystals < amount) return false;
+
+    set({
+      user: {
+        ...currentUser,
+        crystals: currentUser.crystals - amount,
+      },
+    });
+    return true;
+  },
 }));
