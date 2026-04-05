@@ -84,8 +84,8 @@ export const CoursesPage = () => {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-6 py-2.5 rounded-xl font-bold transition-all border ${filter === f
-                ? 'bg-zinc-800 border-purple-500 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)]'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+              ? 'bg-zinc-800 border-purple-500 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)]'
+              : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
           >
             {f === 'all' ? 'Всі портали' : f === 'active' ? 'В процесі' : 'Завершені'}
@@ -107,7 +107,7 @@ export const CoursesPage = () => {
           return (
             <div
               key={course.id}
-              onClick={() => navigate(`/courses/${course.id}`)}
+              onClick={() => navigate(`/courses/${course.id}/foyer`)}
               className={`relative rounded-3xl px-6 pt-6 pb-8 flex flex-col cursor-pointer transition-all duration-300 group ${cardClasses}`}
             >
               <div className="absolute top-6 right-6">
@@ -147,7 +147,7 @@ export const CoursesPage = () => {
         })}
       </div>
 
-      {/* 🗂️ Запечатані Архіви (Оновлений дизайн без сильного блюру) */}
+      {/* 🗂️ Запечатані Архіви */}
       {lockedCourses.length > 0 && (
         <div className="mt-12 pt-8 border-t border-zinc-800/30">
           <button
@@ -162,7 +162,6 @@ export const CoursesPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
               {lockedCourses.map(course => (
                 <div key={course.id} className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 relative">
-                  {/* Оверлей без backdrop-blur та з меншою прозорістю */}
                   <div className="absolute inset-0 bg-zinc-950/50 rounded-3xl z-10 flex items-center justify-center">
                     <Lock size={40} className="text-zinc-700" />
                   </div>

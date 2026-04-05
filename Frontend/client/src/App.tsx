@@ -11,7 +11,8 @@ import { Login } from '@/pages/Login';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
 import { CoursesPage } from '@/pages/student/CoursesPage';
-import { ArenaPage } from '@/pages/student/ArenaPage'; // Додали імпорт Арени
+import { ArenaPage } from '@/pages/student/ArenaPage';
+import { FoyerPage } from '@/pages/student/FoyerPage';
 
 // Налаштовуємо маршрути з використанням Layout
 const router = createBrowserRouter([
@@ -33,8 +34,12 @@ const router = createBrowserRouter([
         element: <CoursesPage />,
       },
       {
-        path: 'tasks/:id',
-        element: <ArenaPage />, // Додали маршрут Арени
+        path: 'courses/:courseId/foyer',
+        element: <FoyerPage />,
+      },
+      {
+        path: 'arena/:id',
+        element: <ArenaPage />,
       }
     ],
   }
