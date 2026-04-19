@@ -2,12 +2,8 @@ export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type QuestionType = 'TEST' | 'TEXT';
 export type CurrencyType = 'GOLD' | 'CRYSTAL';
 export type ItemCategory = 'COSMETIC' | 'CONSUMABLE';
-export type ItemEffect =
-  | 'XP_BOOST_30_MIN'
-  | 'GOLD_BOOST_60_MIN'
-  | 'ENERGY_STASIS_30_MIN'
-  | 'SINGLE_RUN_SHIELD'
-  | 'NONE';
+export type ItemEffect = 'XP_BOOST' | 'GOLD_BOOST' | 'ENERGY_REFILL' | 'SHIELD' | 'NONE';
+export type ItemSlot = 'HEAD' | 'BODY' | 'HANDS' | 'LEGS' | 'WEAPON' | 'BACKGROUND' | 'FRAME' | 'NONE';
 export type SubmissionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface User {
@@ -112,6 +108,7 @@ export interface Item {
   currencyType: CurrencyType;
   category: ItemCategory;
   effect: ItemEffect;
+  slot: ItemSlot; // Slot this item occupies
   assetUrl: string | null;
 }
 

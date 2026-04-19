@@ -21,6 +21,7 @@ public class Item {
     @Column(nullable = false)
     private Integer price;
 
+    // ── Currency ──────────────────────────────────────────────────
     public enum CurrencyType {
         GOLD, CRYSTAL
     }
@@ -29,6 +30,7 @@ public class Item {
     @Column(nullable = false)
     private CurrencyType currencyType;
 
+    // ── Category ──────────────────────────────────────────────────
     public enum ItemCategory {
         COSMETIC, CONSUMABLE
     }
@@ -37,18 +39,28 @@ public class Item {
     @Column(nullable = false)
     private ItemCategory category;
 
-    // --- НОВЕ: ІДЕНТИФІКАТОР ЕФЕКТУ ---
-    public enum ItemEffect {
-        XP_BOOST_30_MIN,       // Еліксир Мудрості (x1.5 XP на 30 хв)
-        GOLD_BOOST_60_MIN,     // Магніт Гобліна (x2 Золота на 60 хв)
-        ENERGY_STASIS_30_MIN,  // Кава Магістра (Енергія не витрачається 30 хв)
-        SINGLE_RUN_SHIELD,     // Аура Безстрашності (Захист на 1 забіг)
-        NONE                   // Для косметики
+    // ── Effect (consumable mechanics) ─────────────────────────────
+    public enum EffectType {
+        XP_BOOST,       // +50% XP for 30 min
+        GOLD_BOOST,     // ×2 Gold for 60 min
+        ENERGY_REFILL,  // instantly restore energy to 100
+        SHIELD,         // protect from one defeat
+        NONE            // cosmetics have no effect
     }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ItemEffect effect = ItemEffect.NONE;
+    private EffectType effect = EffectType.NONE;
+
+    // ── Cosmetic slot (for equip system) ─────────────────────────
+    public enum ItemSlot {
+        HEAD, BODY, HANDS, LEGS, WEAPON, BACKGROUND, FRAME,
+        NONE  // consumables / items without a slot
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ItemSlot slot = ItemSlot.NONE;
 
     private String assetUrl;
 }

@@ -4,6 +4,7 @@ import com.education.rpg.rpglearningbackend.dto.CourseLeaderboardDto;
 import com.education.rpg.rpglearningbackend.model.Role;
 import com.education.rpg.rpglearningbackend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -43,4 +44,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "GROUP BY u.id, u.username " +
             "ORDER BY SUM(t.rewardXp) DESC")
     List<CourseLeaderboardDto> getLeaderboardByCourseId(@Param("courseId") Long courseId);
+
+    // --- SCHEDULER: Масове скидання енергії всіх гравців ---
+    @Modifying
+    @Query("UPDATE User u SET u.energy = 100")
+    void resetAllUsersEnergy();
 }

@@ -1,12 +1,15 @@
 package com.education.rpg.rpglearningbackend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transaction_history")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TransactionHistory {
 
     @Id
@@ -21,15 +24,18 @@ public class TransactionHistory {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    private Integer cost; // Скільки було витрачено
+    @Column(nullable = false)
+    private Integer cost;
 
     @Enumerated(EnumType.STRING)
-    private Item.CurrencyType currencyUsed; // Золото чи Кристали
+    @Column(nullable = false, name = "currency_used")
+    private Item.CurrencyType currencyUsed;
 
+    @Column(nullable = false)
     private LocalDateTime purchasedAt;
 
     @PrePersist
     protected void onCreate() {
         this.purchasedAt = LocalDateTime.now();
     }
-}
+}

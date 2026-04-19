@@ -1,5 +1,7 @@
 package com.education.rpg.rpglearningbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ public class User {
     private String email;
 
     // --- ТВОРЇ СТАРІ БАЗОВІ ПОЛЯ (Повернули на місце) ---
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -56,6 +59,7 @@ public class User {
 
     // --- ПРИВАТНІСТЬ (SDT: Автономія та Безпека) ---
     @Column(nullable = false)
+    @JsonProperty("isPublicProfile")
     private Boolean isPublicProfile = true; // Opt-out система для Лідерборду
 
     // --- АКТИВНІ БАФИ ВІД ПРЕДМЕТІВ ---

@@ -1,11 +1,16 @@
 package com.education.rpg.rpglearningbackend.service;
 
+import com.education.rpg.rpglearningbackend.dto.AnswerResponse;
 import com.education.rpg.rpglearningbackend.dto.RunCompletionRequest;
 import com.education.rpg.rpglearningbackend.model.CompletedTask;
+import com.education.rpg.rpglearningbackend.model.Question;
 import com.education.rpg.rpglearningbackend.model.Task;
 import com.education.rpg.rpglearningbackend.model.User;
+import com.education.rpg.rpglearningbackend.model.UserQuestionFailure;
 import com.education.rpg.rpglearningbackend.repository.CompletedTaskRepository;
+import com.education.rpg.rpglearningbackend.repository.QuestionRepository;
 import com.education.rpg.rpglearningbackend.repository.TaskRepository;
+import com.education.rpg.rpglearningbackend.repository.UserQuestionFailureRepository;
 import com.education.rpg.rpglearningbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -26,9 +32,75 @@ public class SubmissionService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final CompletedTaskRepository completedTaskRepository;
+    private final QuestionRepository questionRepository;
+    private final UserQuestionFailureRepository userQuestionFailureRepository;
+
+    private static final int CRYSTALS_PER_FIRST_FAILURE = 5;
+
+    @Transactional
+    public AnswerResponse checkAnswerAndProcessFailure(Long questionId, String userAnswer, String userEmail) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Запитання не знайдено: " + questionId));
+
+        String normalizedUserAnswer = userAnswer.trim().replaceAll("\\s+", " ").toLowerCase();
+        boolean isCorrect = question.getCorrectAnswers().stream()
+                .map(ans -> ans.trim().replaceAll("\\s+", " ").toLowerCase())
+                .anyMatch(ans -> ans.equals(normalizedUserAnswer));
+
+        if (isCorrect) {
+            return AnswerResponse.builder()
+                    .isCorrect(true)
+                    .explanation(null)
+                    .crystalsAwarded(0)
+                    .build();
+        }
+
+        // Відповідь НЕПРАВИЛЬНА — намагаємось нарахувати кристали
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            // Гість або неавторизований — повертаємо без кристалів
+            return AnswerResponse.builder()
+                    .isCorrect(false)
+                    .explanation(question.getExplanation())
+                    .crystalsAwarded(0)
+                    .build();
+        }
+
+        User student = userOpt.get();
+        boolean alreadyFailed = userQuestionFailureRepository
+                .existsByUserIdAndQuestionId(student.getId(), question.getId());
+
+        if (!alreadyFailed) {
+            // Перша помилка на цьому питанні — нараховуємо кристали
+            userQuestionFailureRepository.save(
+                    UserQuestionFailure.builder()
+                            .user(student)
+                            .question(question)
+                            .build()
+            );
+            student.setCrystals(student.getCrystals() + CRYSTALS_PER_FIRST_FAILURE);
+            student.setLifetimeCrystals(student.getLifetimeCrystals() + CRYSTALS_PER_FIRST_FAILURE);
+            userRepository.save(student);
+
+            return AnswerResponse.builder()
+                    .isCorrect(false)
+                    .explanation(question.getExplanation())
+                    .crystalsAwarded(CRYSTALS_PER_FIRST_FAILURE)
+                    .build();
+        } else {
+            // Повторна помилка — кристали не нараховуються
+            return AnswerResponse.builder()
+                    .isCorrect(false)
+                    .explanation(question.getExplanation())
+                    .crystalsAwarded(0)
+                    .build();
+        }
+    }
 
     @Transactional
     public void processRunCompletion(String studentEmail, RunCompletionRequest request) {
+        log.info("Завершення забігу для {}, завдання: {}, перемога: {}", studentEmail, request.getTaskId(), request.isVictory());
+
         User student = userRepository.findByEmail(studentEmail)
                 .orElseThrow(() -> new RuntimeException("Студента не знайдено"));
 
@@ -36,6 +108,7 @@ public class SubmissionService {
                 .orElseThrow(() -> new RuntimeException("Завдання не знайдено"));
 
         boolean hasApproved = completedTaskRepository.existsByTaskIdAndUserId(task.getId(), student.getId());
+        log.info("Чи проходив юзер це раніше? {}", hasApproved);
         LocalDateTime now = LocalDateTime.now();
 
         if (request.isVictory()) {
@@ -56,6 +129,10 @@ public class SubmissionService {
             }
 
             student.setLastLoginDate(now);
+            log.info("Нараховано нагороди. Новий XP: {}, Золото: {}", student.getCurrentXp(), student.getGold());
+
+            // КРИТИЧНО: Зберігаємо юзера після блоку перемоги
+            userRepository.save(student);
         } else {
             // Game Over
             if (student.getHasActiveShield() != null && student.getHasActiveShield()) {
@@ -64,9 +141,9 @@ public class SubmissionService {
             } else if (request.getFailedQuestionIds() != null && !request.getFailedQuestionIds().isEmpty()) {
                 handleProductiveFailure(student, request.getFailedQuestionIds());
             }
-        }
 
-        userRepository.save(student);
+            userRepository.save(student);
+        }
     }
 
     // --- ТВОЇ ЗБЕРЕЖЕНІ ПРИВАТНІ МЕТОДИ ---
@@ -106,12 +183,9 @@ public class SubmissionService {
     }
 
     private void handleProductiveFailure(User student, List<Long> failedQuestionIds) {
-        // Використовуємо Set, щоб уникнути нарахування кристалів за ту саму помилку кілька разів у межах одного забігу
+        // Кристали вже були нараховані в реальному часі через checkAnswerAndProcessFailure.
+        // Тут лише фіксуємо загальну кількість помилок для статистики.
         Set<Long> uniqueFails = new HashSet<>(failedQuestionIds);
-        int crystalReward = uniqueFails.size() * 5;
-
-        student.setCrystals(student.getCrystals() + crystalReward);
-        student.setLifetimeCrystals(student.getLifetimeCrystals() + crystalReward);
         student.setTotalFailures(student.getTotalFailures() + uniqueFails.size());
     }
 }

@@ -3,8 +3,6 @@ package com.education.rpg.rpglearningbackend.controller;
 import com.education.rpg.rpglearningbackend.dto.AnswerRequest;
 import com.education.rpg.rpglearningbackend.dto.AnswerResponse;
 import com.education.rpg.rpglearningbackend.dto.RunCompletionRequest;
-import com.education.rpg.rpglearningbackend.model.Question;
-import com.education.rpg.rpglearningbackend.repository.QuestionRepository;
 import com.education.rpg.rpglearningbackend.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,22 +15,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ArenaController {
 
-    private final QuestionRepository questionRepository;
     private final SubmissionService submissionService;
 
     @PostMapping("/check-answer")
-    public ResponseEntity<AnswerResponse> checkAnswer(@RequestBody AnswerRequest request) {
-        Question question = questionRepository.findById(request.getQuestionId())
-                .orElseThrow(() -> new RuntimeException("Запитання не знайдено"));
-
-        boolean isCorrect = question.getCorrectAnswers().stream()
-                .anyMatch(correct -> correct.trim().equalsIgnoreCase(request.getUserAnswer().trim()));
-
-        AnswerResponse response = AnswerResponse.builder()
-                .isCorrect(isCorrect)
-                .explanation(isCorrect ? null : question.getExplanation())
-                .build();
-
+    public ResponseEntity<AnswerResponse> checkAnswer(@RequestBody AnswerRequest request,
+                                                      @AuthenticationPrincipal OAuth2User principal) {
+        String email = principal != null ? principal.getAttribute("email") : null;
+        AnswerResponse response = submissionService.checkAnswerAndProcessFailure(
+                request.getQuestionId(),
+                request.getUserAnswer(),
+                email
+        );
         return ResponseEntity.ok(response);
     }
 

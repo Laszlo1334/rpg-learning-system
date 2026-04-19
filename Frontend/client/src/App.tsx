@@ -13,6 +13,10 @@ import { StudentDashboard } from '@/pages/student/StudentDashboard';
 import { CoursesPage } from '@/pages/student/CoursesPage';
 import { ArenaPage } from '@/pages/student/ArenaPage';
 import { FoyerPage } from '@/pages/student/FoyerPage';
+import { InventoryPage } from '@/pages/student/InventoryPage';
+import { LeaderboardPage } from '@/pages/LeaderboardPage';
+import { ShopPage } from '@/pages/ShopPage';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 // Налаштовуємо маршрути з використанням Layout
 const router = createBrowserRouter([
@@ -22,24 +26,43 @@ const router = createBrowserRouter([
   },
   {
     // Цей блок відповідає за всі сторінки, де потрібен Header / Sidebar
+    // ProtectedRoute перевіряє авторизацію перед рендером будь-якого дочірнього маршруту
     path: '/',
-    element: <MainLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
-        path: 'dashboard',
-        element: <StudentDashboard />,
-      },
-      {
-        path: 'courses',
-        element: <CoursesPage />,
-      },
-      {
-        path: 'courses/:courseId/foyer',
-        element: <FoyerPage />,
-      },
-      {
-        path: 'arena/:id',
-        element: <ArenaPage />,
+        path: '/',
+        element: <MainLayout />,
+        children: [
+          {
+            path: 'dashboard',
+            element: <StudentDashboard />,
+          },
+          {
+            path: 'courses',
+            element: <CoursesPage />,
+          },
+          {
+            path: 'courses/:courseId/foyer',
+            element: <FoyerPage />,
+          },
+          {
+            path: 'arena/:id',
+            element: <ArenaPage />,
+          },
+          {
+            path: 'leaderboard',
+            element: <LeaderboardPage />,
+          },
+          {
+            path: 'shop',
+            element: <ShopPage />,
+          },
+          {
+            path: 'inventory',
+            element: <InventoryPage />,
+          }
+        ],
       }
     ],
   }

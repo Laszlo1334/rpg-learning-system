@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Configuration
 public class DatabaseSeeder {
@@ -57,7 +58,48 @@ public class DatabaseSeeder {
                 userRepository.save(student);
 
                 // ==========================================
-                // 2. КУРСИ
+                // 1b. ФІКТИВНІ СТУДЕНТИ ДЛЯ ЛІДЕРБОРДУ (12 гравців)
+                // ==========================================
+                String[] heroNames = {
+                    "Сем Гемджі", "Піппін Тук", "Меррі Брендібак",
+                    "Арагорн", "Леголас", "Гімлі",
+                    "Боромір", "Фарамір", "Еовін",
+                    "Галадріель", "Елронд", "Саруман"
+                };
+                // Індекси 3 та 7 — прихований профіль (перевірка SQL-фільтра isPublicProfile)
+                int[] privateIndexes = {3, 7};
+
+                Random seedRandom = new Random(42); // Фіксований seed для відтворюваності
+
+                for (int i = 0; i < heroNames.length; i++) {
+                    int xp    = 100 + seedRandom.nextInt(4901);   // 100–5000
+                    int level = (xp / 1000) + 1;
+                    int gold  = 50  + seedRandom.nextInt(751);    // 50–800
+
+                    boolean isPrivate = (i == privateIndexes[0] || i == privateIndexes[1]);
+
+                    User hero = new User();
+                    hero.setUsername(heroNames[i]);
+                    hero.setEmail("hero" + i + "@rpg.com");
+                    hero.setPassword(passwordEncoder.encode("12345678"));
+                    hero.setRole(Role.STUDENT);
+                    hero.setLevel(level);
+                    hero.setCurrentXp(xp);
+                    hero.setGold(gold);
+                    hero.setCrystals(seedRandom.nextInt(100));
+                    hero.setCampfireLevel(1 + seedRandom.nextInt(5));  // 1–5
+                    hero.setEnergy(50 + seedRandom.nextInt(51));       // 50–100
+                    hero.setIsPublicProfile(!isPrivate);
+                    hero.setLastLoginDate(LocalDateTime.now().minusDays(seedRandom.nextInt(7)));
+                    hero.setTotalTasksCompleted(seedRandom.nextInt(15));
+                    userRepository.save(hero);
+
+                    System.out.println("  👤 " + heroNames[i]
+                        + " | XP=" + xp + " | Рівень=" + level
+                        + " | Публічний=" + !isPrivate);
+                }
+                System.out.println("✅ Згенеровано 12 тестових гравців для Лідерборду.");
+
                 // ==========================================
                 Course course1 = new Course();
                 course1.setTitle("Основи магії (Java Spring Boot)");
@@ -87,9 +129,9 @@ public class DatabaseSeeder {
                 task1.setBranchName("Базова Алхімія");
                 task1.setOrderIndex(1);
                 task1.setType(Task.TaskType.REGULAR);
-                task1.setDynamicQuestionCount(2); // Видасть 2 випадкових з 4
+                task1.setDynamicQuestionCount(2);
 
-                Question t1q1 = createTextQuestion(task1, "Як оголосити ціле число?", List.of("int x;", "int x"));
+                Question t1q1 = createTestQuestion(task1, "Як оголосити ціле число?", List.of("int x;", "String x;", "boolean x;", "double x;"), "int x;");
                 Question t1q2 = createTestQuestion(task1, "Який тип даних для тексту?", List.of("String", "text", "char", "word"), "String");
                 Question t1q3 = createTestQuestion(task1, "Чи можна змінити значення константи?", List.of("Так", "Ні"), "Ні");
                 Question t1q4 = createTestQuestion(task1, "Який тип займає 8 байт?", List.of("int", "long", "byte", "short"), "long");
@@ -107,7 +149,7 @@ public class DatabaseSeeder {
                 task2.setOrderIndex(2);
                 task2.setType(Task.TaskType.REGULAR);
                 task2.setDynamicQuestionCount(2);
-                task2.setPrerequisiteTaskIds(List.of(task1.getId())); // Потрібно пройти Завдання 1
+                task2.setPrerequisiteTaskIds(List.of(task1.getId()));
 
                 Question t2q1 = createTestQuestion(task2, "Що повертає оператор == ?", List.of("int", "boolean", "String"), "boolean");
                 Question t2q2 = createTestQuestion(task2, "Який оператор означає 'АБО'?", List.of("&&", "||", "!", "!="), "||");
@@ -126,8 +168,8 @@ public class DatabaseSeeder {
                 task3.setOrderIndex(2);
                 task3.setType(Task.TaskType.REGULAR);
                 task3.setDynamicQuestionCount(2);
-                task3.setIsTheoryHidden(true); // Ховаємо теорію для тестування
-                task3.setPrerequisiteTaskIds(List.of(task1.getId())); // Потрібно пройти Завдання 1
+                task3.setIsTheoryHidden(true);
+                task3.setPrerequisiteTaskIds(List.of(task1.getId()));
 
                 Question t3q1 = createTestQuestion(task3, "Який цикл гарантовано виконається хоча б один раз?", List.of("for", "while", "do-while"), "do-while");
                 Question t3q2 = createTestQuestion(task3, "Що робить оператор break?", List.of("Пропускає ітерацію", "Зупиняє цикл", "Видає помилку"), "Зупиняє цикл");
@@ -147,64 +189,208 @@ public class DatabaseSeeder {
                 boss1.setType(Task.TaskType.BOSS);
                 boss1.setBossName("Голем Синтаксису");
                 boss1.setBossAvatarUrl("/assets/bosses/golem.png");
-                boss1.setTimeLimitSeconds(120); // 2 хвилини на проходження
-                boss1.setDynamicQuestionCount(4); // 4 питання
-                boss1.setPrerequisiteTaskIds(List.of(task2.getId(), task3.getId())); // Треба пройти і 2, і 3!
+                boss1.setTimeLimitSeconds(120);
+                boss1.setDynamicQuestionCount(4);
+                boss1.setPrerequisiteTaskIds(List.of(task2.getId(), task3.getId()));
 
-                // Поки немає динамічного агрегатора питань, додаємо вручну для тесту Боса
                 Question b1q1 = createTestQuestion(boss1, "Чи можна використовувати if всередині while?", List.of("Так", "Ні"), "Так");
                 Question b1q2 = createTestQuestion(boss1, "Що буде, якщо умова while завжди true?", List.of("Помилка компіляції", "Нескінченний цикл", "Програма завершиться"), "Нескінченний цикл");
                 Question b1q3 = createTestQuestion(boss1, "Який оператор заперечує логічне значення?", List.of("!", "NOT", "~", "-"), "!");
-                Question b1q4 = createTextQuestion(boss1, "Напишіть ключове слово для виходу з циклу", List.of("break", "break;"));
+                Question b1q4 = createTestQuestion(boss1, "Яке ключове слово використовується для виходу з циклу?", List.of("stop", "exit", "break", "return"), "break");
                 Question b1q5 = createTestQuestion(boss1, "Як називається цикл всередині іншого циклу?", List.of("Подвійний", "Вкладений", "Складний"), "Вкладений");
                 boss1.setQuestions(List.of(b1q1, b1q2, b1q3, b1q4, b1q5));
                 taskRepository.save(boss1);
 
+                // --- ПРОЦЕДУРНА ГЕНЕРАЦІЯ: 3 ЕПОХИ (Курс 1) ---
+                Task currentDivergence = boss1; // Точка роздоріжжя
+                Random random = new Random();
+                int taskCounter = 4;
+
+                for (int epoch = 1; epoch <= 3; epoch++) {
+                    System.out.println("Будуємо Епоху " + epoch + "...");
+
+                    // 🌿 1. Ліва гілка (випадкова довжина від 2 до 5)
+                    int leftLength = random.nextInt(4) + 2;
+                    Task leftLastTask = currentDivergence;
+
+                    for (int i = 0; i < leftLength; i++) {
+                        Task leftTask = new Task();
+                        leftTask.setTitle("Епоха " + epoch + " - Ліва стежка " + (i + 1));
+                        leftTask.setTheoryContent("Таємні знання лівого шляху.");
+                        leftTask.setRewardXp(50 + (epoch * 10));
+                        leftTask.setRewardGold(15);
+                        leftTask.setCourse(course1);
+                        leftTask.setBranchName("Шлях Тіні");
+                        leftTask.setOrderIndex(taskCounter++);
+                        leftTask.setType(Task.TaskType.REGULAR);
+                        leftTask.setDynamicQuestionCount(1);
+                        leftTask.setPrerequisiteTaskIds(List.of(leftLastTask.getId()));
+
+                        Question q = createTestQuestion(leftTask, "Питання лівої стежки", List.of("А", "Б"), "А");
+                        leftTask.setQuestions(List.of(q));
+                        taskRepository.save(leftTask);
+                        leftLastTask = leftTask;
+                    }
+
+                    // 🌿 2. Права гілка (випадкова довжина від 2 до 4)
+                    int rightLength = random.nextInt(3) + 2;
+                    Task rightLastTask = currentDivergence;
+
+                    for (int i = 0; i < rightLength; i++) {
+                        Task rightTask = new Task();
+                        rightTask.setTitle("Епоха " + epoch + " - Права стежка " + (i + 1));
+                        rightTask.setTheoryContent("Світлі знання правого шляху.");
+                        rightTask.setRewardXp(50 + (epoch * 10));
+                        rightTask.setRewardGold(15);
+                        rightTask.setCourse(course1);
+                        rightTask.setBranchName("Шлях Світла");
+                        rightTask.setOrderIndex(taskCounter++);
+                        rightTask.setType(Task.TaskType.REGULAR);
+                        rightTask.setDynamicQuestionCount(1);
+                        rightTask.setPrerequisiteTaskIds(List.of(rightLastTask.getId()));
+
+                        Question q = createTestQuestion(rightTask, "Питання правої стежки", List.of("1", "2"), "1");
+                        rightTask.setQuestions(List.of(q));
+                        taskRepository.save(rightTask);
+                        rightLastTask = rightTask;
+                    }
+
+                    // ⚔️ 3. Злиття: Бос Епохи
+                    boolean isFinalBoss = (epoch == 3);
+                    Task epochBoss = new Task();
+                    epochBoss.setTitle(isFinalBoss ? "Володар Архітектури" : "Вартовий Епохи " + epoch);
+                    epochBoss.setTheoryContent("Здолайте боса, щоб пройти далі.");
+                    epochBoss.setRewardXp(isFinalBoss ? 2000 : 800);
+                    epochBoss.setRewardGold(isFinalBoss ? 500 : 150);
+                    epochBoss.setCourse(course1);
+                    epochBoss.setBranchName("Арена");
+                    epochBoss.setOrderIndex(taskCounter++);
+                    epochBoss.setType(Task.TaskType.BOSS);
+                    epochBoss.setBossName(isFinalBoss ? "Архітектор Систем" : "Вартовий");
+                    epochBoss.setBossAvatarUrl("/assets/bosses/golem.png");
+                    epochBoss.setDynamicQuestionCount(2);
+
+                    epochBoss.setPrerequisiteTaskIds(List.of(leftLastTask.getId(), rightLastTask.getId()));
+
+                    Question bq1 = createTestQuestion(epochBoss, "Тест боса 1", List.of("Так", "Ні"), "Так");
+                    Question bq2 = createTestQuestion(epochBoss, "Тест боса 2", List.of("Так", "Ні"), "Так");
+                    epochBoss.setQuestions(List.of(bq1, bq2));
+                    taskRepository.save(epochBoss);
+
+                    currentDivergence = epochBoss;
+                }
+
+                // --- Генерація 10 вузлів для Курсу 2 ---
+                Task prevCourse2Task = null;
+                for (int i = 1; i <= 10; i++) {
+                    Task c2Task = new Task();
+                    c2Task.setTitle("SQL Запит " + i);
+                    c2Task.setTheoryContent("Теорія баз даних " + i);
+                    c2Task.setRewardXp(40);
+                    c2Task.setCourse(course2);
+                    c2Task.setOrderIndex(i);
+                    c2Task.setType(Task.TaskType.REGULAR);
+                    c2Task.setDynamicQuestionCount(1);
+
+                    if (prevCourse2Task != null) {
+                        c2Task.setPrerequisiteTaskIds(List.of(prevCourse2Task.getId()));
+                    }
+
+                    Question q = createTestQuestion(c2Task, "Якою командою дістати всі колонки з таблиці?", List.of("GET *", "SELECT *", "FETCH ALL", "PULL *"), "SELECT *");
+                    c2Task.setQuestions(List.of(q));
+
+                    taskRepository.save(c2Task);
+                    prevCourse2Task = c2Task;
+                }
+
                 // ==========================================
-                // 4. ТОВАРИ У МАГАЗИНІ
+                // 4. GUILD SHOP ITEMS
                 // ==========================================
-                Item hintScroll = new Item();
-                hintScroll.setName("Сувій Ясновидіння");
-                hintScroll.setDescription("Знімає 'Туман війни' з теорії. Показує приховані знання.");
-                hintScroll.setPrice(15);
-                hintScroll.setCurrencyType(Item.CurrencyType.CRYSTAL);
-                hintScroll.setCategory(Item.ItemCategory.CONSUMABLE);
-                hintScroll.setAssetUrl("/assets/items/scroll.png");
 
-                Item hpPotion = new Item();
-                hpPotion.setName("Зілля Життя");
-                hpPotion.setDescription("Додає +1 серденько на Арені (максимум 5).");
-                hpPotion.setPrice(50);
-                hpPotion.setCurrencyType(Item.CurrencyType.GOLD);
-                hpPotion.setCategory(Item.ItemCategory.CONSUMABLE);
-                hpPotion.setAssetUrl("/assets/items/health_potion.png");
+                // ── Consumables ──────────────────────────────────────────────
+                Item potionOfWisdom = new Item();
+                potionOfWisdom.setName("Potion of Wisdom");
+                potionOfWisdom.setDescription("Grants +50% XP for 30 minutes. Perfect before a boss run.");
+                potionOfWisdom.setPrice(15);
+                potionOfWisdom.setCurrencyType(Item.CurrencyType.CRYSTAL);
+                potionOfWisdom.setCategory(Item.ItemCategory.CONSUMABLE);
+                potionOfWisdom.setEffect(Item.EffectType.XP_BOOST);
+                potionOfWisdom.setSlot(Item.ItemSlot.NONE);
+                potionOfWisdom.setAssetUrl("/assets/items/potion_wisdom.png");
 
-                Item epicFrame = new Item();
-                epicFrame.setName("Золота Рамка Ачівера");
-                epicFrame.setDescription("Епічна рамка для аватара, що показує ваш статус.");
-                epicFrame.setPrice(500);
-                epicFrame.setCurrencyType(Item.CurrencyType.GOLD);
-                epicFrame.setCategory(Item.ItemCategory.COSMETIC);
-                epicFrame.setAssetUrl("/assets/frames/gold-frame.png");
+                Item goblinMagnet = new Item();
+                goblinMagnet.setName("Goblin's Magnet");
+                goblinMagnet.setDescription("Doubles all Gold earned for 60 minutes. The goblins weep.");
+                goblinMagnet.setPrice(15);
+                goblinMagnet.setCurrencyType(Item.CurrencyType.CRYSTAL);
+                goblinMagnet.setCategory(Item.ItemCategory.CONSUMABLE);
+                goblinMagnet.setEffect(Item.EffectType.GOLD_BOOST);
+                goblinMagnet.setSlot(Item.ItemSlot.NONE);
+                goblinMagnet.setAssetUrl("/assets/items/goblin_magnet.png");
 
-                Item fireSword = new Item();
-                fireSword.setName("Палаючий Меч Дебагу");
-                fireSword.setDescription("Косметична зброя. Показує всім, що ви винищувач багів.");
-                fireSword.setPrice(100);
-                fireSword.setCurrencyType(Item.CurrencyType.CRYSTAL);
-                fireSword.setCategory(Item.ItemCategory.COSMETIC);
-                fireSword.setAssetUrl("/assets/items/fire_sword.png");
+                Item elixirOfVigor = new Item();
+                elixirOfVigor.setName("Elixir of Vigor");
+                elixirOfVigor.setDescription("Instantly restores your Energy to 100. Go again, hero.");
+                elixirOfVigor.setPrice(20);
+                elixirOfVigor.setCurrencyType(Item.CurrencyType.CRYSTAL);
+                elixirOfVigor.setCategory(Item.ItemCategory.CONSUMABLE);
+                elixirOfVigor.setEffect(Item.EffectType.ENERGY_REFILL);
+                elixirOfVigor.setSlot(Item.ItemSlot.NONE);
+                elixirOfVigor.setAssetUrl("/assets/items/elixir_vigor.png");
 
-                itemRepository.saveAll(List.of(hintScroll, hpPotion, epicFrame, fireSword));
+                Item runeOfProtection = new Item();
+                runeOfProtection.setName("Rune of Protection");
+                runeOfProtection.setDescription("Elite rune. Absorbs one defeat on the Arena. Does not stack.");
+                runeOfProtection.setPrice(100);
+                runeOfProtection.setCurrencyType(Item.CurrencyType.CRYSTAL);
+                runeOfProtection.setCategory(Item.ItemCategory.CONSUMABLE);
+                runeOfProtection.setEffect(Item.EffectType.SHIELD);
+                runeOfProtection.setSlot(Item.ItemSlot.NONE);
+                runeOfProtection.setAssetUrl("/assets/items/rune_protection.png");
 
-                System.out.println("✅ Світ успішно згенеровано! Завантажено дерева завдань, босів та магазин.");
+                // ── Cosmetics ────────────────────────────────────────────────
+                Item wizardHat = new Item();
+                wizardHat.setName("Wizard Hat");
+                wizardHat.setDescription("A tall pointed hat that radiates ancient power. +0 stats, maximum respect.");
+                wizardHat.setPrice(1500);
+                wizardHat.setCurrencyType(Item.CurrencyType.GOLD);
+                wizardHat.setCategory(Item.ItemCategory.COSMETIC);
+                wizardHat.setEffect(Item.EffectType.NONE);
+                wizardHat.setSlot(Item.ItemSlot.HEAD);
+                wizardHat.setAssetUrl("/assets/cosmetics/wizard_hat.png");
+
+                Item apprenticeRobe = new Item();
+                apprenticeRobe.setName("Apprentice Robe");
+                apprenticeRobe.setDescription("A fine robe worn by the most dedicated students of the Academy.");
+                apprenticeRobe.setPrice(2500);
+                apprenticeRobe.setCurrencyType(Item.CurrencyType.GOLD);
+                apprenticeRobe.setCategory(Item.ItemCategory.COSMETIC);
+                apprenticeRobe.setEffect(Item.EffectType.NONE);
+                apprenticeRobe.setSlot(Item.ItemSlot.BODY);
+                apprenticeRobe.setAssetUrl("/assets/cosmetics/apprentice_robe.png");
+
+                Item mysticForest = new Item();
+                mysticForest.setName("Mystic Forest");
+                mysticForest.setDescription("A legendary background. The forest breathes with you.");
+                mysticForest.setPrice(5000);
+                mysticForest.setCurrencyType(Item.CurrencyType.GOLD);
+                mysticForest.setCategory(Item.ItemCategory.COSMETIC);
+                mysticForest.setEffect(Item.EffectType.NONE);
+                mysticForest.setSlot(Item.ItemSlot.BACKGROUND);
+                mysticForest.setAssetUrl("/assets/cosmetics/mystic_forest.png");
+
+                itemRepository.saveAll(List.of(
+                    potionOfWisdom, goblinMagnet, elixirOfVigor, runeOfProtection,
+                    wizardHat, apprenticeRobe, mysticForest
+                ));
+
+                System.out.println("✅ World generated! Tasks, bosses, heroes and Guild Shop are ready.");
+
             } else {
                 System.out.println("⚡ База даних вже містить інформацію. Генерація пропущена.");
             }
         };
     }
-
-    // --- Допоміжні методи для швидкого створення питань ---
 
     private Question createTestQuestion(Task task, String text, List<String> options, String correctAnswer) {
         Question q = new Question();

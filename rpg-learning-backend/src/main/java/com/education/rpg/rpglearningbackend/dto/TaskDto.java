@@ -1,5 +1,6 @@
 package com.education.rpg.rpglearningbackend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.util.List;
 
@@ -10,12 +11,19 @@ public class TaskDto {
     private String theoryContent;
     private String branchName;
     private Integer orderIndex;
+
+    @JsonProperty("isTheoryHidden")
     private Boolean isTheoryHidden;
+
     private Integer rewardXp;
     private Integer rewardGold;
 
+    @JsonProperty("isCompleted")
     private Boolean isCompleted;
+
+    @JsonProperty("isLocked")
     private Boolean isLocked;
+
     private List<Long> prerequisiteTaskIds;
 
     private List<QuestionDto> questions;

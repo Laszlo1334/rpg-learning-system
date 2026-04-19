@@ -18,6 +18,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final InventoryRepository inventoryRepository;
+    private final TransactionHistoryRepository transactionHistoryRepository;
 
     // Отримати список усіх товарів у магазині
     public List<Item> getAllItems() {
@@ -79,9 +80,19 @@ public class ItemService {
         }
 
         userRepository.save(player);
+
+        // 5. ЗБЕРЕЖЕННЯ ТРАНЗАКЦІЇ
+        TransactionHistory transaction = TransactionHistory.builder()
+                .user(player)
+                .item(item)
+                .cost(item.getPrice())
+                .currencyUsed(item.getCurrencyType())
+                .build();
+        transactionHistoryRepository.save(transaction);
+
         log.info("Гравець {} успішно купив предмет: {} за {} {}",
                 player.getEmail(), item.getName(), item.getPrice(), item.getCurrencyType());
 
         return inventoryRepository.save(inventoryEntry);
     }
-}
+}

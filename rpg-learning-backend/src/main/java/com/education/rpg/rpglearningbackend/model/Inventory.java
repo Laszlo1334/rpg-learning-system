@@ -1,6 +1,7 @@
 package com.education.rpg.rpglearningbackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -12,22 +13,23 @@ public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID залишаємо відкритим, він нам потрібен для фронтенду!
+    private Long id; // ID remains public — frontend needs it for use/equip calls
 
-    @JsonIgnore // ХОВАЄМО ЮЗЕРА ТУТ, щоб не було помилки 500 (LazyInitializationException)
+    @JsonIgnore // Prevent circular reference / LazyInitializationException
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // ЗМІНЮЄМО НА EAGER, щоб фронтенд одразу бачив картинку і назву купленого предмета
+    // EAGER so the frontend immediately gets item name, price, assetUrl
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
+    @JsonProperty("isEquipped") // Fix Lombok is-prefix → Jackson strips "is" → "equipped"
     @Column(nullable = false)
-    private Boolean isEquipped = false; // Чи надягнуто зараз? (Для косметики)
+    private Boolean isEquipped = false;
 
-    // Кількість предметів у стаці (для розхідників)
+    // Stack count for consumables (cosmetics always = 1)
     @Column(nullable = false)
     private Integer quantity = 1;
 

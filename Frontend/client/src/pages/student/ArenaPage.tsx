@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { taskService } from '@/services/taskService';
 import { arenaService } from '@/services/arenaService';
+import { authService } from '@/services/authService';
+import { useAuthStore } from '@/store/authStore';
 import type { TaskDto, AnswerResponse } from '@/types';
-import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff } from 'lucide-react';
+import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff, Shield } from 'lucide-react';
 
 export const ArenaPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { user, refreshUser } = useAuthStore();
 
     const [task, setTask] = useState<TaskDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -19,16 +23,21 @@ export const ArenaPage = () => {
 
     const [isChecking, setIsChecking] = useState(false);
     const [feedback, setFeedback] = useState<AnswerResponse | null>(null);
-    // Додано статус 'cheated'
     const [runStatus, setRunStatus] = useState<'playing' | 'victory' | 'defeat' | 'timeout' | 'cheated'>('playing');
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [showNextButton, setShowNextButton] = useState(false);
 
-    // Таймер для боса
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
-
-    // Стани для анімацій
     const [isShaking, setIsShaking] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+
+    // Inline arena toast (avoids external library dependency)
+    const [arenaToast, setArenaToast] = useState<{ message: string; type: 'shield' | 'crystal' | 'error' } | null>(null);
+
+    const showArenaToast = useCallback((message: string, type: 'shield' | 'crystal' | 'error') => {
+        setArenaToast({ message, type });
+        setTimeout(() => setArenaToast(null), 3500);
+    }, []);
 
     useEffect(() => {
         const fetchTask = async () => {
@@ -42,7 +51,7 @@ export const ArenaPage = () => {
                     }
                 }
             } catch (error) {
-                navigate('/courses');
+                navigate('/courses', { state: { error: 'Завдання заблоковано' } });
             } finally {
                 setIsLoading(false);
             }
@@ -52,34 +61,24 @@ export const ArenaPage = () => {
 
     const isBoss = task?.type === 'BOSS';
 
-    // Античіт: відстежуємо згортання вкладки тільки для Босів
     useEffect(() => {
         if (!isBoss || runStatus !== 'playing') return;
-
         const handleVisibilityChange = () => {
-            if (document.hidden) {
-                // Вкладку згорнуто або перемкнуто — миттєва поразка
-                handleFinishRun(false, 'cheated');
-            }
+            if (document.hidden) handleFinishRun(false, 'cheated');
         };
-
         document.addEventListener('visibilitychange', handleVisibilityChange);
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [isBoss, runStatus]);
 
-    // Логіка таймера
     useEffect(() => {
         if (timeLeft === null || runStatus !== 'playing') return;
-
         if (timeLeft <= 0) {
             handleFinishRun(false, 'timeout');
             return;
         }
-
         const timerId = setInterval(() => {
             setTimeLeft(prev => (prev !== null ? prev - 1 : null));
         }, 1000);
-
         return () => clearInterval(timerId);
     }, [timeLeft, runStatus]);
 
@@ -92,7 +91,7 @@ export const ArenaPage = () => {
     };
 
     const handleAnswer = async (answer: string) => {
-        if (!currentQuestion || isChecking || runStatus !== 'playing') return;
+        if (!currentQuestion || isChecking || runStatus !== 'playing' || showNextButton) return;
 
         setIsChecking(true);
         setSelectedOption(answer);
@@ -105,46 +104,107 @@ export const ArenaPage = () => {
             });
 
             setFeedback(result);
+            setShowNextButton(true);
 
             if (result.isCorrect) {
+                // ── Correct answer ────────────────────────────────────────
                 setIsSuccess(true);
-                setTimeout(() => {
-                    setIsSuccess(false);
-                    setFeedback(null);
-                    setSelectedOption(null);
-                    if (task.questions && currentIndex + 1 < task.questions.length) {
-                        setCurrentIndex(prev => prev + 1);
-                    } else {
-                        handleFinishRun(true, 'victory');
-                    }
-                    setIsChecking(false);
-                }, 1500);
             } else {
+                // ── Wrong answer ──────────────────────────────────────────
                 setIsShaking(true);
                 setTimeout(() => setIsShaking(false), 500);
 
-                setHearts(prev => prev - 1);
-                if (result.crystalsAwarded) setEarnedCrystals(prev => prev + result.crystalsAwarded!);
-                if (!failedQuestionIds.includes(currentQuestion.id)) setFailedQuestionIds(prev => [...prev, currentQuestion.id]);
-
-                if (hearts - 1 <= 0) {
-                    setTimeout(() => handleFinishRun(false, 'defeat'), 1000);
+                // STEP 1: Check if Rune of Protection (shield) is active
+                if (user?.hasActiveShield) {
+                    showArenaToast('🛡️ Rune of Protection absorbed the blow! No life lost.', 'shield');
+                    // Burn the shield on the backend in background (non-blocking UX)
+                    authService.consumeShield()
+                        .then(() => refreshUser())
+                        .catch(err => console.error('[Shield] consume failed:', err));
+                    // Hearts stay the same — skip setHearts
+                } else {
+                    // STEP 2: No shield — deduct a heart
+                    setHearts(prev => prev - 1);
                 }
-                setIsChecking(false);
+
+                // STEP 3: Productive failure crystal reward (first miss only)
+                if (!failedQuestionIds.includes(currentQuestion.id)) {
+                    setFailedQuestionIds(prev => [...prev, currentQuestion.id]);
+                    // Backend already awards crystals via SubmissionService,
+                    // but we reflect the response amount in the local counter
+                    if (result.crystalsAwarded && result.crystalsAwarded > 0) {
+                        setEarnedCrystals(prev => prev + result.crystalsAwarded!);
+                        showArenaToast(`Wrong answer — but you earned +${result.crystalsAwarded} 💎 (Productive Failure)!`, 'crystal');
+                    } else {
+                        showArenaToast('Wrong answer. Keep trying!', 'error');
+                    }
+                } else {
+                    // Repeat mistake — no crystals, no extra toast
+                    showArenaToast('Wrong again. Study the theory carefully!', 'error');
+                }
             }
         } catch (error) {
+            console.error('[ArenaPage] checkAnswer error:', error);
+        } finally {
             setIsChecking(false);
         }
     };
 
-    const handleFinishRun = async (isVictory: boolean, reason: 'victory' | 'defeat' | 'timeout' | 'cheated') => {
-        setRunStatus(reason);
-        if (task) {
-            try {
-                await arenaService.finishRun({ taskId: task.id, isVictory, failedQuestionIds });
-            } catch (error) { }
+    const handleNextStep = () => {
+        setShowNextButton(false);
+        setFeedback(null);
+        setSelectedOption(null);
+        setIsSuccess(false);
+
+        // Якщо втрачено останнє серце, завершуємо гру поразкою
+        if (hearts <= 0) {
+            handleFinishRun(false, 'defeat');
+            return;
+        }
+
+        // Інакше йдемо до наступного питання або святкуємо перемогу
+        if (task?.questions && currentIndex + 1 < task.questions.length) {
+            setCurrentIndex(prev => prev + 1);
+        } else {
+            handleFinishRun(true, 'victory');
         }
     };
+
+    const handleFinishRun = useCallback(async (isVictory: boolean, reason: 'victory' | 'defeat' | 'timeout' | 'cheated') => {
+        setRunStatus(reason);
+
+        // 🎉 Конфетті — лише при перемозі, одразу після відображення екрану
+        if (isVictory) {
+            // Лівий залп
+            confetti({
+                particleCount: 80,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.65 },
+                colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'],
+            });
+            // Правий залп
+            confetti({
+                particleCount: 80,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.65 },
+                colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'],
+            });
+        }
+
+        if (task) {
+            try {
+                const payload = { taskId: task.id, isVictory, failedQuestionIds };
+                console.log('[ArenaPage] Відправляємо finishRun:', payload);
+                await arenaService.finishRun(payload);
+            } catch (error) {
+                console.error('[ArenaPage] Помилка finishRun:', error);
+            }
+        }
+        // Оновлюємо профіль гравця (XP, Gold, Crystals) після завершення забігу
+        await refreshUser();
+    }, [task, failedQuestionIds, refreshUser]);
 
     if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-bold">Підготовка Арени...</div>;
     if (!task || !currentQuestion) return <div className="min-h-screen bg-zinc-950 p-8 text-center text-red-400">Завдання не знайдено.</div>;
@@ -155,21 +215,21 @@ export const ArenaPage = () => {
 
     return (
         <>
-            <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-10px); }
-          50% { transform: translateX(10px); }
-          75% { transform: translateX(-10px); }
-        }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
 
-        @keyframes pulse-red {
-          0%, 100% { box-shadow: inset 0 0 20px rgba(220,38,38,0.05); }
-          50% { box-shadow: inset 0 0 60px rgba(220,38,38,0.2); }
-        }
-        .animate-boss-aura { animation: pulse-red 3s infinite ease-in-out; }
-      `}</style>
+            {/* ── Arena toast notification ──────────────────────────────── */}
+            {arenaToast && (
+                <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all ${
+                    arenaToast.type === 'shield'
+                        ? 'bg-blue-900 border border-blue-600 text-blue-200'
+                        : arenaToast.type === 'crystal'
+                            ? 'bg-purple-900 border border-purple-600 text-purple-200'
+                            : 'bg-red-900 border border-red-700 text-red-200'
+                }`}>
+                    {arenaToast.type === 'shield' && <Shield size={18} />}
+                    {arenaToast.type === 'crystal' && <Gem size={18} />}
+                    {arenaToast.message}
+                </div>
+            )}
 
             <div className={`min-h-screen text-white flex flex-col transition-transform ${isShaking ? 'animate-shake' : ''} ${bgClasses} ${isBoss ? 'animate-boss-aura relative overflow-hidden' : ''}`}>
 
@@ -193,9 +253,19 @@ export const ArenaPage = () => {
                         )}
 
                         <div className="flex items-center gap-2">
-                            {[1, 2, 3].map((h) => (
-                                <Heart key={h} size={24} className={`transition-all duration-300 ${h <= hearts ? (isBoss ? 'fill-red-600 text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]' : 'fill-red-500 text-red-500') : 'fill-zinc-800 text-zinc-700'}`} />
-                            ))}
+                            {[1, 2, 3].map((h) => {
+                                const isLost = h > hearts;
+                                const heartClass = isLost
+                                    ? 'animate-heart-break fill-zinc-800 text-zinc-700'
+                                    : (isBoss ? 'fill-red-600 text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]' : 'fill-red-500 text-red-500');
+                                return (
+                                    <Heart
+                                        key={h}
+                                        size={24}
+                                        className={`transition-all duration-300 ${heartClass}`}
+                                    />
+                                );
+                            })}
                         </div>
                         <div className="flex items-center gap-2 text-purple-400 font-bold bg-purple-500/10 px-3 py-1 rounded-lg">
                             <Gem size={18} /> {earnedCrystals}
@@ -249,7 +319,7 @@ export const ArenaPage = () => {
                                     return (
                                         <button
                                             key={idx}
-                                            disabled={isChecking || runStatus !== 'playing'}
+                                            disabled={isChecking || runStatus !== 'playing' || showNextButton}
                                             onClick={() => handleAnswer(option)}
                                             className={`border p-5 rounded-2xl font-bold transition-all duration-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg ${btnClass}`}
                                         >
@@ -266,6 +336,15 @@ export const ArenaPage = () => {
                                     <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Промах! Спробуй ще раз</p>
                                     <p className="text-sm text-zinc-300">{feedback.explanation}</p>
                                 </div>
+                            )}
+
+                            {showNextButton && (
+                                <button
+                                    onClick={handleNextStep}
+                                    className="mt-8 w-full py-4 rounded-2xl font-black text-xl bg-white text-black hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-300"
+                                >
+                                    Продовжити Шлях <ChevronRight size={24} />
+                                </button>
                             )}
                         </div>
                     </div>

@@ -23,50 +23,60 @@ public class InventoryService {
 
     public List<Inventory> getUserInventory(String email) {
         User player = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
+                .orElseThrow(() -> new RuntimeException("Player not found"));
         return inventoryRepository.findAllByUser(player);
     }
 
     @Transactional
     public void useConsumable(String email, Long inventoryId) {
         User player = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
+                .orElseThrow(() -> new RuntimeException("Player not found"));
 
         Inventory inventoryEntry = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new RuntimeException("Предмет не знайдено в інвентарі"));
+                .orElseThrow(() -> new RuntimeException("Item not found in inventory"));
 
         if (!inventoryEntry.getUser().getId().equals(player.getId())) {
-            throw new RuntimeException("Це не ваш предмет!");
+            throw new RuntimeException("This item does not belong to you!");
         }
 
         Item item = inventoryEntry.getItem();
         if (item.getCategory() != Item.ItemCategory.CONSUMABLE) {
-            throw new RuntimeException("Цей предмет не можна використати таким чином!");
+            throw new RuntimeException("This item cannot be used this way!");
         }
 
-        // --- МАГІЯ БАФІВ (Без Сувою) ---
+        // ── Apply buff effect ─────────────────────────────────────────
         LocalDateTime now = LocalDateTime.now();
         switch (item.getEffect()) {
-            case XP_BOOST_30_MIN:
+            case XP_BOOST:
                 player.setXpBuffEndsAt(now.plusMinutes(30));
+                log.info("Player {} activated XP_BOOST until {}", email, player.getXpBuffEndsAt());
                 break;
-            case GOLD_BOOST_60_MIN:
+
+            case GOLD_BOOST:
                 player.setGoldBuffEndsAt(now.plusMinutes(60));
+                log.info("Player {} activated GOLD_BOOST until {}", email, player.getGoldBuffEndsAt());
                 break;
-            case ENERGY_STASIS_30_MIN:
-                player.setEnergyStasisEndsAt(now.plusMinutes(30));
+
+            case ENERGY_REFILL:
+                player.setEnergy(100);
+                log.info("Player {} restored energy to 100", email);
                 break;
-            case SINGLE_RUN_SHIELD:
-                if (player.getHasActiveShield() != null && player.getHasActiveShield()) {
-                    throw new RuntimeException("Щит вже активний!");
+
+            case SHIELD:
+                if (Boolean.TRUE.equals(player.getHasActiveShield())) {
+                    throw new RuntimeException("Shield is already active!");
                 }
                 player.setHasActiveShield(true);
+                log.info("Player {} activated SHIELD", email);
                 break;
+
             case NONE:
             default:
+                log.warn("Item '{}' has NONE effect — nothing to apply", item.getName());
                 break;
         }
 
+        // ── Consume one unit ─────────────────────────────────────────
         int currentQuantity = inventoryEntry.getQuantity();
         if (currentQuantity <= 1) {
             inventoryRepository.delete(inventoryEntry);
@@ -76,23 +86,22 @@ public class InventoryService {
         }
 
         userRepository.save(player);
-        log.info("Гравець {} активував ефект: {}", email, item.getEffect());
     }
 
     @Transactional
     public Inventory toggleEquipCosmetic(String email, Long inventoryId) {
         User player = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
+                .orElseThrow(() -> new RuntimeException("Player not found"));
 
         Inventory inventoryEntry = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new RuntimeException("Предмет не знайдено в інвентарі"));
+                .orElseThrow(() -> new RuntimeException("Item not found in inventory"));
 
         if (!inventoryEntry.getUser().getId().equals(player.getId())) {
-            throw new RuntimeException("Це не ваш предмет!");
+            throw new RuntimeException("This item does not belong to you!");
         }
 
         if (inventoryEntry.getItem().getCategory() != Item.ItemCategory.COSMETIC) {
-            throw new RuntimeException("Розхідники не можна надягати!");
+            throw new RuntimeException("Consumables cannot be equipped!");
         }
 
         boolean isCurrentlyEquipped = inventoryEntry.getIsEquipped();

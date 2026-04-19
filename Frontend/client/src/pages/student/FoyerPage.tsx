@@ -1,26 +1,30 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ReactFlow, { Background, Controls } from 'reactflow';
+import ReactFlow, { Background, PanOnScrollMode } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import { CustomTaskNode } from '@/components/CustomTaskNode';
 import { buildTreeLayout } from '@/utils/treeLayout';
 import { taskService } from '@/services/taskService';
+import { useAuthStore } from '@/store/authStore';
 import type { TaskDto } from '@/types';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Zap } from 'lucide-react';
 
-// Виносимо за межі компонента для оптимізації
 const nodeTypes = {
     customTaskNode: CustomTaskNode,
 };
 
 export const FoyerPage = () => {
-    // Отримуємо ID курсу з URL (наприклад, /course/1/foyer)
     const { courseId } = useParams<{ courseId: string }>();
     const navigate = useNavigate();
+    const energy = useAuthStore(state => state.user?.energy ?? 0);
 
     const [tasks, setTasks] = useState<TaskDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Стан для модального вікна
+    const [selectedTask, setSelectedTask] = useState<TaskDto | null>(null);
+    const hasEnergy = energy > 0;
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -38,8 +42,14 @@ export const FoyerPage = () => {
         fetchTasks();
     }, [courseId]);
 
-    // Перебудовуємо дерево тільки при зміні списку завдань
     const { nodes, edges } = useMemo(() => buildTreeLayout(tasks), [tasks]);
+
+    // Обробник кліку по вузлу
+    const onNodeClick = useCallback((event: React.MouseEvent, node: any) => {
+        if (!node.data.isLocked) {
+            setSelectedTask(node.data);
+        }
+    }, []);
 
     if (isLoading) {
         return (
@@ -50,9 +60,27 @@ export const FoyerPage = () => {
     }
 
     return (
-        <div className="w-screen h-screen bg-zinc-950 relative">
+        <div className="w-full h-screen bg-zinc-950 relative">
+            {/* ГЛОБАЛЬНІ СТИЛІ ДЛЯ ПЕРЕБИВАННЯ REACT FLOW */}
+            <style>{`
+                /* Прибираємо курсор-руку на фоні */
+                .react-flow__pane {
+                    cursor: default !important;
+                }
+                /* Вимикаємо будь-яку взаємодію з лініями-зв'язками */
+                .react-flow__edge, .react-flow__edge-path, .react-flow__edge-interaction {
+                    pointer-events: none !important;
+                    cursor: default !important;
+                }
+                /* Приховуємо білі крапки (handles) на вузлах */
+                .react-flow__handle {
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                }
+            `}</style>
+
             <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/courses')}
                 className="absolute top-4 left-4 z-10 flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-bold bg-zinc-900/80 px-4 py-2 rounded-xl backdrop-blur-sm border border-zinc-800"
             >
                 <ArrowLeft size={20} /> До списку курсів
@@ -62,15 +90,67 @@ export const FoyerPage = () => {
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
+                onNodeClick={onNodeClick}
                 fitView
+                fitViewOptions={{
+                    nodes: nodes.length > 0 ? [{ id: nodes[0].id }] : undefined,
+                    maxZoom: 1,
+                    minZoom: 0.8
+                }}
+                defaultEdgeOptions={{ interactionWidth: 0, focusable: false }}
+                edgesFocusable={false}
+                edgesUpdatable={false}
                 nodesDraggable={false}
                 nodesConnectable={false}
-                elementsSelectable={false}
+                elementsSelectable={true}
+                panOnDrag={false}
+                zoomOnScroll={false}
+                zoomOnDoubleClick={false}
+                panOnScroll={true}
+                panOnScrollMode={PanOnScrollMode.Vertical}
                 proOptions={{ hideAttribution: true }}
             >
                 <Background color="#27272a" gap={24} />
-                <Controls showInteractive={false} className="bg-zinc-900 border-zinc-800 fill-white" />
             </ReactFlow>
+
+            {/* 🛡️ МОДАЛЬНЕ ВІКНО ПІДТВЕРДЖЕННЯ */}
+            {selectedTask && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="bg-zinc-900 border border-zinc-700 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
+                        <h2 className="text-2xl font-bold text-white mb-4">{selectedTask.title}</h2>
+                        <p className="text-zinc-400 mb-8">Ви готові розпочати це випробування?</p>
+
+                    <div className="flex justify-center gap-4">
+                            <button
+                                onClick={() => setSelectedTask(null)}
+                                className="px-6 py-2 rounded-xl font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                            >
+                                Відступити
+                            </button>
+                            {hasEnergy ? (
+                                <button
+                                    onClick={() => navigate(`/arena/${selectedTask.id}`)}
+                                    className="px-6 py-2 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all"
+                                >
+                                    До бою!
+                                </button>
+                            ) : (
+                                <div className="flex flex-col items-center gap-1">
+                                    <button
+                                        disabled
+                                        className="px-6 py-2 rounded-xl font-bold text-zinc-500 bg-zinc-800 border border-zinc-700 cursor-not-allowed"
+                                    >
+                                        До бою!
+                                    </button>
+                                    <span className="flex items-center gap-1 text-xs text-amber-400 font-bold">
+                                        <Zap size={12} /> Немає сил (0/100). Поверніться пізніше.
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
