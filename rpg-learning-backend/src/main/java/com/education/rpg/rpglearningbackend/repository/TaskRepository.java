@@ -13,4 +13,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     // НОВИЙ МЕТОД: Отримати завдання курсу, ВІДСОРТОВАНІ за порядком (для Туману війни)
     List<Task> findByCourseIdOrderByOrderIndexAsc(Long courseId);
+
+    int countByCourseId(Long courseId);
 }

@@ -1,0 +1,1 @@
+-- Migration V6: Insert initial courses (Cleared for DatabaseSeeder)

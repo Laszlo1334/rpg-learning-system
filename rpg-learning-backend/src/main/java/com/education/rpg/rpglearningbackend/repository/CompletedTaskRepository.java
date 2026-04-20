@@ -17,4 +17,6 @@ public interface CompletedTaskRepository extends JpaRepository<CompletedTask, Lo
 
     // ДОДАНО: Знайти всі завершені завдання конкретного гравця
     List<CompletedTask> findByUserId(Long userId);
+
+    int countByUserIdAndTaskCourseId(Long userId, Long courseId);
 }

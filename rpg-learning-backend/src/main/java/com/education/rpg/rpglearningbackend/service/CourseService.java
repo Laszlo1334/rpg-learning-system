@@ -6,6 +6,7 @@ import com.education.rpg.rpglearningbackend.model.Submission;
 import com.education.rpg.rpglearningbackend.model.SubmissionStatus;
 import com.education.rpg.rpglearningbackend.model.Task;
 import com.education.rpg.rpglearningbackend.model.User;
+import com.education.rpg.rpglearningbackend.repository.CompletedTaskRepository;
 import com.education.rpg.rpglearningbackend.repository.CourseRepository;
 import com.education.rpg.rpglearningbackend.repository.SubmissionRepository;
 import com.education.rpg.rpglearningbackend.repository.TaskRepository;
@@ -24,6 +25,7 @@ public class CourseService {
     private final TaskRepository taskRepository;
     private final SubmissionRepository submissionRepository;
     private final UserRepository userRepository;
+    private final CompletedTaskRepository completedTaskRepository;
 
     // Отримати всі курси разом із прогресом для Глобальної Карти
     public List<CourseProgressDto> getAllCoursesWithProgress(String email) {
@@ -54,32 +56,28 @@ public class CourseService {
         dto.setDescription(course.getDescription());
 
         // 1. Рахуємо всі завдання в цьому курсі
-        List<Task> courseTasks = taskRepository.findByCourseId(course.getId());
-        int totalTasks = courseTasks.size();
+        int totalTasks = taskRepository.countByCourseId(course.getId());
         dto.setTotalTasks(totalTasks);
 
         // 2. Рахуємо пройдені завдання (APPROVED)
-        // Для MVP ми просто витягуємо всі успішні сабмішени студента і фільтруємо по курсу
-        List<Submission> approvedSubmissions = submissionRepository.findAll().stream()
-                .filter(sub -> sub.getStudent().getId().equals(student.getId()))
-                .filter(sub -> sub.getStatus() == SubmissionStatus.APPROVED)
-                .filter(sub -> sub.getTask().getCourse() != null && sub.getTask().getCourse().getId().equals(course.getId()))
-                .toList();
-
-        // Беремо унікальні завдання (бо студент міг здати одне завдання кілька разів, хоча ми це блокуємо)
-        long completedTasks = approvedSubmissions.stream()
-                .map(sub -> sub.getTask().getId())
-                .distinct()
-                .count();
-
-        dto.setCompletedTasks((int) completedTasks);
+        int completedTasks = completedTaskRepository.countByUserIdAndTaskCourseId(student.getId(), course.getId());
+        dto.setCompletedTasks(completedTasks);
 
         // 3. Вираховуємо відсоток (захист від ділення на 0)
         if (totalTasks == 0) {
             dto.setProgressPercentage(0);
         } else {
-            dto.setProgressPercentage((int) ((completedTasks * 100) / totalTasks));
+            dto.setProgressPercentage((completedTasks * 100) / totalTasks);
         }
+        
+        // 4. Логіка статусів
+        String status = "new";
+        if (completedTasks == totalTasks && totalTasks > 0) {
+            status = "completed";
+        } else if (completedTasks > 0) {
+            status = "in_progress";
+        }
+        dto.setStatus(status);
 
         return dto;
     }

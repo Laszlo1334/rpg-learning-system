@@ -12,4 +12,6 @@ public class CourseProgressDto {
     private int totalTasks;       // Скільки всього квестів у курсі
     private int completedTasks;   // Скільки квестів студент уже пройшов (APPROVED)
     private int progressPercentage; // Відсоток проходження (0-100)
+    
+    private String status; // 'new', 'in_progress', 'completed', 'locked'
 }

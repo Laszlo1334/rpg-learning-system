@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
-import { Coins, Swords, LogOut, Trophy, Store, Gem } from 'lucide-react';
+import { Coins, Swords, LogOut, Trophy, Store, Gem, Tent } from 'lucide-react';
 
 export const Header = () => {
   const { user, setUser } = useAuthStore();
@@ -39,6 +39,10 @@ export const Header = () => {
 
           {/* 2. Навігація по сторінках */}
           <nav className="hidden md:flex items-center gap-2">
+            <NavLink to="/dashboard" className={navLinkClass}>
+              <Tent size={20} />
+              <span>Табір</span>
+            </NavLink>
             <NavLink to="/courses" className={navLinkClass}>
               <Swords size={20} />
               <span>Квести</span>

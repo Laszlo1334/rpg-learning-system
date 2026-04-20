@@ -52,6 +52,7 @@ export interface CourseProgressDto {
   totalTasks: number;
   completedTasks: number;
   progressPercentage: number;
+  status: 'new' | 'in_progress' | 'completed';
 }
 
 export interface QuestionDto {
@@ -147,7 +148,7 @@ export interface CourseDto {
   description: string;
   totalTasks: number;
   completedTasks: number;
-  status: 'new' | 'in_progress' | 'completed' | 'locked';
+  status: 'new' | 'in_progress' | 'completed';
   rewardIcon?: string; // Наприклад, 'sword', 'shield', 'scroll'
 }
 

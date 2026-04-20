@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { InventoryEntry } from '@/types';
 
 import { inventoryService } from '@/services/inventoryService';
+import { courseService } from '@/services/courseService';
 
 import { CampfireWidget } from '@/components/widgets/CampfireWidget';
 import { EnergyWidget } from '@/components/widgets/EnergyWidget';
@@ -18,7 +19,26 @@ export const StudentDashboard = () => {
   const [inventory, setInventory] = useState<InventoryEntry[]>([]);
   const [isInventoryLoading, setIsInventoryLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+  const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+      const fetchActiveCourse = async () => {
+          try {
+              if (user && user.totalTasksCompleted > 0) {
+                  const courses = await courseService.getAllCourses();
+                  let targetCourse = courses.find((c: any) => c.status === 'in_progress');
+                  if (!targetCourse) {
+                      targetCourse = [...courses].reverse().find((c: any) => c.completedTasks > 0);
+                  }
+                  if (targetCourse) setActiveCourseId(targetCourse.id);
+              }
+          } catch (error) {
+              console.error("Не вдалося завантажити активний курс", error);
+          }
+      };
+      fetchActiveCourse();
+  }, [user]);
 
   // Load inventory on mount
   useEffect(() => {
@@ -70,6 +90,12 @@ export const StudentDashboard = () => {
   const xpInCurrentLevel = user.currentXp - (user.level - 1) * xpPerLevel;
   const progressPercentage = Math.min(100, Math.max(0, Math.round((xpInCurrentLevel / xpPerLevel) * 100)));
 
+  const isNewbie = !user || user.totalTasksCompleted === 0;
+  const buttonText = isNewbie ? "Розпочати пригоду" : "Продовжити пригоду";
+  const targetUrl = isNewbie || !activeCourseId 
+      ? '/courses' 
+      : `/courses/${activeCourseId}/foyer`;
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 relative">
 
@@ -117,11 +143,11 @@ export const StudentDashboard = () => {
 
       {/* --- БЛОК 2: Головна навігація --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button
-          onClick={() => navigate('/courses')}
-          className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 text-white p-5 rounded-2xl font-bold text-lg transition-colors shadow-lg"
+        <button 
+            onClick={() => navigate(targetUrl)} 
+            className="w-full md:w-auto flex-1 py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-xl text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-3"
         >
-          <Map size={24} /> Продовжити пригоду
+            <Map size={24} /> {buttonText}
         </button>
         <button
           onClick={() => navigate('/shop')}
