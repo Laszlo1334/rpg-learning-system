@@ -1,17 +1,19 @@
 package com.education.rpg.rpglearningbackend.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CourseProgressDto {
     private Long id;
     private String title;
     private String description;
-
-    // Метрики для прогрес-бару на фронтенді
-    private int totalTasks;       // Скільки всього квестів у курсі
-    private int completedTasks;   // Скільки квестів студент уже пройшов (APPROVED)
-    private int progressPercentage; // Відсоток проходження (0-100)
-    
-    private String status; // 'new', 'in_progress', 'completed', 'locked'
+    private int totalTasks;
+    private int completedTasks;
+    private String status;
 }

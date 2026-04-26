@@ -219,10 +219,10 @@ export const LeaderboardPage = () => {
                                             </div>
 
                                             {/* Аватар */}
-                                            <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden flex-shrink-0 flex items-center justify-center text-lg">
+                                            <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
                                                 {player.avatarUrl
-                                                    ? <img src={player.avatarUrl} alt={player.username} className="w-full h-full object-cover" />
-                                                    : '🧙‍♂️'
+                                                    ? <img src={player.avatarUrl} alt={player.username} className="w-full h-full object-contain" style={{ imageRendering: 'pixelated' }} />
+                                                    : <span className="text-lg opacity-40">🧙‍♂️</span>
                                                 }
                                             </div>
 
@@ -263,8 +263,8 @@ export const LeaderboardPage = () => {
                                             <div className="w-7 flex justify-center flex-shrink-0">
                                                 {getMedalIcon(index)}
                                             </div>
-                                            <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex-shrink-0 flex items-center justify-center text-lg">
-                                                🧙‍♂️
+                                            <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                                <span className="text-lg opacity-40">🧙‍♂️</span>
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className={`font-bold truncate ${player.username === user?.username ? 'text-purple-400' : 'text-white'}`}>

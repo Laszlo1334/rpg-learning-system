@@ -149,37 +149,25 @@ public class SubmissionService {
     // --- ТВОЇ ЗБЕРЕЖЕНІ ПРИВАТНІ МЕТОДИ ---
 
     private void grantRewards(User student, Task task, LocalDateTime now) {
-        // Базова енергія дає x1.5
-        double energyMultiplier = (student.getEnergy() != null && student.getEnergy() > 0) ? 1.5 : 1.0;
+        int finalXp = task.getRewardXp();
+        int finalGold = task.getRewardGold();
 
-        // Перевіряємо активні бафи від зілля
-        boolean hasXpBuff = student.getXpBuffEndsAt() != null && now.isBefore(student.getXpBuffEndsAt());
-        boolean hasGoldBuff = student.getGoldBuffEndsAt() != null && now.isBefore(student.getGoldBuffEndsAt());
-        boolean hasEnergyStasis = student.getEnergyStasisEndsAt() != null && now.isBefore(student.getEnergyStasisEndsAt());
+        // Застосування Зілля Досвіду (x1.5)
+        if (student.getXpBuffEndsAt() != null && student.getXpBuffEndsAt().isAfter(now)) {
+            finalXp = (int) (finalXp * 1.5);
+            log.info("XP Buff applied! Original: {}, New: {}", task.getRewardXp(), finalXp);
+        }
 
-        // Застосовуємо бафи (наприклад, ще +50% якщо випив Еліксир)
-        double finalXpMultiplier = hasXpBuff ? energyMultiplier + 0.5 : energyMultiplier;
-        double finalGoldMultiplier = hasGoldBuff ? energyMultiplier + 1.0 : energyMultiplier; // Подвійне золото
-
-        int finalXp = (int) (task.getRewardXp() * finalXpMultiplier);
-        int finalGold = (int) (task.getRewardGold() * finalGoldMultiplier);
+        // Застосування Зілля Золота (x2)
+        if (student.getGoldBuffEndsAt() != null && student.getGoldBuffEndsAt().isAfter(now)) {
+            finalGold = finalGold * 2;
+            log.info("Gold Buff applied! Original: {}, New: {}", task.getRewardGold(), finalGold);
+        }
 
         student.setCurrentXp(student.getCurrentXp() + finalXp);
         student.setGold(student.getGold() + finalGold);
-        student.setLifetimeGold(student.getLifetimeGold() + finalGold);
         student.setTotalTasksCompleted(student.getTotalTasksCompleted() + 1);
-
-        // Якщо немає стазису кави — знімаємо енергію
-        if (student.getEnergy() != null && !hasEnergyStasis) {
-            student.setEnergy(Math.max(0, student.getEnergy() - 20));
-        }
-
         student.setLastTaskCompletionDate(now);
-
-        int calculatedLevel = (student.getCurrentXp() / 1000) + 1;
-        if (calculatedLevel > student.getLevel()) {
-            student.setLevel(calculatedLevel);
-        }
     }
 
     private void handleProductiveFailure(User student, List<Long> failedQuestionIds) {

@@ -8,7 +8,9 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    // Можна буде додати пошук за типом предмета (наприклад, тільки капелюхи)
-    // НОВЕ: Знайти предмети за категорією (наприклад, тільки CONSUMABLE)
+    // Знайти предмети за категорією (наприклад, тільки CONSUMABLE)
     List<Item> findByCategory(Item.ItemCategory category);
+
+    // Перевірка існування предмета за назвою (захист від дублікатів у сідері)
+    boolean existsByName(String name);
 }

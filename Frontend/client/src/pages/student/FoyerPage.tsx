@@ -30,6 +30,7 @@ export const FoyerPage = () => {
         const fetchTasks = async () => {
             try {
                 if (courseId) {
+                    localStorage.setItem('lastActiveCourseId', courseId);
                     const data = await taskService.getTasksByCourse(Number(courseId));
                     setTasks(data);
                 }
@@ -59,8 +60,11 @@ export const FoyerPage = () => {
         );
     }
 
+    const activeNode = nodes.find(n => !n.data.isLocked && !n.data.isCompleted);
+    const focusNodeId = activeNode ? activeNode.id : (nodes.length > 0 ? nodes[nodes.length - 1].id : undefined);
+
     return (
-        <div className="w-full h-screen bg-zinc-950 relative">
+        <div className="w-full h-screen bg-zinc-950 relative overflow-hidden">
             {/* ГЛОБАЛЬНІ СТИЛІ ДЛЯ ПЕРЕБИВАННЯ REACT FLOW */}
             <style>{`
                 /* Прибираємо курсор-руку на фоні */
@@ -93,9 +97,10 @@ export const FoyerPage = () => {
                 onNodeClick={onNodeClick}
                 fitView
                 fitViewOptions={{
-                    nodes: nodes.length > 0 ? [{ id: nodes[0].id }] : undefined,
-                    maxZoom: 1,
-                    minZoom: 0.8
+                    nodes: focusNodeId ? [{ id: focusNodeId }] : undefined,
+                    maxZoom: 1.2,
+                    minZoom: 0.5,
+                    duration: 800
                 }}
                 defaultEdgeOptions={{ interactionWidth: 0, focusable: false }}
                 edgesFocusable={false}
@@ -127,26 +132,15 @@ export const FoyerPage = () => {
                             >
                                 Відступити
                             </button>
-                            {hasEnergy ? (
-                                <button
-                                    onClick={() => navigate(`/arena/${selectedTask.id}`)}
-                                    className="px-6 py-2 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all"
-                                >
+                            <div className="flex flex-col items-center gap-3 w-full">
+                                <button onClick={() => navigate(`/arena/${selectedTask.id}`)}
+                                    className="w-full px-8 py-3 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all">
                                     До бою!
                                 </button>
-                            ) : (
-                                <div className="flex flex-col items-center gap-1">
-                                    <button
-                                        disabled
-                                        className="px-6 py-2 rounded-xl font-bold text-zinc-500 bg-zinc-800 border border-zinc-700 cursor-not-allowed"
-                                    >
-                                        До бою!
-                                    </button>
-                                    <span className="flex items-center gap-1 text-xs text-amber-400 font-bold">
-                                        <Zap size={12} /> Немає сил (0/100). Поверніться пізніше.
-                                    </span>
-                                </div>
-                            )}
+                                <span className={`text-xs font-bold flex items-center gap-1 ${hasEnergy ? 'text-green-400' : 'text-zinc-500'}`}>
+                                    {hasEnergy ? <><Zap size={14}/> Бонус до нагород: x1.5</> : 'Втома: стандартні нагороди'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -241,8 +241,8 @@ export const ArenaPage = () => {
                 )}
 
                 <header className={`p-4 flex items-center justify-between sticky top-0 z-10 border-b backdrop-blur-md ${isBoss ? 'bg-red-950/20 border-red-900/30' : 'bg-zinc-900/90 border-zinc-800'}`}>
-                    <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-bold">
-                        <Flag size={20} /> Відступити до Табору
+                    <button onClick={() => navigate(task?.courseId ? `/courses/${task.courseId}/foyer` : '/courses')} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-bold">
+                        <Flag size={20} /> Відступити на Карту
                     </button>
                     <div className="flex items-center gap-6 md:gap-8">
 
@@ -387,8 +387,8 @@ export const ArenaPage = () => {
                                     </div>
                                 </>
                             )}
-                            <button onClick={() => navigate('/dashboard')} className={`w-full py-4 rounded-2xl font-black text-lg transition-colors flex items-center justify-center gap-2 ${isBoss && runStatus !== 'victory' ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-white text-black hover:bg-zinc-200'}`}>
-                                Повернутися в Табір <ChevronRight size={24} />
+                            <button onClick={() => navigate(task?.courseId ? `/courses/${task.courseId}/foyer` : '/courses')} className={`w-full py-4 rounded-2xl font-black text-lg transition-colors flex items-center justify-center gap-2 ${isBoss && runStatus !== 'victory' ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-white text-black hover:bg-zinc-200'}`}>
+                                {runStatus === 'victory' ? 'Продовжити Шлях' : 'Повернутися на Карту'} <ChevronRight size={24} />
                             </button>
                         </div>
                     </div>

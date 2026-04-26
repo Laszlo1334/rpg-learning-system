@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class TaskDto {
     private Long id;
+    private Long courseId;
     private String title;
     private String theoryContent;
     private String branchName;

@@ -12,10 +12,15 @@ interface PlayerChronicleModalProps {
 
 // --- Допоміжні функції ---
 
+const parseBuffDate = (dateStr?: string) => {
+    if (!dateStr) return new Date(0);
+    return new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+};
+
 /** Повертає true, якщо баф активний (дата у майбутньому) */
 const isBuffActive = (dateString: string | null): boolean => {
     if (!dateString) return false;
-    return new Date(dateString) > new Date();
+    return parseBuffDate(dateString) > new Date();
 };
 
 /** Форматує ISO-дату в читабельний вигляд або "Немає даних" */
@@ -188,33 +193,56 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                             <Sparkles size={11} /> Активні чари
                         </p>
 
-                        {buffs.length === 0 ? (
-                            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-5 text-center">
-                                <p className="text-zinc-600 text-sm font-bold">
-                                    Зараз на вас не діють жодні чари
-                                </p>
+                        {(!user?.hasActiveShield && !(user?.xpBuffEndsAt && parseBuffDate(user.xpBuffEndsAt) > new Date()) && !(user?.goldBuffEndsAt && parseBuffDate(user.goldBuffEndsAt) > new Date()) && !(user?.energyStasisEndsAt && parseBuffDate(user.energyStasisEndsAt) > new Date())) ? (
+                            <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 text-center text-zinc-500 font-bold">
+                                Зараз на вас не діють жодні чари
                             </div>
                         ) : (
-                            <div className="space-y-2">
-                                {buffs.map((buff, idx) => (
-                                    <div
-                                        key={idx}
-                                        className={`flex items-center gap-3 border rounded-xl px-4 py-3 ${buff.color}`}
-                                    >
+                            <div className="flex flex-col gap-2">
+                                {user?.hasActiveShield && (
+                                    <div className="flex items-center gap-3 border rounded-xl px-4 py-3 border-blue-500/30 bg-blue-500/5">
                                         <div className="w-8 h-8 rounded-lg bg-zinc-900/60 flex items-center justify-center flex-shrink-0">
-                                            {buff.icon}
+                                            <Shield size={18} className="text-blue-400" />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-sm font-bold text-white leading-tight">{buff.label}</p>
-                                            <p className="text-[11px] text-zinc-500 truncate">{buff.sublabel}</p>
-                                        </div>
-                                        <div className="ml-auto flex-shrink-0">
-                                            <span className="text-[10px] font-black text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                Активно
-                                            </span>
+                                            <p className="text-sm font-bold text-white leading-tight">Аура безстрашності</p>
+                                            <p className="text-[11px] text-zinc-500 truncate">Щит від поразки</p>
                                         </div>
                                     </div>
-                                ))}
+                                )}
+                                {user?.xpBuffEndsAt && parseBuffDate(user.xpBuffEndsAt) > new Date() && (
+                                    <div className="flex items-center gap-3 border rounded-xl px-4 py-3 border-purple-500/30 bg-purple-500/5">
+                                        <div className="w-8 h-8 rounded-lg bg-zinc-900/60 flex items-center justify-center flex-shrink-0">
+                                            <FlaskConical size={18} className="text-purple-400" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-white leading-tight">Еліксир Мудрості</p>
+                                            <p className="text-[11px] text-zinc-500 truncate">XP x1.5 до {formatDate(user.xpBuffEndsAt)}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {user?.goldBuffEndsAt && parseBuffDate(user.goldBuffEndsAt) > new Date() && (
+                                    <div className="flex items-center gap-3 border rounded-xl px-4 py-3 border-yellow-500/30 bg-yellow-500/5">
+                                        <div className="w-8 h-8 rounded-lg bg-zinc-900/60 flex items-center justify-center flex-shrink-0">
+                                            <Magnet size={18} className="text-yellow-400" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-white leading-tight">Магніт Гобліна</p>
+                                            <p className="text-[11px] text-zinc-500 truncate">Золото x2 до {formatDate(user.goldBuffEndsAt)}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {user?.energyStasisEndsAt && parseBuffDate(user.energyStasisEndsAt) > new Date() && (
+                                    <div className="flex items-center gap-3 border rounded-xl px-4 py-3 border-amber-500/30 bg-amber-500/5">
+                                        <div className="w-8 h-8 rounded-lg bg-zinc-900/60 flex items-center justify-center flex-shrink-0">
+                                            <Coffee size={18} className="text-amber-400" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-white leading-tight">Кава Магістра</p>
+                                            <p className="text-[11px] text-zinc-500 truncate">Енергія не витрачається до {formatDate(user.energyStasisEndsAt)}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

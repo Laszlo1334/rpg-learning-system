@@ -3,7 +3,8 @@ export type QuestionType = 'TEST' | 'TEXT';
 export type CurrencyType = 'GOLD' | 'CRYSTAL';
 export type ItemCategory = 'COSMETIC' | 'CONSUMABLE';
 export type ItemEffect = 'XP_BOOST' | 'GOLD_BOOST' | 'ENERGY_REFILL' | 'SHIELD' | 'NONE';
-export type ItemSlot = 'HEAD' | 'BODY' | 'HANDS' | 'LEGS' | 'WEAPON' | 'BACKGROUND' | 'FRAME' | 'NONE';
+export type ItemSlot = 'HEAD' | 'BODY' | 'HANDS' | 'LEGS' | 'WEAPON' | 'AVATAR' | 'NONE';
+export type ItemRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 export type SubmissionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface User {
@@ -64,6 +65,7 @@ export interface QuestionDto {
 
 export interface TaskDto {
   id: number;
+  courseId: number; // <-- ДОДАНО ЦЕ ПОЛЕ
   title: string;
   theoryContent: string;
   branchName: string;
@@ -109,7 +111,8 @@ export interface Item {
   currencyType: CurrencyType;
   category: ItemCategory;
   effect: ItemEffect;
-  slot: ItemSlot; // Slot this item occupies
+  slot: ItemSlot;
+  rarity: ItemRarity;
   assetUrl: string | null;
 }
 

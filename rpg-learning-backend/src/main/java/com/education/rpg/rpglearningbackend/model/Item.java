@@ -54,13 +54,22 @@ public class Item {
 
     // ── Cosmetic slot (for equip system) ─────────────────────────
     public enum ItemSlot {
-        HEAD, BODY, HANDS, LEGS, WEAPON, BACKGROUND, FRAME,
+        HEAD, BODY, HANDS, LEGS, WEAPON, AVATAR,
         NONE  // consumables / items without a slot
     }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ItemSlot slot = ItemSlot.NONE;
+
+    // ── Rarity ────────────────────────────────────────────────────
+    public enum ItemRarity {
+        COMMON, RARE, EPIC, LEGENDARY
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ItemRarity rarity = ItemRarity.COMMON;
 
     private String assetUrl;
 }

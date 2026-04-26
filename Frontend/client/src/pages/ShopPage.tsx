@@ -4,22 +4,59 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { shopService } from '@/services/shopService';
 import { inventoryService } from '@/services/inventoryService';
-import type { Item, InventoryEntry } from '@/types';
+import type { Item, InventoryEntry, ItemSlot } from '@/types';
 import {
     ArrowLeft, Coins, Gem, ShoppingCart, Loader2,
-    Shirt, FlaskConical, AlertCircle, X, Eye, CheckCircle
+    Shirt, FlaskConical, AlertCircle, X, CheckCircle
 } from 'lucide-react';
 
 type ActiveTab = 'COSMETIC' | 'CONSUMABLE';
+type SlotFilter = ItemSlot | 'ALL';
 
 // Backend effect → readable label
 const EFFECT_LABELS: Record<string, string> = {
-    XP_BOOST_30_MIN:      '🧪 XP ×1.5 на 30 хв',
-    GOLD_BOOST_60_MIN:    '🧲 Gold ×2 на 60 хв',
-    ENERGY_STASIS_30_MIN: '☕ Енергія не витрачається 30 хв',
-    SINGLE_RUN_SHIELD:    '🛡️ Захист на 1 забіг',
-    NONE:                 '',
+    XP_BOOST:      '🧪 XP ×1.5 на 30 хв',
+    GOLD_BOOST:    '🧲 Gold ×2 на 60 хв',
+    ENERGY_REFILL: '☕ Відновлення енергії',
+    SHIELD:        '🛡️ Захист на 1 забіг',
+    NONE:          '',
 };
+
+// Rarity color map
+const RARITY_BORDER: Record<string, string> = {
+    COMMON:    'border-zinc-600',
+    RARE:      'border-blue-500',
+    EPIC:      'border-purple-500',
+    LEGENDARY: 'border-yellow-400',
+};
+const RARITY_GLOW: Record<string, string> = {
+    COMMON:    '',
+    RARE:      'shadow-[0_0_12px_rgba(59,130,246,0.35)]',
+    EPIC:      'shadow-[0_0_12px_rgba(168,85,247,0.35)]',
+    LEGENDARY: 'shadow-[0_0_16px_rgba(234,179,8,0.45)]',
+};
+const RARITY_LABEL: Record<string, string> = {
+    COMMON:    'Звичайний',
+    RARE:      'Рідкісний',
+    EPIC:      'Епічний',
+    LEGENDARY: 'Легендарний',
+};
+const RARITY_TEXT: Record<string, string> = {
+    COMMON:    'text-zinc-400',
+    RARE:      'text-blue-400',
+    EPIC:      'text-purple-400',
+    LEGENDARY: 'text-yellow-400',
+};
+
+const SLOT_FILTERS: { label: string; value: SlotFilter }[] = [
+    { label: 'Всі',    value: 'ALL' },
+    { label: 'Аватари', value: 'AVATAR' },
+    { label: 'Голова', value: 'HEAD' },
+    { label: 'Тулуб',  value: 'BODY' },
+    { label: 'Ноги',   value: 'LEGS' },
+    { label: 'Руки',   value: 'HANDS' },
+    { label: 'Зброя',  value: 'WEAPON' },
+];
 
 export const ShopPage = () => {
     const navigate = useNavigate();
@@ -32,9 +69,9 @@ export const ShopPage = () => {
 
     // ─── UI state ──────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<ActiveTab>('CONSUMABLE');
+    const [activeFilter, setActiveFilter] = useState<SlotFilter>('ALL');
     const [buyingId, setBuyingId] = useState<number | null>(null);
-    const [itemToBuy, setItemToBuy] = useState<Item | null>(null);        // confirmation modal
-    const [previewItem, setPreviewItem] = useState<Item | null>(null);    // cosmetic preview
+    const [itemToBuy, setItemToBuy] = useState<Item | null>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     // ─── Load items + inventory on mount ───────────────────────────
@@ -72,14 +109,11 @@ export const ShopPage = () => {
 
         try {
             await shopService.buyItem(boughtItem.id);
-
-            // Refresh both balance and inventory in parallel
             const [, newInventory] = await Promise.all([
                 refreshUser(),
                 inventoryService.getInventory(),
             ]);
             setInventory(newInventory);
-
             setNotification({ type: 'success', message: `"${boughtItem.name}" додано до рюкзака! ✅` });
         } catch (err: unknown) {
             const raw = err instanceof Error ? err.message : '';
@@ -100,35 +134,57 @@ export const ShopPage = () => {
         return entry ? entry.quantity : 0;
     };
 
-    const filteredItems = items.filter(i => i.category === activeTab);
+    // Filter by tab first, then by slot
+    const tabFiltered = items.filter(i => i.category === activeTab);
+    const filteredItems = activeTab === 'COSMETIC' && activeFilter !== 'ALL'
+        ? tabFiltered.filter(i => i.slot === activeFilter)
+        : tabFiltered;
 
     const tabClass = (tab: ActiveTab) =>
         `flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeTab === tab ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
         }`;
 
-    // ─── Shared item card (consumables grid + cosmetics right col) ──
-    const ItemCard = ({ item, onCardClick }: { item: Item; onCardClick?: () => void }) => {
+    const filterBtnClass = (val: SlotFilter) =>
+        `px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+            activeFilter === val
+                ? 'bg-purple-600 border-purple-500 text-white'
+                : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+        }`;
+
+    // ─── Item Card ─────────────────────────────────────────────────
+    const ItemCard = ({ item }: { item: Item }) => {
         const affordable = canAfford(item);
         const isBuying = buyingId === item.id;
         const ownedQty  = getOwnedQuantity(item);
-        const isPreview = previewItem?.id === item.id;
+        const rarity = item.rarity ?? 'COMMON';
 
         return (
             <div
-                onClick={onCardClick}
                 className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 ${
-                    isPreview
-                        ? 'border-purple-500/60 shadow-[0_0_20px_rgba(168,85,247,0.15)]'
-                        : affordable
-                            ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
-                            : 'border-zinc-800/50 opacity-60'
-                } ${onCardClick ? 'cursor-pointer' : ''}`}
+                    affordable
+                        ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
+                        : 'border-zinc-800/50 opacity-60'
+                }`}
             >
-                {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-2xl">
-                    {item.category === 'COSMETIC' ? '✨' : '🧪'}
+                {/* Icon with rarity border */}
+                <div className={`w-14 h-14 rounded-xl bg-zinc-800 border-2 ${RARITY_BORDER[rarity]} ${RARITY_GLOW[rarity]} flex items-center justify-center overflow-hidden`}>
+                    {item.assetUrl ? (
+                        <img
+                            src={item.assetUrl}
+                            alt={item.name}
+                            className="w-full h-full object-contain"
+                            style={{ imageRendering: 'pixelated' }}
+                        />
+                    ) : (
+                        <span className="text-2xl">{item.category === 'COSMETIC' ? '✨' : '🧪'}</span>
+                    )}
                 </div>
+
+                {/* Rarity label */}
+                <span className={`text-[10px] font-black uppercase tracking-wider ${RARITY_TEXT[rarity]}`}>
+                    {RARITY_LABEL[rarity]}
+                </span>
 
                 {/* Info */}
                 <div className="flex-1">
@@ -158,17 +214,8 @@ export const ShopPage = () => {
                         </span>
                     </div>
 
-                    {onCardClick && (
-                        <button
-                            onClick={e => { e.stopPropagation(); setPreviewItem(isPreview ? null : item); }}
-                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors text-xs font-bold"
-                        >
-                            <Eye size={14} /> Приміряти
-                        </button>
-                    )}
-
                     <button
-                        onClick={e => { e.stopPropagation(); if (affordable && !isBuying) setItemToBuy(item); }}
+                        onClick={() => { if (affordable && !isBuying) setItemToBuy(item); }}
                         disabled={!affordable || isBuying}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${
                             affordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
@@ -211,7 +258,6 @@ export const ShopPage = () => {
                         className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
                         onClick={e => e.stopPropagation()}
                     >
-                        {/* Header */}
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-black text-white">Підтвердження покупки</h3>
                             <button onClick={() => setItemToBuy(null)} className="text-zinc-500 hover:text-white transition-colors">
@@ -219,7 +265,6 @@ export const ShopPage = () => {
                             </button>
                         </div>
 
-                        {/* Item summary */}
                         <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 mb-5 flex items-center gap-3">
                             <span className="text-3xl">{itemToBuy.category === 'COSMETIC' ? '✨' : '🧪'}</span>
                             <div>
@@ -234,7 +279,6 @@ export const ShopPage = () => {
                             </div>
                         </div>
 
-                        {/* Actions */}
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setItemToBuy(null)}
@@ -284,18 +328,33 @@ export const ShopPage = () => {
             {/* ── Tabs ──────────────────────────────────────────────── */}
             <div className="flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1 gap-1">
                 <button
-                    onClick={() => { setActiveTab('CONSUMABLE'); setPreviewItem(null); }}
+                    onClick={() => { setActiveTab('CONSUMABLE'); setActiveFilter('ALL'); }}
                     className={tabClass('CONSUMABLE')}
                 >
                     <FlaskConical size={16} /> Розхідники
                 </button>
                 <button
-                    onClick={() => { setActiveTab('COSMETIC'); setPreviewItem(null); }}
+                    onClick={() => { setActiveTab('COSMETIC'); setActiveFilter('ALL'); }}
                     className={tabClass('COSMETIC')}
                 >
                     <Shirt size={16} /> Косметика
                 </button>
             </div>
+
+            {/* ── Slot filter (visible only for COSMETIC tab) ────────── */}
+            {activeTab === 'COSMETIC' && (
+                <div className="flex flex-wrap gap-2">
+                    {SLOT_FILTERS.map(f => (
+                        <button
+                            key={f.value}
+                            onClick={() => setActiveFilter(f.value)}
+                            className={filterBtnClass(f.value)}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* ── Content ───────────────────────────────────────────── */}
             {isLoading ? (
@@ -305,80 +364,9 @@ export const ShopPage = () => {
                 </div>
             ) : filteredItems.length === 0 ? (
                 <div className="py-20 text-center text-zinc-500 font-bold">Тут поки що пусто 🧹</div>
-            ) : activeTab === 'CONSUMABLE' ? (
-
-                /* ── Consumables: simple 3-col grid ──────────────────── */
+            ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredItems.map(item => <ItemCard key={item.id} item={item} />)}
-                </div>
-
-            ) : (
-
-                /* ── Cosmetics: fitting-room layout ──────────────────── */
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                    {/* LEFT: Fitting room */}
-                    <div className="md:col-span-1">
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sticky top-24">
-                            <p className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">
-                                ✨ Примірочна
-                            </p>
-
-                            {/* Composite avatar */}
-                            <div className="relative w-48 h-48 mx-auto">
-                                {/* Base avatar */}
-                                <div className="absolute inset-0 bg-zinc-800 rounded-2xl border border-zinc-700 flex items-center justify-center text-7xl overflow-hidden">
-                                    {user?.avatarUrl
-                                        ? <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                                        : '🧙‍♂️'
-                                    }
-                                </div>
-
-                                {/* Cosmetic overlay (frame / background) */}
-                                {previewItem?.assetUrl && (
-                                    <img
-                                        src={previewItem.assetUrl}
-                                        alt={previewItem.name}
-                                        className="absolute inset-0 w-full h-full object-cover rounded-2xl pointer-events-none"
-                                        style={{ zIndex: 10 }}
-                                    />
-                                )}
-
-                                {/* "Worn" badge */}
-                                {previewItem && (
-                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-[10px] font-black px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
-                                        {previewItem.name}
-                                    </div>
-                                )}
-                            </div>
-
-                            {!previewItem && (
-                                <p className="text-center text-xs text-zinc-600 mt-6 font-bold">
-                                    Клікни на товар, щоб приміряти
-                                </p>
-                            )}
-
-                            {previewItem && (
-                                <button
-                                    onClick={() => setPreviewItem(null)}
-                                    className="mt-6 w-full py-2 rounded-xl text-zinc-400 hover:text-white text-xs font-bold hover:bg-zinc-800 transition-colors"
-                                >
-                                    Зняти
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* RIGHT: Cosmetics grid */}
-                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">
-                        {filteredItems.map(item => (
-                            <ItemCard
-                                key={item.id}
-                                item={item}
-                                onCardClick={() => setPreviewItem(prev => prev?.id === item.id ? null : item)}
-                            />
-                        ))}
-                    </div>
                 </div>
             )}
         </div>

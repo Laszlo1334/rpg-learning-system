@@ -96,6 +96,9 @@ public class TaskService {
     private TaskDto convertToDto(Task task) {
         TaskDto dto = new TaskDto();
         dto.setId(task.getId());
+        if (task.getCourse() != null) {
+            dto.setCourseId(task.getCourse().getId());
+        }
         dto.setTitle(task.getTitle());
         dto.setTheoryContent(task.getTheoryContent());
         dto.setBranchName(task.getBranchName());

@@ -2,15 +2,10 @@ package com.education.rpg.rpglearningbackend.service;
 
 import com.education.rpg.rpglearningbackend.dto.CourseProgressDto;
 import com.education.rpg.rpglearningbackend.model.Course;
-import com.education.rpg.rpglearningbackend.model.Submission;
-import com.education.rpg.rpglearningbackend.model.SubmissionStatus;
-import com.education.rpg.rpglearningbackend.model.Task;
 import com.education.rpg.rpglearningbackend.model.User;
 import com.education.rpg.rpglearningbackend.repository.CompletedTaskRepository;
 import com.education.rpg.rpglearningbackend.repository.CourseRepository;
-import com.education.rpg.rpglearningbackend.repository.SubmissionRepository;
 import com.education.rpg.rpglearningbackend.repository.TaskRepository;
-import com.education.rpg.rpglearningbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,62 +18,54 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final TaskRepository taskRepository;
-    private final SubmissionRepository submissionRepository;
-    private final UserRepository userRepository;
     private final CompletedTaskRepository completedTaskRepository;
 
-    // Отримати всі курси разом із прогресом для Глобальної Карти
-    public List<CourseProgressDto> getAllCoursesWithProgress(String email) {
-        User student = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
+    public List<CourseProgressDto> getAllCoursesWithProgress(User user) {
+        List<Course> courses = courseRepository.findAll();
 
-        List<Course> allCourses = courseRepository.findAll();
+        return courses.stream().map(course -> {
+            int totalTasks = taskRepository.countByCourseId(course.getId());
+            int completedTasks = completedTaskRepository.countByUserIdAndTaskCourseId(user.getId(), course.getId());
 
-        return allCourses.stream().map(course -> buildCourseProgress(course, student)).collect(Collectors.toList());
+            String status = "new";
+            if (totalTasks > 0 && completedTasks == totalTasks) {
+                status = "completed";
+            } else if (completedTasks > 0) {
+                status = "in_progress";
+            }
+
+            return CourseProgressDto.builder()
+                .id(course.getId())
+                .title(course.getTitle())
+                .description(course.getDescription())
+                .totalTasks(totalTasks)
+                .completedTasks(completedTasks)
+                .status(status)
+                .build();
+        }).collect(Collectors.toList());
     }
 
-    // Отримати один курс (для входу в Підземелля)
-    public CourseProgressDto getCourseById(Long courseId, String email) {
-        User student = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
-
+    public CourseProgressDto getCourseById(Long courseId, User user) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Курс не знайдено"));
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        return buildCourseProgress(course, student);
-    }
-
-    // --- ПРИВАТНИЙ МЕТОД: Розрахунок математики прогресу ---
-    private CourseProgressDto buildCourseProgress(Course course, User student) {
-        CourseProgressDto dto = new CourseProgressDto();
-        dto.setId(course.getId());
-        dto.setTitle(course.getTitle());
-        dto.setDescription(course.getDescription());
-
-        // 1. Рахуємо всі завдання в цьому курсі
         int totalTasks = taskRepository.countByCourseId(course.getId());
-        dto.setTotalTasks(totalTasks);
+        int completedTasks = completedTaskRepository.countByUserIdAndTaskCourseId(user.getId(), course.getId());
 
-        // 2. Рахуємо пройдені завдання (APPROVED)
-        int completedTasks = completedTaskRepository.countByUserIdAndTaskCourseId(student.getId(), course.getId());
-        dto.setCompletedTasks(completedTasks);
-
-        // 3. Вираховуємо відсоток (захист від ділення на 0)
-        if (totalTasks == 0) {
-            dto.setProgressPercentage(0);
-        } else {
-            dto.setProgressPercentage((completedTasks * 100) / totalTasks);
-        }
-        
-        // 4. Логіка статусів
         String status = "new";
-        if (completedTasks == totalTasks && totalTasks > 0) {
+        if (totalTasks > 0 && completedTasks == totalTasks) {
             status = "completed";
         } else if (completedTasks > 0) {
             status = "in_progress";
         }
-        dto.setStatus(status);
 
-        return dto;
+        return CourseProgressDto.builder()
+            .id(course.getId())
+            .title(course.getTitle())
+            .description(course.getDescription())
+            .totalTasks(totalTasks)
+            .completedTasks(completedTasks)
+            .status(status)
+            .build();
     }
 }

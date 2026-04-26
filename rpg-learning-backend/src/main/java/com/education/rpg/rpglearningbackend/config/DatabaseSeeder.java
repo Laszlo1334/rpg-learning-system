@@ -24,35 +24,34 @@ public class DatabaseSeeder {
             PasswordEncoder passwordEncoder
     ) {
         return args -> {
-            if (userRepository.count() > 0) {
-                System.out.println("⚡ База даних вже містить інформацію. Генерація пропущена.");
-                return;
+            System.out.println("🌱 Запуск модульної перевірки бази даних...");
+
+            // 1. БЛОК КОРИСТУВАЧІВ
+            if (userRepository.count() == 0) {
+                System.out.println("Створення користувачів...");
+                generateUsers(userRepository, passwordEncoder);
             }
 
-            System.out.println("🌱 База даних порожня. Починаємо епічну генерацію світу...");
-            generateUsers(userRepository, passwordEncoder);
-            User teacher = userRepository.findByEmail("teacher@rpg.com").orElseThrow();
+            // 2. БЛОК КУРСІВ ТА ЗАВДАНЬ
+            if (courseRepository.count() == 0) {
+                System.out.println("Створення курсів...");
+                User teacher = userRepository.findByEmail("teacher@rpg.com").orElseThrow();
+                List<Course> courses = new ArrayList<>();
+                courses.add(createCourse("Основи магії (Java Spring Boot)", "Вступний курс.", "MAGIC101", teacher));
+                courses.add(createCourse("Некромантія Баз Даних (SQL)", "JOIN-и та магія.", "SQL666", teacher));
+                courses.add(createCourse("Алгоритмічні закляття", "Оптимізація коду.", "ALGO99", teacher));
+                courseRepository.saveAll(courses);
 
-            // СТВОРЕННЯ 6 КУРСІВ
-            List<Course> courses = new ArrayList<>();
-            courses.add(createCourse("Основи магії (Java Spring Boot)", "Вступний курс для юних чарівників-програмістів.", "MAGIC101", teacher));
-            courses.add(createCourse("Некромантія Баз Даних (SQL)", "Навчіться піднімати дані з мертвих за допомогою складних JOIN'ів.", "SQL666", teacher));
-            courses.add(createCourse("Алгоритмічні закляття", "Оптимізація та магія пам'яті. Дізнайся, як зробити код швидким.", "ALGO99", teacher));
-            courses.add(createCourse("Архітектура Магічних Систем", "Проектування великих застосунків. (Вимагає розуміння ООП).", "ARCH01", teacher));
-            courses.add(createCourse("Захист від темних багів (QA)", "Мистецтво тестування. Як не дозволити демонам зламати ваш код.", "QA777", teacher));
-            courses.add(createCourse("Магія Інтерфейсів (React)", "Створення порталів для спілкування з користувачами.", "REACT22", teacher));
-            courseRepository.saveAll(courses);
+                generateBranchedCourse(courses.get(0), 30, taskRepository);
+                generateLinearCourse(courses.get(1), 25, "SQL Запит", taskRepository);
+                generateBranchedCourse(courses.get(2), 20, taskRepository);
+            }
 
-            // ГЕНЕРАЦІЯ СОТЕНЬ ЗАВДАНЬ ДЛЯ КУРСІВ
-            generateBranchedCourse(courses.get(0), 30, taskRepository); // Java
-            generateLinearCourse(courses.get(1), 25, "SQL Запит", taskRepository); // SQL
-            generateBranchedCourse(courses.get(2), 20, taskRepository); // Алгоритми
-            generateLinearCourse(courses.get(3), 15, "Паттерн", taskRepository); // Архітектура
-            generateLinearCourse(courses.get(4), 20, "Тест-кейс", taskRepository); // QA
-            generateBranchedCourse(courses.get(5), 25, taskRepository); // React
-
+            // 3. БЛОК МАГАЗИНУ (запускається завжди, але хелпери не дадуть створити дублікати)
+            System.out.println("Перевірка та оновлення асортименту магазину...");
             generateShopItems(itemRepository);
-            System.out.println("✅ Світ згенеровано! 6 курсів та сотні завдань готові.");
+
+            System.out.println("✅ База даних успішно синхронізована!");
         };
     }
 
@@ -192,79 +191,65 @@ public class DatabaseSeeder {
     }
 
     private void generateShopItems(ItemRepository itemRepository) {
-        Item potionOfWisdom = new Item();
-        potionOfWisdom.setName("Potion of Wisdom");
-        potionOfWisdom.setDescription("Grants +50% XP for 30 minutes. Perfect before a boss run.");
-        potionOfWisdom.setPrice(15);
-        potionOfWisdom.setCurrencyType(Item.CurrencyType.CRYSTAL);
-        potionOfWisdom.setCategory(Item.ItemCategory.CONSUMABLE);
-        potionOfWisdom.setEffect(Item.EffectType.XP_BOOST);
-        potionOfWisdom.setSlot(Item.ItemSlot.NONE);
-        potionOfWisdom.setAssetUrl("/assets/items/potion_wisdom.png");
+        // --- Розхідники (Consumables) ---
+        createConsumable(itemRepository, "Зілля Мудрості", "+50% XP на 30 хвилин.", 15, Item.CurrencyType.CRYSTAL, Item.EffectType.XP_BOOST, "/assets/items/potion_wisdom.png");
+        createConsumable(itemRepository, "Магніт Гобліна", "Подвійне золото на 60 хвилин.", 15, Item.CurrencyType.CRYSTAL, Item.EffectType.GOLD_BOOST, "/assets/items/goblin_magnet.png");
+        createConsumable(itemRepository, "Еліксир Бадьорості", "Миттєво відновлює 100 Енергії.", 20, Item.CurrencyType.CRYSTAL, Item.EffectType.ENERGY_REFILL, "/assets/items/elixir_vigor.png");
+        createConsumable(itemRepository, "Руна Захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL, Item.EffectType.SHIELD, "/assets/items/rune_protection.png");
 
-        Item goblinMagnet = new Item();
-        goblinMagnet.setName("Goblin's Magnet");
-        goblinMagnet.setDescription("Doubles all Gold earned for 60 minutes. The goblins weep.");
-        goblinMagnet.setPrice(15);
-        goblinMagnet.setCurrencyType(Item.CurrencyType.CRYSTAL);
-        goblinMagnet.setCategory(Item.ItemCategory.CONSUMABLE);
-        goblinMagnet.setEffect(Item.EffectType.GOLD_BOOST);
-        goblinMagnet.setSlot(Item.ItemSlot.NONE);
-        goblinMagnet.setAssetUrl("/assets/items/goblin_magnet.png");
+        // --- Аватари (AVATAR) ---
+        createEquipment(itemRepository, "Елронд", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE, "/assets/avatars/elrond.png");
+        createEquipment(itemRepository, "Гімлі", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE, "/assets/avatars/gimli.png");
 
-        Item elixirOfVigor = new Item();
-        elixirOfVigor.setName("Elixir of Vigor");
-        elixirOfVigor.setDescription("Instantly restores your Energy to 100. Go again, hero.");
-        elixirOfVigor.setPrice(20);
-        elixirOfVigor.setCurrencyType(Item.CurrencyType.CRYSTAL);
-        elixirOfVigor.setCategory(Item.ItemCategory.CONSUMABLE);
-        elixirOfVigor.setEffect(Item.EffectType.ENERGY_REFILL);
-        elixirOfVigor.setSlot(Item.ItemSlot.NONE);
-        elixirOfVigor.setAssetUrl("/assets/items/elixir_vigor.png");
+        // --- Голова (HEAD) ---
+        createEquipment(itemRepository, "Шолом Новачка", 200, Item.ItemSlot.HEAD, Item.ItemRarity.COMMON, "/assets/cosmetics/Head/head1.png");
 
-        Item runeOfProtection = new Item();
-        runeOfProtection.setName("Rune of Protection");
-        runeOfProtection.setDescription("Elite rune. Absorbs one defeat on the Arena. Does not stack.");
-        runeOfProtection.setPrice(100);
-        runeOfProtection.setCurrencyType(Item.CurrencyType.CRYSTAL);
-        runeOfProtection.setCategory(Item.ItemCategory.CONSUMABLE);
-        runeOfProtection.setEffect(Item.EffectType.SHIELD);
-        runeOfProtection.setSlot(Item.ItemSlot.NONE);
-        runeOfProtection.setAssetUrl("/assets/items/rune_protection.png");
+        // --- Тулуб (BODY) ---
+        createEquipment(itemRepository, "Мантія Учня", 300, Item.ItemSlot.BODY, Item.ItemRarity.COMMON, "/assets/cosmetics/Chest/chest1.png");
 
-        Item wizardHat = new Item();
-        wizardHat.setName("Wizard Hat");
-        wizardHat.setDescription("A tall pointed hat that radiates ancient power. +0 stats, maximum respect.");
-        wizardHat.setPrice(1500);
-        wizardHat.setCurrencyType(Item.CurrencyType.GOLD);
-        wizardHat.setCategory(Item.ItemCategory.COSMETIC);
-        wizardHat.setEffect(Item.EffectType.NONE);
-        wizardHat.setSlot(Item.ItemSlot.HEAD);
-        wizardHat.setAssetUrl("/assets/cosmetics/wizard_hat.png");
+        // --- Руки (HANDS) ---
+        createEquipment(itemRepository, "Шкіряні Рукавиці", 150, Item.ItemSlot.HANDS, Item.ItemRarity.COMMON, "/assets/cosmetics/Hands/hands1.png");
 
-        Item apprenticeRobe = new Item();
-        apprenticeRobe.setName("Apprentice Robe");
-        apprenticeRobe.setDescription("A fine robe worn by the most dedicated students of the Academy.");
-        apprenticeRobe.setPrice(2500);
-        apprenticeRobe.setCurrencyType(Item.CurrencyType.GOLD);
-        apprenticeRobe.setCategory(Item.ItemCategory.COSMETIC);
-        apprenticeRobe.setEffect(Item.EffectType.NONE);
-        apprenticeRobe.setSlot(Item.ItemSlot.BODY);
-        apprenticeRobe.setAssetUrl("/assets/cosmetics/apprentice_robe.png");
+        // --- Ноги (LEGS) ---
+        createEquipment(itemRepository, "Чоботи Мандрівника", 150, Item.ItemSlot.LEGS, Item.ItemRarity.COMMON, "/assets/cosmetics/Legs/legs1.png");
 
-        Item mysticForest = new Item();
-        mysticForest.setName("Mystic Forest");
-        mysticForest.setDescription("A legendary background. The forest breathes with you.");
-        mysticForest.setPrice(5000);
-        mysticForest.setCurrencyType(Item.CurrencyType.GOLD);
-        mysticForest.setCategory(Item.ItemCategory.COSMETIC);
-        mysticForest.setEffect(Item.EffectType.NONE);
-        mysticForest.setSlot(Item.ItemSlot.BACKGROUND);
-        mysticForest.setAssetUrl("/assets/cosmetics/mystic_forest.png");
+        // --- Зброя (WEAPON) ---
+        createEquipment(itemRepository, "Гостра Сокира", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE, "/assets/weapons/axe_1.png");
+        createEquipment(itemRepository, "Лук Лісника", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE, "/assets/weapons/bow_1.png");
+        createEquipment(itemRepository, "Сталевий Меч", 600, Item.ItemSlot.WEAPON, Item.ItemRarity.EPIC, "/assets/weapons/sword_1.png");
+    }
 
-        itemRepository.saveAll(List.of(
-            potionOfWisdom, goblinMagnet, elixirOfVigor, runeOfProtection,
-            wizardHat, apprenticeRobe, mysticForest
-        ));
+    // ==========================================
+    // ХЕЛПЕРИ ДЛЯ ПРЕДМЕТІВ МАГАЗИНУ
+    // ==========================================
+
+    private void createEquipment(ItemRepository repo, String name, int price, Item.ItemSlot slot, Item.ItemRarity rarity, String assetUrl) {
+        if (repo.existsByName(name)) return; // Захист від дублікатів
+        Item item = new Item();
+        item.setName(name);
+        item.setDescription("Елемент екіпірування героя.");
+        item.setPrice(price);
+        item.setCurrencyType(Item.CurrencyType.GOLD);
+        item.setCategory(Item.ItemCategory.COSMETIC);
+        item.setEffect(Item.EffectType.NONE);
+        item.setSlot(slot);
+        item.setRarity(rarity);
+        item.setAssetUrl(assetUrl);
+        repo.save(item);
+    }
+
+    private void createConsumable(ItemRepository repo, String name, String desc, int price, Item.CurrencyType currency, Item.EffectType effect, String assetUrl) {
+        if (repo.existsByName(name)) return; // Захист від дублікатів
+        Item item = new Item();
+        item.setName(name);
+        item.setDescription(desc);
+        item.setPrice(price);
+        item.setCurrencyType(currency);
+        item.setCategory(Item.ItemCategory.CONSUMABLE);
+        item.setEffect(effect);
+        item.setSlot(Item.ItemSlot.NONE);
+        item.setRarity(Item.ItemRarity.COMMON);
+        item.setAssetUrl(assetUrl);
+        repo.save(item);
     }
 }
