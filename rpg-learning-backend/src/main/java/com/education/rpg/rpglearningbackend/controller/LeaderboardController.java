@@ -3,6 +3,7 @@ package com.education.rpg.rpglearningbackend.controller;
 import com.education.rpg.rpglearningbackend.dto.CourseLeaderboardDto;
 import com.education.rpg.rpglearningbackend.dto.LeaderboardDto;
 import com.education.rpg.rpglearningbackend.repository.UserRepository;
+import com.education.rpg.rpglearningbackend.service.LeaderboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,34 +19,22 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/leaderboard")
 @RequiredArgsConstructor
-@Tag(name = "Зал Слави (Leaderboard)", description = "Глобальний та мікро-рейтинги гравців")
+@Tag(name = "Hall of Fame (Leaderboard)", description = "Global and per-course player rankings")
 public class LeaderboardController {
 
     private final UserRepository userRepository;
+    private final LeaderboardService leaderboardService;
 
     @GetMapping("/global")
-    @Operation(summary = "Глобальний Лідерборд", description = "Топ-10 гравців за загальним XP")
+    @Operation(summary = "Global Leaderboard", description = "Top 10 players by total XP")
     public ResponseEntity<List<LeaderboardDto>> getGlobalLeaderboard() {
-        List<LeaderboardDto> topPlayers = userRepository.findTop10ByIsPublicProfileTrueOrderByCurrentXpDesc()
-                .stream()
-                .map(user -> {
-                    LeaderboardDto dto = new LeaderboardDto();
-                    dto.setId(user.getId());
-                    dto.setUsername(user.getUsername());
-                    dto.setLevel(user.getLevel());
-                    dto.setXp(Long.valueOf(user.getCurrentXp()));
-                    dto.setAvatarUrl(user.getAvatarUrl());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(topPlayers);
+        return ResponseEntity.ok(leaderboardService.getGlobalLeaderboard());
     }
 
     @GetMapping("/course/{courseId}")
-    @Operation(summary = "Мікро-Лідерборд", description = "Топ гравців у межах конкретного курсу (з урахуванням приватності)")
+    @Operation(summary = "Course Leaderboard", description = "Top players within a specific course (respects privacy settings)")
     public ResponseEntity<List<CourseLeaderboardDto>> getCourseLeaderboard(@PathVariable Long courseId) {
-        // Завдяки @Query у репозиторії, цей метод одразу повертає готові DTO!
-        return ResponseEntity.ok(userRepository.getLeaderboardByCourseId(courseId));
+        // Delegate to the service so that avatar URLs are resolved from the inventory
+        return ResponseEntity.ok(leaderboardService.getCourseLeaderboard(courseId));
     }
 }

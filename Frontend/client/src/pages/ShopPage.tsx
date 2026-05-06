@@ -15,10 +15,10 @@ type SlotFilter = ItemSlot | 'ALL';
 
 // Backend effect → readable label
 const EFFECT_LABELS: Record<string, string> = {
-    XP_BOOST:      '🧪 XP ×1.5 на 30 хв',
-    GOLD_BOOST:    '🧲 Gold ×2 на 60 хв',
-    ENERGY_REFILL: '☕ Відновлення енергії',
-    SHIELD:        '🛡️ Захист на 1 забіг',
+    XP_BOOST:      '🧪 XP ×1.5 for 30 min',
+    GOLD_BOOST:    '🧲 Gold ×2 for 60 min',
+    ENERGY_REFILL: '☕ Restore energy to 100',
+    SHIELD:        '🛡️ Shield for 1 run',
     NONE:          '',
 };
 
@@ -36,10 +36,10 @@ const RARITY_GLOW: Record<string, string> = {
     LEGENDARY: 'shadow-[0_0_16px_rgba(234,179,8,0.45)]',
 };
 const RARITY_LABEL: Record<string, string> = {
-    COMMON:    'Звичайний',
-    RARE:      'Рідкісний',
-    EPIC:      'Епічний',
-    LEGENDARY: 'Легендарний',
+    COMMON:    'Common',
+    RARE:      'Rare',
+    EPIC:      'Epic',
+    LEGENDARY: 'Legendary',
 };
 const RARITY_TEXT: Record<string, string> = {
     COMMON:    'text-zinc-400',
@@ -49,13 +49,13 @@ const RARITY_TEXT: Record<string, string> = {
 };
 
 const SLOT_FILTERS: { label: string; value: SlotFilter }[] = [
-    { label: 'Всі',    value: 'ALL' },
-    { label: 'Аватари', value: 'AVATAR' },
-    { label: 'Голова', value: 'HEAD' },
-    { label: 'Тулуб',  value: 'BODY' },
-    { label: 'Ноги',   value: 'LEGS' },
-    { label: 'Руки',   value: 'HANDS' },
-    { label: 'Зброя',  value: 'WEAPON' },
+    { label: 'All',     value: 'ALL' },
+    { label: 'Avatars', value: 'AVATAR' },
+    { label: 'Head',    value: 'HEAD' },
+    { label: 'Body',    value: 'BODY' },
+    { label: 'Legs',    value: 'LEGS' },
+    { label: 'Hands',   value: 'HANDS' },
+    { label: 'Weapon',  value: 'WEAPON' },
 ];
 
 export const ShopPage = () => {
@@ -114,10 +114,10 @@ export const ShopPage = () => {
                 inventoryService.getInventory(),
             ]);
             setInventory(newInventory);
-            setNotification({ type: 'success', message: `"${boughtItem.name}" додано до рюкзака! ✅` });
+            setNotification({ type: 'success', message: `"${boughtItem.name}" added to inventory! ✅` });
         } catch (err: unknown) {
             const raw = err instanceof Error ? err.message : '';
-            setNotification({ type: 'error', message: raw || 'Помилка при покупці' });
+            setNotification({ type: 'error', message: raw || 'Purchase failed. Please try again.' });
         } finally {
             setBuyingId(null);
         }
@@ -157,14 +157,21 @@ export const ShopPage = () => {
         const affordable = canAfford(item);
         const isBuying = buyingId === item.id;
         const ownedQty  = getOwnedQuantity(item);
+        const isOwned   = inventory.some(inv => inv.item.id === item.id);
         const rarity = item.rarity ?? 'COMMON';
+
+        // Cosmetics that are already owned cannot be repurchased
+        const isCosmeticOwned = item.category === 'COSMETIC' && isOwned;
+        const cardAffordable  = !isCosmeticOwned && affordable;
 
         return (
             <div
                 className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 ${
-                    affordable
-                        ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
-                        : 'border-zinc-800/50 opacity-60'
+                    isCosmeticOwned
+                        ? 'border-emerald-800/40 opacity-75'
+                        : cardAffordable
+                            ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
+                            : 'border-zinc-800/50 opacity-60'
                 }`}
             >
                 {/* Icon with rarity border */}
@@ -198,7 +205,7 @@ export const ShopPage = () => {
                 {/* Owned quantity (consumables only) */}
                 {item.category === 'CONSUMABLE' && (
                     <p className="text-xs text-zinc-500">
-                        В наявності: <span className={ownedQty > 0 ? 'text-green-400 font-bold' : ''}>{ownedQty} шт.</span>
+                        In inventory: <span className={ownedQty > 0 ? 'text-green-400 font-bold' : ''}>{ownedQty} pcs.</span>
                     </p>
                 )}
 
@@ -214,19 +221,26 @@ export const ShopPage = () => {
                         </span>
                     </div>
 
-                    <button
-                        onClick={() => { if (affordable && !isBuying) setItemToBuy(item); }}
-                        disabled={!affordable || isBuying}
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${
-                            affordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
-                        }`}
-                    >
-                        {isBuying
-                            ? <Loader2 size={16} className="animate-spin" />
-                            : <ShoppingCart size={16} />
-                        }
-                        {isBuying ? 'Купую...' : affordable ? 'Купити' : 'Мало коштів'}
-                    </button>
+                    {/* Owned badge for cosmetics already in inventory */}
+                    {isCosmeticOwned ? (
+                        <span className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm bg-emerald-900/50 border border-emerald-700/50 text-emerald-400 cursor-not-allowed">
+                            <CheckCircle size={14} /> Owned
+                        </span>
+                    ) : (
+                        <button
+                            onClick={() => { if (cardAffordable && !isBuying) setItemToBuy(item); }}
+                            disabled={!cardAffordable || isBuying}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${
+                                cardAffordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
+                            }`}
+                        >
+                            {isBuying
+                                ? <Loader2 size={16} className="animate-spin" />
+                                : <ShoppingCart size={16} />
+                            }
+                            {isBuying ? 'Buying...' : cardAffordable ? 'Buy' : 'Not enough funds'}
+                        </button>
+                    )}
                 </div>
             </div>
         );
@@ -259,7 +273,7 @@ export const ShopPage = () => {
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-black text-white">Підтвердження покупки</h3>
+                            <h3 className="text-lg font-black text-white">Confirm Purchase</h3>
                             <button onClick={() => setItemToBuy(null)} className="text-zinc-500 hover:text-white transition-colors">
                                 <X size={20} />
                             </button>
@@ -270,10 +284,10 @@ export const ShopPage = () => {
                             <div>
                                 <p className="font-black text-white">{itemToBuy.name}</p>
                                 <p className="text-sm text-zinc-500 flex items-center gap-1 mt-0.5">
-                                    Витратити&nbsp;
+                                    Spend&nbsp;
                                     {itemToBuy.currencyType === 'GOLD'
-                                        ? <><Coins size={14} className="text-yellow-400" /><span className="text-yellow-400 font-bold">{itemToBuy.price} золота</span></>
-                                        : <><Gem   size={14} className="text-purple-400" /><span className="text-purple-400 font-bold">{itemToBuy.price} кристалів</span></>
+                                        ? <><Coins size={14} className="text-yellow-400" /><span className="text-yellow-400 font-bold">{itemToBuy.price} gold</span></>
+                                        : <><Gem   size={14} className="text-purple-400" /><span className="text-purple-400 font-bold">{itemToBuy.price} crystals</span></>
                                     }
                                 </p>
                             </div>
@@ -284,13 +298,13 @@ export const ShopPage = () => {
                                 onClick={() => setItemToBuy(null)}
                                 className="flex-1 py-2.5 rounded-xl font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
                             >
-                                Скасувати
+                                Cancel
                             </button>
                             <button
                                 onClick={handleConfirmBuy}
                                 className="flex-1 py-2.5 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center justify-center gap-2"
                             >
-                                <CheckCircle size={16} /> Підтвердити
+                                <CheckCircle size={16} /> Confirm
                             </button>
                         </div>
                     </div>
@@ -308,8 +322,8 @@ export const ShopPage = () => {
                         <ArrowLeft size={22} />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-black text-white">Крамниця Гільдії</h1>
-                        <p className="text-zinc-500 text-sm">Витрач своє золото та кристали з розумом</p>
+                        <h1 className="text-2xl font-black text-white">Guild Shop</h1>
+                        <p className="text-zinc-500 text-sm">Spend your gold and crystals wisely</p>
                     </div>
                 </div>
 
@@ -331,13 +345,13 @@ export const ShopPage = () => {
                     onClick={() => { setActiveTab('CONSUMABLE'); setActiveFilter('ALL'); }}
                     className={tabClass('CONSUMABLE')}
                 >
-                    <FlaskConical size={16} /> Розхідники
+                    <FlaskConical size={16} /> Consumables
                 </button>
                 <button
                     onClick={() => { setActiveTab('COSMETIC'); setActiveFilter('ALL'); }}
                     className={tabClass('COSMETIC')}
                 >
-                    <Shirt size={16} /> Косметика
+                    <Shirt size={16} /> Cosmetics
                 </button>
             </div>
 
@@ -360,10 +374,10 @@ export const ShopPage = () => {
             {isLoading ? (
                 <div className="flex items-center justify-center py-20 gap-3 text-zinc-500">
                     <Loader2 size={24} className="animate-spin" />
-                    <span className="font-bold">Завантаження товарів...</span>
+                    <span className="font-bold">Loading items...</span>
                 </div>
             ) : filteredItems.length === 0 ? (
-                <div className="py-20 text-center text-zinc-500 font-bold">Тут поки що пусто 🧹</div>
+                <div className="py-20 text-center text-zinc-500 font-bold">Nothing here yet 🧹</div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredItems.map(item => <ItemCard key={item.id} item={item} />)}

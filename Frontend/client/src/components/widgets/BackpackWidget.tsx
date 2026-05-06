@@ -57,7 +57,17 @@ export const BackpackWidget = ({ inventory, onUseItem, isLoading = false }: Back
                             className="flex items-center gap-3 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 group hover:border-amber-500/30 transition-all duration-200"
                         >
                             {/* Icon */}
-                            <span className="text-xl flex-shrink-0">🧪</span>
+                            {entry.item.assetUrl ? (
+                                <img
+                                    src={entry.item.assetUrl}
+                                    alt={entry.item.name}
+                                    className="w-8 h-8 object-contain flex-shrink-0"
+                                    style={{ imageRendering: 'pixelated' }}
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                            ) : (
+                                <span className="text-xl flex-shrink-0">🧪</span>
+                            )}
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">

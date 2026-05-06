@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -108,5 +109,50 @@ public class InventoryService {
         inventoryEntry.setIsEquipped(!isCurrentlyEquipped);
 
         return inventoryRepository.save(inventoryEntry);
+    }
+
+    @Transactional
+    public void equipItem(Long inventoryId, Long userId, Long replaceId) {
+        Inventory entry = inventoryRepository.findByIdAndUserId(inventoryId, userId)
+                .orElseThrow(() -> new RuntimeException("Item not found in inventory"));
+
+        Item.ItemSlot slot = entry.getItem().getSlot();
+
+        // Items with NONE slot (consumables) cannot be equipped via this endpoint
+        if (slot == Item.ItemSlot.NONE) {
+            throw new RuntimeException("This item has no equipment slot.");
+        }
+
+        List<Inventory> equipped = inventoryRepository.findByUserIdAndIsEquippedTrue(userId);
+
+        // 1. If a specific item was targeted for replacement (crucial for dual-wielding independent slots)
+        if (replaceId != null) {
+            equipped.stream()
+                    .filter(i -> i.getId().equals(replaceId))
+                    .findFirst()
+                    .ifPresent(i -> i.setIsEquipped(false));
+        }
+
+        // 2. Clear other items in the same slot.
+        //    For non-weapon slots (including AVATAR) always unequip all — fixes the avatar stacking bug.
+        //    For weapons, only unequip if no specific target was given (fallback: displace oldest).
+        if (slot != Item.ItemSlot.WEAPON) {
+            equipped.stream()
+                    .filter(i -> i.getItem().getSlot() == slot && !i.getId().equals(inventoryId))
+                    .forEach(i -> i.setIsEquipped(false));
+        } else if (replaceId == null) {
+            // Fallback for weapons when no target specified: allow max 2, displace oldest
+            List<Inventory> weapons = equipped.stream()
+                    .filter(i -> i.getItem().getSlot() == Item.ItemSlot.WEAPON
+                              && !i.getId().equals(inventoryId))
+                    .collect(Collectors.toList());
+            if (weapons.size() >= 2) {
+                weapons.get(0).setIsEquipped(false);
+            }
+        }
+
+        entry.setIsEquipped(true);
+        inventoryRepository.saveAll(equipped);
+        inventoryRepository.save(entry);
     }
 }

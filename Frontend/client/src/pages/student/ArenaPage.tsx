@@ -6,7 +6,7 @@ import { arenaService } from '@/services/arenaService';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import type { TaskDto, AnswerResponse } from '@/types';
-import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff, Shield } from 'lucide-react';
+import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff, Shield, BookOpen } from 'lucide-react';
 
 export const ArenaPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -15,6 +15,8 @@ export const ArenaPage = () => {
 
     const [task, setTask] = useState<TaskDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    // Controls whether the theory panel is visible; synced after the task loads
+    const [isTheoryVisible, setIsTheoryVisible] = useState(true);
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [hearts, setHearts] = useState(3);
@@ -45,6 +47,8 @@ export const ArenaPage = () => {
                 if (id) {
                     const data = await taskService.getTaskById(Number(id));
                     setTask(data);
+                    // Hide theory by default when the task explicitly hides it
+                    setIsTheoryVisible(!data.isTheoryHidden);
 
                     if (data.type === 'BOSS' && data.bossMetadata?.timeLimitSeconds) {
                         setTimeLeft(data.bossMetadata.timeLimitSeconds);
@@ -173,9 +177,9 @@ export const ArenaPage = () => {
     const handleFinishRun = useCallback(async (isVictory: boolean, reason: 'victory' | 'defeat' | 'timeout' | 'cheated') => {
         setRunStatus(reason);
 
-        // 🎉 Конфетті — лише при перемозі, одразу після відображення екрану
+        // 🎉 Confetti — only on victory, right after showing the screen
         if (isVictory) {
-            // Лівий залп
+            // Left burst
             confetti({
                 particleCount: 80,
                 angle: 60,
@@ -183,7 +187,7 @@ export const ArenaPage = () => {
                 origin: { x: 0, y: 0.65 },
                 colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'],
             });
-            // Правий залп
+            // Right burst
             confetti({
                 particleCount: 80,
                 angle: 120,
@@ -196,18 +200,18 @@ export const ArenaPage = () => {
         if (task) {
             try {
                 const payload = { taskId: task.id, isVictory, failedQuestionIds };
-                console.log('[ArenaPage] Відправляємо finishRun:', payload);
+                console.log('[ArenaPage] Sending finishRun:', payload);
                 await arenaService.finishRun(payload);
             } catch (error) {
-                console.error('[ArenaPage] Помилка finishRun:', error);
+                console.error('[ArenaPage] finishRun error:', error);
             }
         }
-        // Оновлюємо профіль гравця (XP, Gold, Crystals) після завершення забігу
+        // Update player profile (XP, Gold, Crystals) after run completion
         await refreshUser();
     }, [task, failedQuestionIds, refreshUser]);
 
-    if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-bold">Підготовка Арени...</div>;
-    if (!task || !currentQuestion) return <div className="min-h-screen bg-zinc-950 p-8 text-center text-red-400">Завдання не знайдено.</div>;
+    if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-bold">Preparing Arena...</div>;
+    if (!task || !currentQuestion) return <div className="min-h-screen bg-zinc-950 p-8 text-center text-red-400">Task not found.</div>;
 
     const bgClasses = isBoss
         ? "bg-gradient-to-b from-red-950/40 via-zinc-950 to-zinc-950 border-red-900/30"
@@ -218,13 +222,12 @@ export const ArenaPage = () => {
 
             {/* ── Arena toast notification ──────────────────────────────── */}
             {arenaToast && (
-                <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all ${
-                    arenaToast.type === 'shield'
+                <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all ${arenaToast.type === 'shield'
                         ? 'bg-blue-900 border border-blue-600 text-blue-200'
                         : arenaToast.type === 'crystal'
                             ? 'bg-purple-900 border border-purple-600 text-purple-200'
                             : 'bg-red-900 border border-red-700 text-red-200'
-                }`}>
+                    }`}>
                     {arenaToast.type === 'shield' && <Shield size={18} />}
                     {arenaToast.type === 'crystal' && <Gem size={18} />}
                     {arenaToast.message}
@@ -242,9 +245,20 @@ export const ArenaPage = () => {
 
                 <header className={`p-4 flex items-center justify-between sticky top-0 z-10 border-b backdrop-blur-md ${isBoss ? 'bg-red-950/20 border-red-900/30' : 'bg-zinc-900/90 border-zinc-800'}`}>
                     <button onClick={() => navigate(task?.courseId ? `/courses/${task.courseId}/foyer` : '/courses')} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-bold">
-                        <Flag size={20} /> Відступити на Карту
+                        <Flag size={20} /> Retreat to Map
                     </button>
                     <div className="flex items-center gap-6 md:gap-8">
+
+                        {/* Theory toggle button — hidden during boss runs */}
+                        {!isBoss && (
+                            <button
+                                onClick={() => setIsTheoryVisible(v => !v)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors border border-zinc-700 text-sm font-bold"
+                            >
+                                {isTheoryVisible ? <EyeOff size={16} /> : <BookOpen size={16} />}
+                                <span>{isTheoryVisible ? 'Hide Theory' : 'Show Theory'}</span>
+                            </button>
+                        )}
 
                         {timeLeft !== null && (
                             <div className={`flex items-center gap-2 font-black text-lg ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'}`}>
@@ -273,16 +287,34 @@ export const ArenaPage = () => {
                     </div>
                 </header>
 
-                <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-4 lg:p-6 gap-6 relative z-10">
-                    {!task.isTheoryHidden && (
-                        <div className={`lg:w-1/2 border rounded-3xl p-6 overflow-y-auto max-h-[80vh] ${isBoss ? 'bg-zinc-950/60 border-red-900/30' : 'bg-zinc-900 border-zinc-800'}`}>
+                <main className="flex-1 flex flex-col w-full p-4 lg:p-6 relative z-10">
+
+                    {/* 1. Full-width progress bar above the panels */}
+                    <div className="w-full max-w-7xl mx-auto mb-6">
+                        <div className={`flex items-center gap-4 text-sm font-bold tracking-wider uppercase ${isBoss ? 'text-red-500/70' : 'text-zinc-400'}`}>
+                            <span className="whitespace-nowrap">Step {currentIndex + 1} of {task.questions?.length || 1}</span>
+                            <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isBoss ? 'bg-red-950/50' : 'bg-zinc-800'}`}>
+                                <div
+                                    className={`h-full transition-all duration-500 ease-out ${isBoss ? 'bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-purple-600'}`}
+                                    style={{ width: `${((currentIndex) / (task.questions?.length || 1)) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 2. Split panels container — Theory (left) + Questions (right) */}
+                    <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto transition-all duration-500">
+
+                    {/* Theory panel — collapses smoothly when hidden */}
+                    <div className={`transition-all duration-500 overflow-hidden ${isTheoryVisible && !isBoss ? 'lg:w-1/2 opacity-100' : 'w-0 opacity-0 p-0'}`}>
+                        <div className={`border rounded-3xl p-6 overflow-y-auto max-h-[80vh] h-full ${isBoss ? 'bg-zinc-950/60 border-red-900/30' : 'bg-zinc-900 border-zinc-800'}`}>
                             {isBoss ? (
                                 <div className="flex items-center gap-4 mb-6 border-b border-red-900/30 pb-4">
                                     <div className="p-3 bg-red-950 border border-red-900/50 rounded-2xl">
                                         <Skull className="text-red-500" size={32} />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-black text-red-500">{task.bossMetadata?.bossName || 'Фінальне Випробування'}</h2>
+                                        <h2 className="text-2xl font-black text-red-500">{task.bossMetadata?.bossName || 'Final Challenge'}</h2>
                                         <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1 mt-1"><Flame size={14} /> {task.title}</span>
                                     </div>
                                 </div>
@@ -291,15 +323,10 @@ export const ArenaPage = () => {
                             )}
                             <div className="prose prose-invert max-w-none text-zinc-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: task.theoryContent || '' }} />
                         </div>
-                    )}
+                    </div>
 
-                    <div className={`flex flex-col ${task.isTheoryHidden ? 'w-full max-w-3xl mx-auto' : 'lg:w-1/2'}`}>
-                        <div className="flex items-center justify-between mb-6">
-                            <span className={`text-sm font-bold uppercase tracking-widest ${isBoss ? 'text-red-500/70' : 'text-zinc-500'}`}>Крок {currentIndex + 1} з {task.questions?.length}</span>
-                            <div className={`h-2 flex-1 mx-4 rounded-full overflow-hidden ${isBoss ? 'bg-red-950/50' : 'bg-zinc-900'}`}>
-                                <div className={`h-full transition-all duration-500 ${isBoss ? 'bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-blue-500'}`} style={{ width: `${((currentIndex) / (task.questions?.length || 1)) * 100}%` }} />
-                            </div>
-                        </div>
+                    {/* Questions panel — expands to full width when theory is hidden */}
+                    <div className={`transition-all duration-500 flex flex-col ${isBoss || !isTheoryVisible ? 'w-full max-w-3xl mx-auto' : 'lg:w-1/2'}`}>
 
                         <div className={`border rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center relative backdrop-blur-sm ${isBoss ? 'bg-zinc-950/80 border-red-900/30 shadow-[0_0_30px_rgba(220,38,38,0.05)]' : 'bg-zinc-900 border-zinc-800'}`}>
                             <h3 className="text-xl md:text-2xl font-bold mb-8 text-center">{currentQuestion.questionText}</h3>
@@ -333,7 +360,7 @@ export const ArenaPage = () => {
 
                             {feedback && !feedback.isCorrect && feedback.explanation && (
                                 <div className="mt-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 animate-in fade-in slide-in-from-bottom-4">
-                                    <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Промах! Спробуй ще раз</p>
+                                    <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Miss! Try again</p>
                                     <p className="text-sm text-zinc-300">{feedback.explanation}</p>
                                 </div>
                             )}
@@ -343,11 +370,13 @@ export const ArenaPage = () => {
                                     onClick={handleNextStep}
                                     className="mt-8 w-full py-4 rounded-2xl font-black text-xl bg-white text-black hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-300"
                                 >
-                                    Продовжити Шлях <ChevronRight size={24} />
+                                    Continue <ChevronRight size={24} />
                                 </button>
                             )}
                         </div>
                     </div>
+
+                    </div> {/* end: split panels container */}
                 </main>
 
                 {runStatus !== 'playing' && (
@@ -358,8 +387,8 @@ export const ArenaPage = () => {
                                     <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
                                         {isBoss ? <Skull size={40} /> : <Flag size={40} />}
                                     </div>
-                                    <h2 className="text-3xl font-black mb-2">{isBoss ? 'Боса Подолано!' : 'Перемога!'}</h2>
-                                    <p className="text-zinc-400 mb-6">Ти успішно пройшов підземелля.</p>
+                                    <h2 className="text-3xl font-black mb-2">{isBoss ? 'Boss Defeated!' : 'Victory!'}</h2>
+                                    <p className="text-zinc-400 mb-6">You have successfully cleared the dungeon.</p>
                                     <div className="flex justify-center gap-4 mb-8">
                                         <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-bold text-yellow-400">+{task.rewardGold} 🪙</div>
                                         <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-bold text-blue-400">+{task.rewardXp} XP</div>
@@ -373,22 +402,22 @@ export const ArenaPage = () => {
                                         {runStatus === 'defeat' && <ShieldAlert size={40} />}
                                     </div>
                                     <h2 className="text-3xl font-black mb-2">
-                                        {runStatus === 'timeout' && 'Час вийшов'}
-                                        {runStatus === 'cheated' && 'Магія розсіялася'}
-                                        {runStatus === 'defeat' && 'Сили вичерпано'}
+                                        {runStatus === 'timeout' && 'Time is Up'}
+                                        {runStatus === 'cheated' && 'Focus Lost'}
+                                        {runStatus === 'defeat' && 'Defeated'}
                                     </h2>
                                     <p className="text-zinc-400 mb-6">
-                                        {runStatus === 'timeout' && 'Ти не встиг розвіяти закляття.'}
-                                        {runStatus === 'cheated' && 'Ти втратив концентрацію. Під час битви з Босом не можна відводити погляд!'}
-                                        {runStatus === 'defeat' && 'Ти помилявся, але це шлях до знань!'}
+                                        {runStatus === 'timeout' && 'You ran out of time.'}
+                                        {runStatus === 'cheated' && 'You lost concentration. Do not switch away during a Boss fight!'}
+                                        {runStatus === 'defeat' && 'You made mistakes, but that is the path to knowledge!'}
                                     </p>
                                     <div className="inline-flex items-center gap-2 bg-purple-500/20 px-6 py-3 rounded-xl border border-purple-500/30 font-bold text-purple-400 mb-8">
-                                        Здобуто: {earnedCrystals} <Gem size={20} />
+                                        Earned: {earnedCrystals} <Gem size={20} />
                                     </div>
                                 </>
                             )}
                             <button onClick={() => navigate(task?.courseId ? `/courses/${task.courseId}/foyer` : '/courses')} className={`w-full py-4 rounded-2xl font-black text-lg transition-colors flex items-center justify-center gap-2 ${isBoss && runStatus !== 'victory' ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-white text-black hover:bg-zinc-200'}`}>
-                                {runStatus === 'victory' ? 'Продовжити Шлях' : 'Повернутися на Карту'} <ChevronRight size={24} />
+                                {runStatus === 'victory' ? 'Continue' : 'Return to Map'} <ChevronRight size={24} />
                             </button>
                         </div>
                     </div>

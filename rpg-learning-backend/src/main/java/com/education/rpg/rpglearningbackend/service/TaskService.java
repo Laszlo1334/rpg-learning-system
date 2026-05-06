@@ -8,6 +8,7 @@ import com.education.rpg.rpglearningbackend.model.User;
 import com.education.rpg.rpglearningbackend.repository.CompletedTaskRepository;
 import com.education.rpg.rpglearningbackend.repository.TaskRepository;
 import com.education.rpg.rpglearningbackend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.education.rpg.rpglearningbackend.model.Question;
@@ -30,17 +31,17 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // НОВЕ: Безпечне отримання ОДНОГО завдання для Арени
+    // Safely fetch a single task for the Arena, enforcing lock rules
     public TaskDto getTaskById(Long taskId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Завдання не знайдено"));
+                .orElseThrow(() -> new RuntimeException("Task not found"));
 
         boolean isCompleted = completedTaskRepository.existsByTaskIdAndUserId(taskId, user.getId());
 
-        // Якщо квест ще не пройдено, перевіряємо, чи не заблокований він
+        // If the task is not yet completed, verify that all prerequisites are met
         if (!isCompleted) {
             List<Long> prereqs = task.getPrerequisiteTaskIds();
             if (prereqs != null && !prereqs.isEmpty()) {
@@ -51,7 +52,7 @@ public class TaskService {
 
                 boolean allPrereqsMet = completedTaskIds.containsAll(prereqs);
                 if (!allPrereqsMet) {
-                    throw new RuntimeException("Це завдання заблоковано! Пройдіть попередні квести.");
+                    throw new RuntimeException("This task is locked! Complete the prerequisite quests first.");
                 }
             }
         }
@@ -64,7 +65,7 @@ public class TaskService {
 
     public List<TaskDto> getTasksByCourseId(Long courseId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Task> tasks = taskRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
 
@@ -119,16 +120,16 @@ public class TaskService {
         }
 
         if (task.getQuestions() != null && !task.getQuestions().isEmpty()) {
-            // 1. Створюємо копію списку, щоб не змінити оригінальні дані в кеші Hibernate
+            // 1. Copy the list to avoid mutating the original data held in Hibernate's cache
             List<Question> allQuestions = new ArrayList<>(task.getQuestions());
 
-            // 2. Визначаємо, скільки питань треба взяти
+            // 2. Determine how many questions to include
             int limit = task.getDynamicQuestionCount() != null ? task.getDynamicQuestionCount() : allQuestions.size();
 
-            // 3. Перемішуємо питання випадковим чином
+            // 3. Shuffle the questions randomly
             java.util.Collections.shuffle(allQuestions);
 
-            // 4. Відрізаємо потрібну кількість і мапимо в безпечний DTO
+            // 4. Slice to the required count and map to a safe DTO
             List<QuestionDto> safeQuestions = allQuestions.stream()
                     .limit(limit)
                     .map(q -> {
@@ -150,20 +151,5 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public TaskDto getMemoryTask(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
 
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        List<CompletedTask> oldTasks = completedTaskRepository.findByUserIdAndCompletedAtBefore(user.getId(), threeDaysAgo);
-
-        if (oldTasks.isEmpty()) {
-            return null;
-        }
-
-        int randomIndex = new java.util.Random().nextInt(oldTasks.size());
-        Task randomOldTask = oldTasks.get(randomIndex).getTask();
-
-        return convertToDto(randomOldTask);
-    }
 }

@@ -65,7 +65,7 @@ export interface QuestionDto {
 
 export interface TaskDto {
   id: number;
-  courseId: number; // <-- ДОДАНО ЦЕ ПОЛЕ
+  courseId: number; // Added to support per-course navigation
   title: string;
   theoryContent: string;
   branchName: string;
@@ -136,6 +136,7 @@ export interface CourseLeaderboardDto {
   userId: number;
   username: string;
   courseXp: number;
+  avatarUrl?: string | null;
 }
 
 export interface RegisterRequest {
@@ -152,6 +153,6 @@ export interface CourseDto {
   totalTasks: number;
   completedTasks: number;
   status: 'new' | 'in_progress' | 'completed';
-  rewardIcon?: string; // Наприклад, 'sword', 'shield', 'scroll'
+  rewardIcon?: string; // e.g. 'sword', 'shield', 'scroll'
 }
 

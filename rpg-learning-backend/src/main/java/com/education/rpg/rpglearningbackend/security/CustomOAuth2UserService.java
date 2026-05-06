@@ -37,7 +37,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setRole(Role.STUDENT);
             newUser.setPassword("");
 
-            // --- СТАРТОВИЙ НАБІР НОВАЧКА (Щоб база не падала через null) ---
+            // --- Starter pack defaults so the DB does not fail on null fields ---
             newUser.setLevel(1);
             newUser.setCurrentXp(0);
             newUser.setGold(0);

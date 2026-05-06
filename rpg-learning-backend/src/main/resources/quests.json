@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "title": "Основи: Модель OSI",
+    "branchName": "Базова теорія",
+    "orderIndex": 1,
+    "prerequisiteTaskIds": [],
+    "theoryContent": "### Рівні моделі OSI\nМодель складається з 7 рівнів. Найважливіші для інженерів: Мережевий (L3 - IP-адресація) та Транспортний (L4 - порти TCP/UDP). Вони забезпечують доставку пакетів між різними мережами.",
+    "isTheoryHidden": false,
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "dynamicQuestionCount": 2,
+    "type": "REGULAR",
+    "questions": [
+      {
+        "questionText": "Скільки всього рівнів має класична еталонна модель OSI?",
+        "type": "TEST",
+        "options": ["4", "5", "7", "9"],
+        "correctAnswers": ["7"],
+        "explanation": "Модель OSI має 7 рівнів: Фізичний, Канальний, Мережевий, Транспортний, Сеансовий, Представлення, Прикладний."
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Мережевий рівень (L3)",
+    "branchName": "Гілка Маршрутизації",
+    "orderIndex": 2,
+    "prerequisiteTaskIds": [1],
+    "theoryContent": "### Протокол IP\nIPv4 використовує 32-бітні адреси. Маршрутизатори (Routers) працюють саме на цьому рівні, визначаючи оптимальний шлях для пакетів на основі таблиці маршрутизації.",
+    "isTheoryHidden": false,
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "dynamicQuestionCount": 2,
+    "type": "REGULAR",
+    "questions": [
+      {
+        "questionText": "Який пристрій приймає рішення про пересилання пакетів на основі IP-адреси?",
+        "type": "TEST",
+        "options": ["Комутатор (Switch)", "Концентратор (Hub)", "Маршрутизатор (Router)", "Міст (Bridge)"],
+        "correctAnswers": ["Маршрутизатор (Router)"],
+        "explanation": "Маршрутизатори працюють на L3 і використовують IP-адреси для визначення шляху пакета."
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Транспортний рівень (L4)",
+    "branchName": "Гілка Передачі",
+    "orderIndex": 2,
+    "prerequisiteTaskIds": [1],
+    "theoryContent": "### TCP vs UDP\nTCP гарантує доставку даних (встановлює з'єднання, перевіряє цілісність). UDP - швидкий, але не гарантує доставку (використовується для стрімінгу, ігор).",
+    "isTheoryHidden": false,
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "dynamicQuestionCount": 2,
+    "type": "REGULAR",
+    "questions": [
+      {
+        "questionText": "Який протокол варто обрати для онлайн-гри (наприклад, Dota 2) або відеодзвінка для мінімізації затримок?",
+        "type": "TEST",
+        "options": ["TCP", "UDP", "HTTP", "FTP"],
+        "correctAnswers": ["UDP"],
+        "explanation": "UDP ідеальний для реального часу, оскільки не витрачає час на підтвердження доставки кожного пакета."
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Екзамен: Мережева Архітектура",
+    "branchName": "Фінал",
+    "orderIndex": 3,
+    "prerequisiteTaskIds": [2, 3],
+    "theoryContent": "Увага! Це екзаменаційне завдання. Теорія прихована. Використайте знання з попередніх гілок.",
+    "isTheoryHidden": true,
+    "rewardXp": 500,
+    "rewardGold": 200,
+    "dynamicQuestionCount": 3,
+    "type": "BOSS",
+    "bossName": "Cisco Examiner",
+    "timeLimitSeconds": 120,
+    "questions": [
+      {
+        "questionText": "Що з наведеного працює на 7-му (Прикладному) рівні OSI?",
+        "type": "TEST",
+        "options": ["TCP", "IP", "DNS", "MAC"],
+        "correctAnswers": ["DNS"],
+        "explanation": "DNS, HTTP, DHCP - це протоколи прикладного рівня."
+      }
+    ]
+  }
+]

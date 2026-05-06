@@ -29,11 +29,11 @@ public class TaskDto {
 
     private List<QuestionDto> questions;
 
-    private String type; // Відправляємо як String (REGULAR, BOSS, MEMORY)
+    private String type; // Serialized as a String to the frontend (REGULAR, BOSS, MEMORY)
     private BossMetadata bossMetadata;
     private Integer dynamicQuestionCount;
 
-    // Вкладений клас для метаданих
+    // Nested class for boss-specific metadata
     @Data
     public static class BossMetadata {
         private String bossName;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { Map, ShoppingBag, Coins, Gem, BookOpen, Sparkles, Shield, FlaskConical } from 'lucide-react';
+import { Map, ShoppingBag, Coins, Gem, BookOpen, Sparkles, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { InventoryEntry, ItemSlot } from '@/types';
 
@@ -9,8 +9,9 @@ import { inventoryService } from '@/services/inventoryService';
 import { CampfireWidget } from '@/components/widgets/CampfireWidget';
 import { EnergyWidget } from '@/components/widgets/EnergyWidget';
 import { BackpackWidget } from '@/components/widgets/BackpackWidget';
-import { MemoryQuestAlert } from '@/components/widgets/MemoryQuestAlert';
+
 import { PlayerChronicleModal } from '@/components/modals/PlayerChronicleModal';
+import { EquipModal } from '@/components/modals/EquipModal';
 
 // ─── RPG Equipment Layout ──────────────────────────────────────────────────
 
@@ -30,17 +31,31 @@ const SLOT_CONFIGS: SlotConfig[] = [
   { slot: 'WEAPON', label: 'Зброя (доп.)', icon: '🛡️',  gridArea: 'off'    },
 ];
 
+// Helper: rarity → solid border class (replaces default dashed border when item is equipped)
+const getRarityBorder = (rarity?: string): string => {
+  switch (rarity) {
+    case 'COMMON':    return 'border-solid border-zinc-400';
+    case 'RARE':      return 'border-solid border-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.4)]';
+    case 'EPIC':      return 'border-solid border-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.4)]';
+    case 'LEGENDARY': return 'border-solid border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]';
+    default:          return 'border-dashed border-zinc-700';
+  }
+};
+
 interface EquipSlotProps {
   config: SlotConfig;
   equippedEntry: InventoryEntry | null;
+  onClick: () => void;
 }
 
-const EquipSlot = ({ config, equippedEntry }: EquipSlotProps) => {
+const EquipSlot = ({ config, equippedEntry, onClick }: EquipSlotProps) => {
   const item = equippedEntry?.item;
+  const borderClass = item ? getRarityBorder(item.rarity) : 'border-dashed border-zinc-700';
   return (
     <div
       title={config.label}
-      className="w-12 h-12 rounded-xl border-2 border-dashed border-zinc-700 bg-zinc-900/80 flex items-center justify-center overflow-hidden relative group transition-all hover:border-zinc-500"
+      onClick={onClick}
+      className={`w-12 h-12 rounded-xl border-2 ${borderClass} bg-zinc-900/80 flex items-center justify-center overflow-hidden relative group transition-all hover:border-blue-500/60 hover:shadow-[0_0_10px_rgba(59,130,246,0.2)] cursor-pointer`}
     >
       {item?.assetUrl ? (
         <img
@@ -57,29 +72,6 @@ const EquipSlot = ({ config, equippedEntry }: EquipSlotProps) => {
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded-lg text-[10px] text-zinc-300 font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
         {item ? item.name : config.label}
       </div>
-    </div>
-  );
-};
-
-interface AvatarSlotProps {
-  avatarUrl: string | null;
-  equippedAvatar: InventoryEntry | null;
-}
-
-const AvatarSlot = ({ avatarUrl, equippedAvatar }: AvatarSlotProps) => {
-  const src = equippedAvatar?.item.assetUrl ?? avatarUrl;
-  return (
-    <div className="w-24 h-24 rounded-2xl border-2 border-zinc-600 bg-zinc-800 shadow-lg overflow-hidden flex items-center justify-center relative">
-      {src ? (
-        <img
-          src={src}
-          alt="Avatar"
-          className="w-full h-full object-contain"
-          style={{ imageRendering: 'pixelated' }}
-        />
-      ) : (
-        <span className="text-5xl select-none">🧙‍♂️</span>
-      )}
     </div>
   );
 };
@@ -101,22 +93,25 @@ export const StudentDashboard = () => {
   const [isInventoryLoading, setIsInventoryLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [itemToUse, setItemToUse] = useState<{id: number, name: string, description: string} | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<ItemSlot | null>(null);
+  const [replaceItemId, setReplaceItemId] = useState<number | null>(null);
+
+  const loadInventory = useCallback(async () => {
+    try {
+      const data = await inventoryService.getInventory();
+      setInventory(data);
+    } catch (err) {
+      console.error('[Dashboard] Failed to load inventory:', err);
+    } finally {
+      setIsInventoryLoading(false);
+    }
+  }, []);
 
 
   // Load inventory on mount
   useEffect(() => {
-    const loadInventory = async () => {
-      try {
-        const data = await inventoryService.getInventory();
-        setInventory(data);
-      } catch (err) {
-        console.error('[Dashboard] Failed to load inventory:', err);
-      } finally {
-        setIsInventoryLoading(false);
-      }
-    };
     loadInventory();
-  }, []);
+  }, [loadInventory]);
 
   // Auto-dismiss toast after 3 s
   useEffect(() => {
@@ -130,11 +125,11 @@ export const StudentDashboard = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="p-8 text-center text-zinc-400">Завантаження табору...</div>;
+    return <div className="p-8 text-center text-zinc-400">Loading camp...</div>;
   }
 
   if (!user) {
-    return <div className="p-8 text-center text-red-400">Помилка: Користувача не знайдено</div>;
+    return <div className="p-8 text-center text-red-400">Error: User not found</div>;
   }
 
   const xpPerLevel = 1000;
@@ -162,8 +157,10 @@ export const StudentDashboard = () => {
   const equippedBody    = findEquipped(inventory, 'BODY');
   const equippedHands   = findEquipped(inventory, 'HANDS');
   const equippedLegs    = findEquipped(inventory, 'LEGS');
-  const equippedMainWpn = findEquipped(inventory, 'WEAPON');
-  const equippedOffWpn  = findEquipped(inventory, 'WEAPON', true);
+  // Dual-wield: collect up to 2 equipped weapons as an ordered array
+  const equippedWeapons = inventory.filter(e => e.isEquipped && e.item.slot === 'WEAPON');
+  const equippedMainWpn = equippedWeapons[0] ?? null;
+  const equippedOffWpn  = equippedWeapons[1] ?? null;
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 relative">
@@ -180,21 +177,39 @@ export const StudentDashboard = () => {
 
         {/* ── RPG Equipment Grid ────────────────────────────── */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Left column: HEAD / BODY / HANDS */}
+                  {/* Left column: HEAD / BODY / HANDS */}
           <div className="flex flex-col gap-2">
-            <EquipSlot config={{ slot: 'HEAD',  label: 'Голова', icon: '⛑️', gridArea: 'head'  }} equippedEntry={equippedHead}  />
-            <EquipSlot config={{ slot: 'BODY',  label: 'Тулуб',  icon: '🥋', gridArea: 'body'  }} equippedEntry={equippedBody}  />
-            <EquipSlot config={{ slot: 'HANDS', label: 'Руки',   icon: '🧤', gridArea: 'hands' }} equippedEntry={equippedHands} />
+            <EquipSlot config={{ slot: 'HEAD',  label: 'Head',  icon: '⛑️', gridArea: 'head'  }} equippedEntry={equippedHead}  onClick={() => { setSelectedSlot('HEAD');  setReplaceItemId(equippedHead?.id  ?? null); }} />
+            <EquipSlot config={{ slot: 'BODY',  label: 'Body',  icon: '🥋', gridArea: 'body'  }} equippedEntry={equippedBody}  onClick={() => { setSelectedSlot('BODY');  setReplaceItemId(equippedBody?.id  ?? null); }} />
+            <EquipSlot config={{ slot: 'HANDS', label: 'Hands', icon: '🧤', gridArea: 'hands' }} equippedEntry={equippedHands} onClick={() => { setSelectedSlot('HANDS'); setReplaceItemId(equippedHands?.id ?? null); }} />
           </div>
 
           {/* Center: AVATAR */}
-          <AvatarSlot avatarUrl={user.avatarUrl} equippedAvatar={equippedAvatar} />
+          <div
+            className={`w-24 h-24 rounded-2xl border-2 ${
+              equippedAvatar ? getRarityBorder(equippedAvatar.item.rarity) : 'border-zinc-600'
+            } bg-zinc-800 shadow-lg overflow-hidden flex items-center justify-center relative cursor-pointer hover:border-blue-500/60 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-all group`}
+            onClick={() => { setSelectedSlot('AVATAR'); setReplaceItemId(equippedAvatar?.id ?? null); }}
+            title="Avatar"
+          >
+            {(equippedAvatar?.item.assetUrl ?? user.avatarUrl) ? (
+              <img
+                src={equippedAvatar?.item.assetUrl ?? user.avatarUrl!}
+                alt="Avatar"
+                className="w-full h-full object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            ) : (
+              <span className="text-5xl select-none">🧙‍♂️</span>
+            )}
+            <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+          </div>
 
-          {/* Right column: LEGS / WEAPON / WEAPON OFF */}
+          {/* Right column: LEGS / WEAPON (main) / WEAPON (off) */}
           <div className="flex flex-col gap-2">
-            <EquipSlot config={{ slot: 'LEGS',   label: 'Ноги',         icon: '👢', gridArea: 'legs' }} equippedEntry={equippedLegs}    />
-            <EquipSlot config={{ slot: 'WEAPON', label: 'Зброя (гол.)', icon: '⚔️', gridArea: 'main' }} equippedEntry={equippedMainWpn} />
-            <EquipSlot config={{ slot: 'WEAPON', label: 'Зброя (доп.)', icon: '🛡️', gridArea: 'off'  }} equippedEntry={equippedOffWpn}  />
+            <EquipSlot config={{ slot: 'LEGS',   label: 'Legs',         icon: '👢', gridArea: 'legs' }} equippedEntry={equippedLegs}    onClick={() => { setSelectedSlot('LEGS');   setReplaceItemId(equippedLegs?.id    ?? null); }} />
+            <EquipSlot config={{ slot: 'WEAPON', label: 'Weapon (main)', icon: '⚔️', gridArea: 'main' }} equippedEntry={equippedMainWpn} onClick={() => { setSelectedSlot('WEAPON'); setReplaceItemId(equippedMainWpn?.id ?? null); }} />
+            <EquipSlot config={{ slot: 'WEAPON', label: 'Weapon (off)',  icon: '🛡️', gridArea: 'off'  }} equippedEntry={equippedOffWpn}  onClick={() => { setSelectedSlot('WEAPON'); setReplaceItemId(equippedOffWpn?.id  ?? null); }} />
           </div>
         </div>
 
@@ -228,22 +243,24 @@ export const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* --- БАФИ --- */}
+        {/* Active Buffs */}
         {(isXpActive || isGoldActive || isShieldActive) && (
-          <div className="flex flex-wrap gap-2 justify-center w-full mt-4 justify-start">
+          <div className="flex flex-wrap gap-2 w-full mt-4">
             {isXpActive && (
                 <span className="bg-blue-500/20 text-blue-400 text-sm font-bold px-3 py-1.5 rounded-lg border border-blue-500/30 flex items-center gap-2">
-                    <FlaskConical size={16} /> XP Бонус
+                    <img src="/assets/items/potion_wisdom.png" alt="XP Buff" className="w-5 h-5 object-contain" style={{ imageRendering: 'pixelated' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    XP Bonus
                 </span>
             )}
             {isGoldActive && (
                 <span className="bg-yellow-500/20 text-yellow-400 text-sm font-bold px-3 py-1.5 rounded-lg border border-yellow-500/30 flex items-center gap-2">
-                    <Coins size={16} /> Золото x2
+                    <img src="/assets/items/goblin_magnet.png" alt="Gold Buff" className="w-5 h-5 object-contain" style={{ imageRendering: 'pixelated' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    Gold x2
                 </span>
             )}
             {isShieldActive && (
                 <span className="bg-purple-500/20 text-purple-400 text-sm font-bold px-3 py-1.5 rounded-lg border border-purple-500/30 flex items-center gap-2">
-                    <Shield size={16} /> Руна Захисту
+                    <Shield size={16} /> Rune of Protection
                 </span>
             )}
           </div>
@@ -297,22 +314,33 @@ export const StudentDashboard = () => {
         </div>
       </div>
 
-      <MemoryQuestAlert />
+
       <PlayerChronicleModal isOpen={isChronicleOpen} onClose={() => { setIsChronicleOpen(false); refreshUser(); }} />
 
-      {/* Кастомна модалка для Зілля */}
+      {/* Equip Modal — opens when a slot box is clicked */}
+      {selectedSlot && (
+        <EquipModal
+          selectedSlot={selectedSlot}
+          inventory={inventory}
+          replaceItemId={replaceItemId}
+          onClose={() => { setSelectedSlot(null); setReplaceItemId(null); }}
+          onEquipped={() => { loadInventory(); }}
+        />
+      )}
+
+      {/* Custom confirmation modal for consumables */}
       {itemToUse && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
               <div className="bg-zinc-900 border border-zinc-700 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
                   <div className="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-purple-500/30">
                       <Sparkles size={32} />
                   </div>
-                  <h3 className="text-2xl font-black text-white mb-2">Використати предмет?</h3>
-                  <p className="text-zinc-400 mb-2">Ти збираєшся застосувати магію: <span className="text-purple-400 font-bold">{itemToUse.name}</span>. Цю дію неможливо скасувати.</p>
+                  <h3 className="text-2xl font-black text-white mb-2">Use item?</h3>
+                  <p className="text-zinc-400 mb-2">You are about to use: <span className="text-purple-400 font-bold">{itemToUse.name}</span>. This action cannot be undone.</p>
                   <p className="text-sm font-bold text-zinc-500 mb-8 max-w-xs mx-auto italic">{itemToUse.description}</p>
                   <div className="flex gap-4">
                       <button onClick={() => setItemToUse(null)} className="flex-1 py-3 rounded-xl font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
-                          Сховати
+                          Cancel
                       </button>
                       <button onClick={async () => {
                           try {
@@ -322,7 +350,7 @@ export const StudentDashboard = () => {
                               window.location.reload();
                           } catch (e) { console.error(e); }
                       }} className="flex-1 py-3 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all">
-                          Випити
+                          Use
                       </button>
                   </div>
               </div>

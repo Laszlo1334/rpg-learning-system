@@ -14,8 +14,10 @@ export const inventoryService = {
         await api.post(`/inventory/${inventoryId}/use`);
     },
 
-    // POST /api/inventory/{id}/equip — toggle equipped state for a cosmetic item
-    toggleEquip: async (inventoryId: number): Promise<void> => {
-        await api.post(`/inventory/${inventoryId}/equip`);
+    // POST /api/inventory/{id}/equip — slot-exclusive equip with optional targeted replacement
+    // replaceId: the inventory entry ID of the item to unequip (used for dual-wield weapon swaps)
+    equipItem: async (inventoryId: number, replaceId?: number | null): Promise<void> => {
+        const query = replaceId != null ? `?replaceId=${replaceId}` : '';
+        await api.post(`/inventory/${inventoryId}/equip${query}`);
     },
 };

@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
-@Tag(name = "Квести (Tasks)", description = "Керування завданнями для Дерева навичок")
+@Tag(name = "Tasks", description = "Task management for the Skill Tree")
 public class TaskController {
 
     private final TaskService taskService;
@@ -24,51 +24,42 @@ public class TaskController {
     }
 
     @GetMapping
-    @Operation(summary = "Отримати всі квести", description = "Повертає список усіх доступних завдань у грі")
+    @Operation(summary = "Get all tasks", description = "Returns a list of all available tasks in the game")
     public ResponseEntity<List<TaskDto>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
+    // IMPORTANT: /memory and /course/{courseId} must be declared BEFORE /{id}.
+    // Spring matches routes top-to-bottom; if /{id} is first, the literal string
+    // "memory" would be parsed as a Long, causing a 400/404 conversion error.
+
+
+
+    @GetMapping("/course/{courseId}")
+    @Operation(summary = "Course Skill Tree", description = "Returns course tasks with completed/locked statuses for the current player")
+    public ResponseEntity<List<TaskDto>> getTasksByCourseId(
+            @PathVariable Long courseId,
+            @AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) return ResponseEntity.status(401).build();
+        String email = principal.getAttribute("email");
+        return ResponseEntity.ok(taskService.getTasksByCourseId(courseId, email));
+    }
+
     @GetMapping("/{id}")
-    @Operation(summary = "Отримати конкретний квест", description = "Повертає дані для старту забігу на Арені (із захистом)")
+    @Operation(summary = "Get a specific task", description = "Returns task data for starting an Arena run (with lock enforcement)")
     public ResponseEntity<?> getTaskById(@PathVariable Long id, @AuthenticationPrincipal OAuth2User principal) {
-        if (principal == null) return ResponseEntity.status(401).body("Увійдіть у систему!");
+        if (principal == null) return ResponseEntity.status(401).body("Please log in!");
         try {
             String email = principal.getAttribute("email");
             return ResponseEntity.ok(taskService.getTaskById(id, email));
         } catch (RuntimeException e) {
-            // Віддаємо 403 Forbidden, якщо гравець намагається відкрити заблокований квест
+            // Return 403 Forbidden if the player tries to open a locked task
             return ResponseEntity.status(403).body(e.getMessage());
         }
     }
 
-    @GetMapping("/course/{courseId}")
-    @Operation(summary = "Дерево навичок курсу", description = "Повертає завдання курсу зі статусами (пройдено/заблоковано) для поточного гравця")
-    public ResponseEntity<List<TaskDto>> getTasksByCourseId(
-            @PathVariable Long courseId,
-            @AuthenticationPrincipal OAuth2User principal) {
-
-        if (principal == null) return ResponseEntity.status(401).build();
-        String email = principal.getAttribute("email");
-
-        return ResponseEntity.ok(taskService.getTasksByCourseId(courseId, email));
-    }
-
-    @GetMapping("/memory")
-    @Operation(summary = "Квест-Спогад", description = "Повертає випадкове завдання для інтервального повторення")
-    public ResponseEntity<TaskDto> getMemoryTask(@AuthenticationPrincipal OAuth2User principal) {
-        String email = principal.getAttribute("email");
-        TaskDto memoryTask = taskService.getMemoryTask(email);
-
-        if (memoryTask == null) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(memoryTask);
-    }
-
     @PostMapping
-    @Operation(summary = "Створити новий квест", description = "Додає нове завдання в базу даних (Для Вчителів)")
+    @Operation(summary = "Create a new task", description = "Adds a new task to the database (for Teachers)")
     public ResponseEntity<Task> createTask(@RequestBody Task task) {
         Task savedTask = taskService.createTask(task);
         return ResponseEntity.ok(savedTask);

@@ -11,18 +11,21 @@ import java.util.Optional;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
-    // Отримати всі предмети за ID юзера
+    // Fetch all inventory entries by user id
     List<Inventory> findByUserId(Long userId);
 
-    // НОВИЙ МЕТОД: Отримати всі предмети, передавши об'єкт User (Вирішує нашу помилку!)
+    // Fetch all inventory entries by User object
     List<Inventory> findAllByUser(User user);
 
-    // Знайти тільки ті предмети, які зараз надягнуті
+    // Fetch all currently equipped items for a user
     List<Inventory> findByUserIdAndIsEquippedTrue(Long userId);
 
-    // Перевірка наявності для Косметики
+    // Find a specific inventory entry belonging to a user (used for equip/unequip security check)
+    Optional<Inventory> findByIdAndUserId(Long id, Long userId);
+
+    // Check ownership for cosmetics (prevents duplicate purchases)
     boolean existsByUserAndItem(User user, Item item);
 
-    // Знайти конкретний предмет гравця для стакування (збільшення/зменшення quantity)
+    // Find a specific item entry for stacking (consumable quantity management)
     Optional<Inventory> findByUserAndItem(User user, Item item);
 }

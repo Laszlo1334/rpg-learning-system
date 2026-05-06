@@ -3,7 +3,7 @@ package com.education.rpg.rpglearningbackend.config;
 import com.education.rpg.rpglearningbackend.security.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer; // ДОДАНО ІМПОРТ
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,7 +24,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // МАГІЯ ТУТ: Дозволяємо Security бачити наш CorsConfig!
+                .cors(Customizer.withDefaults()) // Apply CORS config so Spring Security respects the CorsConfig bean
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("http://localhost:5173/dashboard", true) // Краще одразу кидати в Табір
+                        .defaultSuccessUrl("http://localhost:5173/dashboard", true) // Redirect straight to the player's camp on login
                 );
 
         return http.build();
