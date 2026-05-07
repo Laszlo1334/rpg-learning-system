@@ -1,0 +1,1812 @@
+[
+  {
+    "id": 101,
+    "title": "Сучасні мережні технології",
+    "theoryContent": "Підказка до рівня: У цьому завданні перевіряються знання щодо типів мереж (Intranet, Extranet), сучасних тенденцій (BYOD) та базових загроз безпеці.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Основи",
+    "orderIndex": 1,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [],
+    "questions": [
+      {
+        "questionText": "During a routine inspection, a technician discovered that software that was installed on a computer was secretly collecting data about websites that were visited by users of the computer. Which type of threat is affecting this computer?",
+        "type": "TEST",
+        "options": [
+          "DoS attack",
+          "identity theft",
+          "spyware",
+          "zero-day attack"
+        ],
+        "correctAnswers": [
+          "spyware"
+        ],
+        "explanation": "Topic 1.8.1: Spyware is software that is installed on a network device and that collects information."
+      },
+      {
+        "questionText": "Which term refers to a network that provides secure access to the corporate offices by suppliers, customers and collaborators?",
+        "type": "TEST",
+        "options": [
+          "Internet",
+          "intranet",
+          "extranet",
+          "extendednet"
+        ],
+        "correctAnswers": [
+          "extranet"
+        ],
+        "explanation": "Topic 1.4.4: Extranets provide secure and safe access to suppliers, customers, and collaborators."
+      },
+      {
+        "questionText": "A large corporation has modified its network to allow users to access network resources from their personal laptops and smart phones. Which networking trend does this describe?",
+        "type": "TEST",
+        "options": [
+          "cloud computing",
+          "online collaboration",
+          "bring your own device",
+          "video conferencing"
+        ],
+        "correctAnswers": [
+          "bring your own device"
+        ],
+        "explanation": "Topic 1.7.2: BYOD allows end users to use personal tools to access the corporate network."
+      },
+      {
+        "questionText": "An employee at a branch office is creating a quote for a customer. In order to do this, the employee needs to access confidential pricing information from internal servers at the Head Office. What type of network would the employee access?",
+        "type": "TEST",
+        "options": [
+          "an intranet",
+          "the Internet",
+          "an extranet",
+          "a local area network"
+        ],
+        "correctAnswers": [
+          "an intranet"
+        ],
+        "explanation": "Topic 1.4.4: Intranet is a term used to refer to a private connection of LANs and WANs that belongs to an organization."
+      },
+      {
+        "questionText": "A networking technician is working on the wireless network at a medical clinic. The technician accidentally sets up the wireless network so that patients can see the medical records data of other patients. Which of the four network characteristics has been violated in this situation?",
+        "type": "TEST",
+        "options": [
+          "fault tolerance",
+          "scalability",
+          "security",
+          "Quality of Service (QoS)",
+          "reliability"
+        ],
+        "correctAnswers": [
+          "security"
+        ],
+        "explanation": "Topic 1.1.8: Network security includes protecting the confidentiality of data. In this case, the security characteristic has failed."
+      },
+      {
+        "questionText": "What type of network traffic requires QoS?",
+        "type": "TEST",
+        "options": [
+          "email",
+          "on-line purchasing",
+          "video conferencing",
+          "wiki"
+        ],
+        "correctAnswers": [
+          "video conferencing"
+        ],
+        "explanation": "Topic 1.6.4: Video conferencing utilizes real-time audio and video communications that are time-sensitive and bandwidth-intensive, requiring QoS."
+      },
+      {
+        "questionText": "Which device performs the function of determining the path that messages should take through internetworks?",
+        "type": "TEST",
+        "options": [
+          "a router",
+          "a firewall",
+          "a web server",
+          "a DSL modem"
+        ],
+        "correctAnswers": [
+          "a router"
+        ],
+        "explanation": "Topic 1.2.4: A router is used to determine the path that the messages should take through the network."
+      }
+    ]
+  }
+,
+  {
+    "id": 102,
+    "title": "Basic Device Configuration",
+    "theoryContent": "Focus on Cisco IOS interaction: shortcuts, configuration management, and remote access interfaces. This is Branch A.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Branch A",
+    "orderIndex": 2,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [101],
+    "questions": [
+      {
+        "questionText": "Which interface allows remote management of a Layer 2 switch?",
+        "type": "TEST",
+        "options": ["the AUX interface", "the console port interface", "the switch virtual interface", "the first Ethernet port interface"],
+        "correctAnswers": ["the switch virtual interface"],
+        "explanation": "Topic 2.6.2: In a Layer 2 switch, the switch virtual interface (SVI) provides a means for remotely managing the device."
+      },
+      {
+        "questionText": "What function does pressing the Tab key have when entering a command in IOS?",
+        "type": "TEST",
+        "options": ["It aborts the current command", "It exits configuration mode", "It moves the cursor to the beginning of the next line", "It completes the remainder of a partially typed word"],
+        "correctAnswers": ["It completes the remainder of a partially typed word"],
+        "explanation": "Topic 2.3.5: Pressing the Tab key after a command has been partially typed will cause the IOS to complete the rest of the command."
+      },
+      {
+        "questionText": "What action can the technician take to discard changes and work with the file in NVRAM?",
+        "type": "TEST",
+        "options": ["Issue the reload command without saving", "Delete the vlan.dat file", "Close the terminal software", "Issue the copy startup-config running-config command"],
+        "correctAnswers": ["Issue the reload command without saving"],
+        "explanation": "Topic 2.5.2: Rebooting the router without saving the running configuration restores the file stored in NVRAM."
+      },
+      {
+        "questionText": "What is the purpose of using the Ctrl-Shift-6 key combination?",
+        "type": "TEST",
+        "options": ["to restart the process", "to interrupt the process", "to exit to a different mode", "to allow the user to complete the command"],
+        "correctAnswers": ["to interrupt the process"],
+        "explanation": "Topic 2.3.5: To interrupt an IOS process such as ping or traceroute, use the Ctrl-Shift-6 key combination."
+      },
+      {
+        "questionText": "What command verifies the condition of switch interfaces, including status and IP address?",
+        "type": "TEST",
+        "options": ["ipconfig", "ping", "traceroute", "show ip interface brief"],
+        "correctAnswers": ["show ip interface brief"],
+        "explanation": "Topic 2.8.1: The show ip interface brief command displays a brief synopsis of the device interfaces condition."
+      },
+      {
+        "questionText": "In the 'show running-config' command, which part of the syntax is 'running-config'?",
+        "type": "TEST",
+        "options": ["the command", "a keyword", "a variable", "a prompt"],
+        "correctAnswers": ["a keyword"],
+        "explanation": "Topic 2.3.1: The first part is the command (show), and the second part is the keyword (running-config)."
+      },
+      {
+        "questionText": "What is the result of issuing a 'copy running-config startup-config' command?",
+        "type": "TEST",
+        "options": ["Stored in flash", "Loaded if the switch is restarted", "Current IOS file replaced", "Changes will be removed"],
+        "correctAnswers": ["Loaded if the switch is restarted"],
+        "explanation": "Topic 2.5.2: The configuration file saved in NVRAM (startup-config) will be loaded when the device is restarted."
+      }
+    ]
+  },
+  {
+    "id": 103,
+    "title": "Protocols and Models",
+    "theoryContent": "Explore data encapsulation, PDU names, and how computers manage timing and communication. This is Branch B.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Branch B",
+    "orderIndex": 2,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [101],
+    "questions": [
+      {
+        "questionText": "What method ensures that packets are not dropped because too much data is being sent too quickly?",
+        "type": "TEST",
+        "options": ["encapsulation", "flow control", "access method", "response timeout"],
+        "correctAnswers": ["flow control"],
+        "explanation": "Topic 3.1.9: Flow control ensures that data is not sent too fast for it to be received properly."
+      },
+      {
+        "questionText": "Which statement describes a TCP/IP encapsulation process when a PC sends data?",
+        "type": "TEST",
+        "options": ["Data sent from internet to network access layer", "Packets sent from network access to transport layer", "Segments sent from transport layer to internet layer", "Frames sent from network access to internet layer"],
+        "correctAnswers": ["Segments sent from transport layer to internet layer"],
+        "explanation": "Topic 3.6.4: When data travels from the PC to the network, the transport layer sends segments to the internet layer."
+      },
+      {
+        "questionText": "Which name is assigned to the transport layer PDU?",
+        "type": "TEST",
+        "options": ["bits", "data", "frame", "packet", "segment"],
+        "correctAnswers": ["segment"],
+        "explanation": "Topic 3.6.3: The PDU at the transport layer is called a Segment."
+      },
+      {
+        "questionText": "What process involves placing one PDU inside of another PDU?",
+        "type": "TEST",
+        "options": ["encapsulation", "encoding", "segmentation", "flow control"],
+        "correctAnswers": ["encapsulation"],
+        "explanation": "Topic 3.6.3: When a message is placed inside of another message, it is known as encapsulation."
+      },
+      {
+        "questionText": "What layer is responsible for routing messages through an internetwork in the TCP/IP model?",
+        "type": "TEST",
+        "options": ["internet", "transport", "network access", "session"],
+        "correctAnswers": ["internet"],
+        "explanation": "Topic 3.5.4: In the TCP/IP model, the internet layer is responsible for routing messages."
+      },
+      {
+        "questionText": "Which PDU format is used when bits are received from the network medium by the NIC?",
+        "type": "TEST",
+        "options": ["file", "frame", "packet", "segment"],
+        "correctAnswers": ["frame"],
+        "explanation": "Topic 3.6.3: When received at the physical layer, bits are formatted into a frame at the data link layer."
+      },
+      {
+        "questionText": "Which method allows a computer to react when a server takes too long to respond?",
+        "type": "TEST",
+        "options": ["encapsulation", "flow control", "access method", "response timeout"],
+        "correctAnswers": ["response timeout"],
+        "explanation": "Topic 3.1.9: If a computer does not hear a response within an acceptable time, it assumes no answer is coming (timeout)."
+      }
+    ]
+  },
+  {
+    "id": 104,
+    "title": "Miniboss: Foundation Guardian",
+    "theoryContent": "The first major challenge! ⚔️ Prove your mastery of Modern Trends, IOS basics, and Network Models. 15 questions mixed from all previous topics. No hints allowed during the battle!",
+    "rewardXp": 500,
+    "rewardGold": 200,
+    "branchName": "Arena",
+    "orderIndex": 3,
+    "type": "BOSS",
+    "bossName": "Guardian of the Layers",
+    "bossAvatarUrl": "/assets/bosses/golem.png",
+    "timeLimitSeconds": 300,
+    "prerequisiteTaskIds": [102, 103],
+    "questions": [
+      {
+        "questionText": "What type of threat secretly collects data about websites visited by users?",
+        "type": "TEST",
+        "options": ["DoS attack", "identity theft", "spyware", "zero-day attack"],
+        "correctAnswers": ["spyware"],
+        "explanation": "Spyware collects information secretly from a host."
+      },
+      {
+        "questionText": "Which network provides secure access to corporate offices by suppliers and collaborators?",
+        "type": "TEST",
+        "options": ["Internet", "intranet", "extranet", "extendednet"],
+        "correctAnswers": ["extranet"],
+        "explanation": "Extranets provide safe access to authorized external partners."
+      },
+      {
+        "questionText": "Which trend allows users to use personal laptops and phones to access network resources?",
+        "type": "TEST",
+        "options": ["cloud computing", "online collaboration", "bring your own device", "video conferencing"],
+        "correctAnswers": ["bring your own device"],
+        "explanation": "BYOD (Bring Your Own Device) involves using personal tools for corporate tasks."
+      },
+      {
+        "questionText": "Which term refers to a private connection of LANs/WANs accessible only to organization members?",
+        "type": "TEST",
+        "options": ["an intranet", "the Internet", "an extranet", "a local area network"],
+        "correctAnswers": ["an intranet"],
+        "explanation": "An intranet is a private internal network."
+      },
+      {
+        "questionText": "Which characteristic is violated if unauthorized patients see others' medical records?",
+        "type": "TEST",
+        "options": ["fault tolerance", "scalability", "security", "QoS"],
+        "correctAnswers": ["security"],
+        "explanation": "Security protects data confidentiality."
+      },
+      {
+        "questionText": "Which interface is used for remote management on a Layer 2 switch?",
+        "type": "TEST",
+        "options": ["AUX", "Console", "SVI (Switch Virtual Interface)", "Ethernet Port"],
+        "correctAnswers": ["SVI (Switch Virtual Interface)"],
+        "explanation": "The SVI allows IP-based remote management."
+      },
+      {
+        "questionText": "What key completes a partially typed command in Cisco IOS?",
+        "type": "TEST",
+        "options": ["Enter", "Space", "Tab", "Escape"],
+        "correctAnswers": ["Tab"],
+        "explanation": "Tab key is used for command completion."
+      },
+      {
+        "questionText": "What command reboots the device without saving changes?",
+        "type": "TEST",
+        "options": ["exit", "reload", "copy run start", "delete"],
+        "correctAnswers": ["reload"],
+        "explanation": "Reload restarts the system with the startup-config."
+      },
+      {
+        "questionText": "Which key combination interrupts a running IOS process like ping?",
+        "type": "TEST",
+        "options": ["Ctrl-C", "Ctrl-Z", "Ctrl-Shift-6", "Esc"],
+        "correctAnswers": ["Ctrl-Shift-6"],
+        "explanation": "Ctrl-Shift-6 is the specific break sequence for Cisco IOS."
+      },
+      {
+        "questionText": "What command shows a brief summary of all interfaces?",
+        "type": "TEST",
+        "options": ["show interfaces", "ipconfig", "show ip interface brief", "ping"],
+        "correctAnswers": ["show ip interface brief"],
+        "explanation": "This command provides a concise table of interface status."
+      },
+      {
+        "questionText": "What mechanism allows two hosts to synchronize the timing of data transmission?",
+        "type": "TEST",
+        "options": ["encapsulation", "flow control", "arbitration", "segmentation"],
+        "correctAnswers": ["flow control"],
+        "explanation": "Flow control manages the rate of data exchange."
+      },
+      {
+        "questionText": "At which layer are segments passed to the internet layer during encapsulation?",
+        "type": "TEST",
+        "options": ["Application", "Transport", "Network Access", "Physical"],
+        "correctAnswers": ["Transport"],
+        "explanation": "The transport layer creates segments and passes them down."
+      },
+      {
+        "questionText": "What is the PDU name used at the Network layer of the TCP/IP model?",
+        "type": "TEST",
+        "options": ["Frame", "Segment", "Packet", "Bit"],
+        "correctAnswers": ["Packet"],
+        "explanation": "Network layer PDUs are called packets."
+      },
+      {
+        "questionText": "What is the process of placing one PDU inside another known as?",
+        "type": "TEST",
+        "options": ["De-segmentation", "Encapsulation", "Multiplexing", "Routing"],
+        "correctAnswers": ["Encapsulation"],
+        "explanation": "Encapsulation wraps data with protocol headers."
+      },
+      {
+        "questionText": "Which layer in the TCP/IP model is responsible for routing messages?",
+        "type": "TEST",
+        "options": ["Network Access", "Transport", "Internet", "Application"],
+        "correctAnswers": ["Internet"],
+        "explanation": "The Internet layer handles routing and path determination."
+      }
+    ]
+  },
+  {
+    "id": 105,
+    "title": "Фізичний рівень",
+    "theoryContent": "Підказка: Цей рівень присвячений фізичному середовищу передачі даних, кабелям, пропускній здатності (bandwidth) та проблемам, як-от затухання (attenuation).",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Physical",
+    "orderIndex": 4,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [104],
+    "questions": [
+      {
+        "questionText": "What is the purpose of the OSI physical layer?",
+        "type": "TEST",
+        "options": ["controlling access to media", "transmitting bits across the local media", "performing error detection on received frames", "exchanging frames between nodes over physical network media"],
+        "correctAnswers": ["transmitting bits across the local media"],
+        "explanation": "Topic 4.1.1: The OSI physical layer provides the means to transport the bits across the network media."
+      },
+      {
+        "questionText": "Why are two strands of fiber used for a single fiber optic connection?",
+        "type": "TEST",
+        "options": ["The two strands allow the data to travel for longer distances without degrading.", "They prevent crosstalk from causing interference on the connection.", "They increase the speed at which the data can travel.", "They allow for full-duplex connectivity."],
+        "correctAnswers": ["They allow for full-duplex connectivity."],
+        "explanation": "Topic 4.5.4: Two strands are used to allow data to travel in both directions simultaneously (full-duplex)."
+      },
+      {
+        "questionText": "With the use of unshielded twisted-pair copper wire in a network, what causes crosstalk within the cable pairs?",
+        "type": "TEST",
+        "options": ["the magnetic field around the adjacent pairs of wire", "the use of braided wire to shield the adjacent wire pairs", "the reflection of the electrical wave back from the far end of the cable", "the collision caused by two nodes trying to use the media simultaneously"],
+        "correctAnswers": ["the magnetic field around the adjacent pairs of wire"],
+        "explanation": "Topic 4.3.1: Current flowing through a wire produces a magnetic field that interferes with adjacent wires, causing crosstalk."
+      },
+      {
+        "questionText": "What OSI physical layer term describes the process by which one wave modifies another wave?",
+        "type": "TEST",
+        "options": ["modulation", "IEEE", "EIA/TIA", "air"],
+        "correctAnswers": ["modulation"],
+        "explanation": "Topic 4.2.4: Modulation is the process by which one wave modifies another to carry data."
+      },
+      {
+        "questionText": "What does the term 'attenuation' mean in data communication?",
+        "type": "TEST",
+        "options": ["loss of signal strength as distance increases", "time for a signal to reach its destination", "leakage of signals from one cable pair to another", "strengthening of a signal by a networking device"],
+        "correctAnswers": ["loss of signal strength as distance increases"],
+        "explanation": "Topic 4.3.1: Attenuation refers to the deterioration or loss of signal strength as the signal travels further."
+      },
+      {
+        "questionText": "What OSI physical layer term describes the capacity at which a medium can carry data?",
+        "type": "TEST",
+        "options": ["bandwidth", "IEEE", "EIA/TIA", "air"],
+        "correctAnswers": ["bandwidth"],
+        "explanation": "Topic 4.2.5: Bandwidth is the capacity of a medium to carry data."
+      },
+      {
+        "questionText": "What OSI physical layer term describes the amount of time, including delays, for data to travel from one point to another?",
+        "type": "TEST",
+        "options": ["latency", "bandwidth", "throughput", "goodput"],
+        "correctAnswers": ["latency"],
+        "explanation": "Topic 4.2.6: Latency describes the time it takes for data to travel from one point to another, including delays."
+      }
+    ]
+  },
+  {
+    "id": 106,
+    "title": "Канальний рівень",
+    "theoryContent": "Підказка: Фокус на Data Link Layer (OSI Layer 2). Тут розглядається структура кадру (frame), перевірка помилок (FCS) та методи доступу до середовища.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Data Link",
+    "orderIndex": 4,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [104],
+    "questions": [
+      {
+        "questionText": "What is the function of the CRC value that is found in the FCS field of a frame?",
+        "type": "TEST",
+        "options": ["to verify the integrity of the received frame", "to verify the physical address in the frame", "to verify the logical address in the frame", "to compute the checksum header for the data field in the frame"],
+        "correctAnswers": ["to verify the integrity of the received frame"],
+        "explanation": "Topic 6.3.2: The CRC value in the FCS field is compared to the computed CRC to verify the integrity of the frame."
+      },
+      {
+        "questionText": "What is contained in the trailer of a data-link frame?",
+        "type": "TEST",
+        "options": ["logical address", "physical address", "data", "error detection"],
+        "correctAnswers": ["error detection"],
+        "explanation": "Topic 6.3.2: The trailer in a data-link frame contains error detection information included in the FCS field."
+      },
+      {
+        "questionText": "Which statement describes a characteristic of the frame header fields of the data link layer?",
+        "type": "TEST",
+        "options": ["They all include the flow control and logical connection fields.", "Ethernet frame header fields contain Layer 3 source and destination addresses.", "They vary depending on protocols.", "They include information on user applications."],
+        "correctAnswers": ["They vary depending on protocols."],
+        "explanation": "Topic 6.3.2: The structure of the frame and the fields contained in the header vary according to the protocol."
+      },
+      {
+        "questionText": "Which topology provides high availability and connects some, but not all, remote sites?",
+        "type": "TEST",
+        "options": ["mesh", "partial mesh", "hub and spoke", "point-to-point"],
+        "correctAnswers": ["partial mesh"],
+        "explanation": "Topic 6.2.2: Partial mesh topologies provide high availability by interconnecting multiple remote sites, but not all."
+      },
+      {
+        "questionText": "Which media communication type does not require media arbitration in the data link layer?",
+        "type": "TEST",
+        "options": ["deterministic", "half-duplex", "full-duplex", "controlled access"],
+        "correctAnswers": ["full-duplex"],
+        "explanation": "Topic 6.2.5: Full-duplex communication allows both devices to transmit and receive simultaneously without arbitration."
+      },
+      {
+        "questionText": "During the encapsulation process, what occurs at the data link layer for a PC connected to an Ethernet network?",
+        "type": "TEST",
+        "options": ["An IP address is added.", "The logical address is added.", "The physical address is added.", "The process port number is added."],
+        "correctAnswers": ["The physical address is added."],
+        "explanation": "Topic 6.3.3: The Ethernet frame includes the source and destination physical address (MAC)."
+      },
+      {
+        "questionText": "What type of communication rule would best describe CSMA/CD?",
+        "type": "TEST",
+        "options": ["access method", "flow control", "message encapsulation", "message encoding"],
+        "correctAnswers": ["access method"],
+        "explanation": "Topic 6.2.6: Carrier sense multiple access collision detection (CSMA/CD) is the access method used with Ethernet."
+      }
+    ]
+  },
+  {
+    "id": 107,
+    "title": "Комутація Ethernet",
+    "theoryContent": "Підказка: Згадаймо, як працюють комутатори (switches). Основні теми: методи пересилання (store-and-forward, cut-through) та буферизація пам'яті.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Switching",
+    "orderIndex": 4,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [104],
+    "questions": [
+      {
+        "questionText": "A Layer 2 switch is used to switch incoming frames from a 1000BASE-T port to a port connected to a 100Base-T network. Which method of memory buffering would work best for this task?",
+        "type": "TEST",
+        "options": ["port-based buffering", "level 1 cache buffering", "shared memory buffering", "fixed configuration buffering"],
+        "correctAnswers": ["shared memory buffering"],
+        "explanation": "Topic 7.4.3: With shared memory buffering, frames are stored unrestricted by port limits, which is vital for asymmetric switching."
+      },
+      {
+        "questionText": "Which frame forwarding method receives the entire frame and performs a CRC check to detect errors before forwarding the frame?",
+        "type": "TEST",
+        "options": ["cut-through switching", "store-and-forward switching", "fragment-free switching", "fast-forward switching"],
+        "correctAnswers": ["store-and-forward switching"],
+        "explanation": "Topic 7.4.1: Store-and-forward receives the full frame and checks CRC before forwarding."
+      },
+      {
+        "questionText": "What is the purpose of the FCS field in a frame?",
+        "type": "TEST",
+        "options": ["to obtain the MAC address of the sending node", "to verify the logical address of the sending node", "to compute the CRC header for the data field", "to determine if errors occurred in the transmission and reception"],
+        "correctAnswers": ["to determine if errors occurred in the transmission and reception"],
+        "explanation": "Topic 7.1.4: FCS field detects transmission errors by comparing CRC values."
+      },
+      {
+        "questionText": "Which switching method has the lowest level of latency?",
+        "type": "TEST",
+        "options": ["cut-through", "store-and-forward", "fragment-free", "fast-forward"],
+        "correctAnswers": ["fast-forward"],
+        "explanation": "Topic 7.4.2: Fast-forward switching begins forwarding right after reading the destination MAC, resulting in lowest latency."
+      },
+      {
+        "questionText": "Which advantage does the store-and-forward switching method have compared with the cut-through switching method?",
+        "type": "TEST",
+        "options": ["collision detecting", "frame error checking", "faster frame forwarding", "frame forwarding using IPv4 Layer 3 and 4 information"],
+        "correctAnswers": ["frame error checking"],
+        "explanation": "Topic 7.4.1: Store-and-forward performs an error check via FCS calculation before forwarding."
+      },
+      {
+        "questionText": "When the store-and-forward method of switching is in use, what part of the Ethernet frame is used to perform an error check?",
+        "type": "TEST",
+        "options": ["CRC in the trailer", "source MAC address in the header", "destination MAC address in the header", "protocol type in the header"],
+        "correctAnswers": ["CRC in the trailer"],
+        "explanation": "Topic 7.4.1: The CRC part of the trailer determines if the frame was modified during transit."
+      }
+    ]
+  },
+  {
+    "id": 109,
+    "title": "Мережний рівень",
+    "theoryContent": "Підказка: OSI Layer 3. Тут ми говоримо про протоколи IPv4 та IPv6, поля заголовків (TTL, Protocol) та принципи маршрутизації.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Network",
+    "orderIndex": 4,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [108],
+    "questions": [
+      {
+        "questionText": "What is a basic characteristic of the IP protocol?",
+        "type": "TEST",
+        "options": ["connectionless", "media dependent", "user data segmentation", "reliable end-to-end delivery"],
+        "correctAnswers": ["connectionless"],
+        "explanation": "Topic 8.1.3: IP is connectionless and does not require an initial exchange of control information to establish an end-to-end connection."
+      },
+      {
+        "questionText": "Which field in the IPv4 header is used to prevent a packet from traversing a network endlessly?",
+        "type": "TEST",
+        "options": ["Time-to-Live", "Sequence Number", "Acknowledgment Number", "Differentiated Services"],
+        "correctAnswers": ["Time-to-Live"],
+        "explanation": "Topic 8.2.2: The Time-to-Live (TTL) field limits the lifetime of a packet."
+      },
+      {
+        "questionText": "What is one advantage that the IPv6 simplified header offers over IPv4?",
+        "type": "TEST",
+        "options": ["smaller-sized header", "little requirement for processing checksums", "smaller-sized source and destination IP addresses", "efficient packet handling"],
+        "correctAnswers": ["efficient packet handling"],
+        "explanation": "Topic 8.3.3: IPv6 offers better routing efficiency and efficient packet handling."
+      },
+      {
+        "questionText": "What IPv4 header field identifies the upper layer protocol carried in the packet?",
+        "type": "TEST",
+        "options": ["Protocol", "Identification", "Version", "Differentiated Services"],
+        "correctAnswers": ["Protocol"],
+        "explanation": "Topic 8.2.2: The Protocol field identifies the upper-layer protocol."
+      },
+      {
+        "questionText": "What information does the loopback test provide?",
+        "type": "TEST",
+        "options": ["The TCP/IP stack on the device is working correctly.", "The device has end-to-end connectivity.", "DHCP is working correctly.", "The Ethernet cable is working correctly.", "The device has the correct IP address on the network."],
+        "correctAnswers": ["The TCP/IP stack on the device is working correctly."],
+        "explanation": "Topic 8.4.1: The loopback test verifies that the host NIC, drivers, and TCP/IP stack are functioning."
+      },
+      {
+        "questionText": "What routing table entry has a next hop address associated with a destination network?",
+        "type": "TEST",
+        "options": ["directly-connected routes", "local routes", "remote routes", "C and L source routes"],
+        "correctAnswers": ["remote routes"],
+        "explanation": "Topic 8.5.4: Routing table entries for remote routes will have a next hop IP address."
+      },
+      {
+        "questionText": "When transporting data from real-time applications, which field in the IPv6 header can be used to inform the routers and switches to maintain the same path?",
+        "type": "TEST",
+        "options": ["Next Header", "Flow Label", "Traffic Class", "Differentiated Services"],
+        "correctAnswers": ["Flow Label"],
+        "explanation": "Topic 8.3.4: The Flow Label field in IPv6 informs routers to maintain the same path for packet flow."
+      }
+    ]
+  },
+  {
+    "id": 108,
+    "title": "Miniboss: Warden of the Wires",
+    "theoryContent": "The second major challenge! ⚔️ Prove your understanding of physical media, frame structures, and switch operations. 15 questions, no hints. Good luck!",
+    "rewardXp": 500,
+    "rewardGold": 200,
+    "branchName": "Arena",
+    "orderIndex": 5,
+    "type": "BOSS",
+    "bossName": "Warden of the Wires",
+    "bossAvatarUrl": "/assets/bosses/gargoyle.png",
+    "timeLimitSeconds": 300,
+    "prerequisiteTaskIds": [105, 106, 107],
+    "questions": [
+      {
+        "questionText": "What is the purpose of the OSI physical layer?",
+        "type": "TEST",
+        "options": ["controlling access to media", "transmitting bits across the local media", "performing error detection on received frames", "exchanging frames between nodes over physical network media"],
+        "correctAnswers": ["transmitting bits across the local media"],
+        "explanation": "Topic 4.1.1: The OSI physical layer transmits bits across the media."
+      },
+      {
+        "questionText": "What does the term 'attenuation' mean in data communication?",
+        "type": "TEST",
+        "options": ["loss of signal strength as distance increases", "time for a signal to reach its destination", "leakage of signals from one cable pair to another", "strengthening of a signal by a networking device"],
+        "correctAnswers": ["loss of signal strength as distance increases"],
+        "explanation": "Topic 4.3.1: Attenuation is the loss of signal strength as distance increases."
+      },
+      {
+        "questionText": "Why are two strands of fiber used for a single fiber optic connection?",
+        "type": "TEST",
+        "options": ["The two strands allow the data to travel for longer distances without degrading.", "They prevent crosstalk from causing interference on the connection.", "They increase the speed at which the data can travel.", "They allow for full-duplex connectivity."],
+        "correctAnswers": ["They allow for full-duplex connectivity."],
+        "explanation": "Topic 4.5.4: Two strands are required to allow simultaneous transmission and reception (full-duplex)."
+      },
+      {
+        "questionText": "With the use of unshielded twisted-pair copper wire, what causes crosstalk within the cable pairs?",
+        "type": "TEST",
+        "options": ["the magnetic field around the adjacent pairs of wire", "the use of braided wire to shield the adjacent wire pairs", "the reflection of the electrical wave back from the far end of the cable", "the collision caused by two nodes trying to use the media simultaneously"],
+        "correctAnswers": ["the magnetic field around the adjacent pairs of wire"],
+        "explanation": "Topic 4.3.1: The magnetic field produced by current in one wire interferes with the adjacent wire."
+      },
+      {
+        "questionText": "What OSI physical layer term describes the capacity at which a medium can carry data?",
+        "type": "TEST",
+        "options": ["bandwidth", "IEEE", "EIA/TIA", "air"],
+        "correctAnswers": ["bandwidth"],
+        "explanation": "Topic 4.2.5: Bandwidth is the measure of data capacity on a medium."
+      },
+      {
+        "questionText": "What is the function of the CRC value that is found in the FCS field of a frame?",
+        "type": "TEST",
+        "options": ["to verify the integrity of the received frame", "to verify the physical address in the frame", "to verify the logical address in the frame", "to compute the checksum header for the data field in the frame"],
+        "correctAnswers": ["to verify the integrity of the received frame"],
+        "explanation": "Topic 6.3.2: CRC checks the integrity of the received frame to detect errors."
+      },
+      {
+        "questionText": "What is contained in the trailer of a data-link frame?",
+        "type": "TEST",
+        "options": ["logical address", "physical address", "data", "error detection"],
+        "correctAnswers": ["error detection"],
+        "explanation": "Topic 6.3.2: The trailer contains error detection information (the FCS field)."
+      },
+      {
+        "questionText": "What type of communication rule would best describe CSMA/CD?",
+        "type": "TEST",
+        "options": ["access method", "flow control", "message encapsulation", "message encoding"],
+        "correctAnswers": ["access method"],
+        "explanation": "Topic 6.2.6: CSMA/CD is the access method used to place signals on Ethernet media."
+      },
+      {
+        "questionText": "During the encapsulation process, what occurs at the data link layer for a PC connected to an Ethernet network?",
+        "type": "TEST",
+        "options": ["An IP address is added.", "The logical address is added.", "The physical address is added.", "The process port number is added."],
+        "correctAnswers": ["The physical address is added."],
+        "explanation": "Topic 6.3.3: The physical (MAC) address is added at the data link layer."
+      },
+      {
+        "questionText": "Which media communication type does not require media arbitration in the data link layer?",
+        "type": "TEST",
+        "options": ["deterministic", "half-duplex", "full-duplex", "controlled access"],
+        "correctAnswers": ["full-duplex"],
+        "explanation": "Topic 6.2.5: Full-duplex allows simultaneous two-way communication, removing the need for arbitration."
+      },
+      {
+        "questionText": "Which switching method has the lowest level of latency?",
+        "type": "TEST",
+        "options": ["cut-through", "store-and-forward", "fragment-free", "fast-forward"],
+        "correctAnswers": ["fast-forward"],
+        "explanation": "Topic 7.4.2: Fast-forward switching starts forwarding immediately after reading the destination MAC."
+      },
+      {
+        "questionText": "Which advantage does the store-and-forward switching method have compared with the cut-through switching method?",
+        "type": "TEST",
+        "options": ["collision detecting", "frame error checking", "faster frame forwarding", "frame forwarding using IPv4 Layer 3 and 4 information"],
+        "correctAnswers": ["frame error checking"],
+        "explanation": "Topic 7.4.1: Store-and-forward performs a full error check before forwarding."
+      },
+      {
+        "questionText": "A Layer 2 switch is used to switch incoming frames from a 1000BASE-T port to a 100Base-T network. Which buffering works best?",
+        "type": "TEST",
+        "options": ["port-based buffering", "level 1 cache buffering", "shared memory buffering", "fixed configuration buffering"],
+        "correctAnswers": ["shared memory buffering"],
+        "explanation": "Topic 7.4.3: Shared memory buffering is ideal for asymmetric switching between different port speeds."
+      },
+      {
+        "questionText": "What is the purpose of the FCS field in a frame?",
+        "type": "TEST",
+        "options": ["to obtain the MAC address of the sending node", "to verify the logical address of the sending node", "to compute the CRC header for the data field", "to determine if errors occurred in the transmission and reception"],
+        "correctAnswers": ["to determine if errors occurred in the transmission and reception"],
+        "explanation": "Topic 7.1.4: The FCS field detects any errors in the transmission and receipt of a frame."
+      },
+      {
+        "questionText": "When the store-and-forward method of switching is in use, what part of the Ethernet frame is used to perform an error check?",
+        "type": "TEST",
+        "options": ["CRC in the trailer", "source MAC address in the header", "destination MAC address in the header", "protocol type in the header"],
+        "correctAnswers": ["CRC in the trailer"],
+        "explanation": "Topic 7.4.1: The CRC part of the trailer is used to verify frame integrity."
+      }
+    ]
+  }
+  ,
+  {
+    "id": 110,
+    "title": "Address Resolution",
+    "theoryContent": "Tip: This level focuses on how devices map IP addresses to MAC addresses using the Address Resolution Protocol (ARP) and the security risks associated with it, like ARP spoofing.",
+    "rewardXp": 120,
+    "rewardGold": 40,
+    "branchName": "Network",
+    "orderIndex": 6,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [109],
+    "questions": [
+      {
+        "questionText": "What statement describes the function of the Address Resolution Protocol?",
+        "type": "TEST",
+        "options": [
+          "ARP is used to discover the IP address of any host on a different network.",
+          "ARP is used to discover the IP address of any host on the local network.",
+          "ARP is used to discover the MAC address of any host on a different network.",
+          "ARP is used to discover the MAC address of any host on the local network."
+        ],
+        "correctAnswers": ["ARP is used to discover the MAC address of any host on the local network."],
+        "explanation": "Topic 9.2.1: ARP is used to discover the MAC address of a host that belongs to the same local network when the IP address is known[cite: 1, 452, 456]."
+      },
+      {
+        "questionText": "Which statement describes the treatment of ARP requests on the local link?",
+        "type": "TEST",
+        "options": [
+          "They must be forwarded by all routers on the local network.",
+          "They are received and processed by every device on the local network.",
+          "They are dropped by all switches on the local network.",
+          "They are received and processed only by the target device."
+        ],
+        "correctAnswers": ["They are received and processed by every device on the local network."],
+        "explanation": "Topic 9.2.8: ARP requests are sent as a broadcast, meaning all devices on the local link must receive and process them[cite: 1, 459, 464]."
+      },
+      {
+        "questionText": "A network technician issues the 'arp -d *' command on a PC. What is the result?",
+        "type": "TEST",
+        "options": [
+          "The ARP cache is cleared.",
+          "The current content of the ARP cache is displayed.",
+          "The detailed information of the ARP cache is displayed.",
+          "The ARP cache is synchronized with the router interface."
+        ],
+        "correctAnswers": ["The ARP cache is cleared."],
+        "explanation": "Topic 9.2.6: The 'arp -d *' command clears the content of the ARP cache on a PC[cite: 1, 467, 472]."
+      },
+      {
+        "questionText": "What is the aim of an ARP spoofing attack?",
+        "type": "TEST",
+        "options": [
+          "to flood the network with ARP reply broadcasts",
+          "to fill switch MAC address tables with bogus addresses",
+          "to associate IP addresses to the wrong MAC address",
+          "to overwhelm network hosts with ARP requests"
+        ],
+        "correctAnswers": ["to associate IP addresses to the wrong MAC address"],
+        "explanation": "Topic 9.2.8: In an ARP spoofing attack, a malicious host sends false ARP replies to link its MAC address with a legitimate IP address[cite: 1, 477, 480]."
+      },
+      {
+        "questionText": "Where are IPv4 address to Layer 2 Ethernet address mappings maintained on a host computer?",
+        "type": "TEST",
+        "options": [
+          "neighbor table",
+          "ARP cache",
+          "routing table",
+          "MAC address table"
+        ],
+        "correctAnswers": ["ARP cache"],
+        "explanation": "Topic 9.2.2: The mappings of IPv4 addresses to MAC addresses are stored in the ARP cache of the host[cite: 1, 483, 487]."
+      },
+      {
+        "questionText": "What important information is examined in the Ethernet frame header by a Layer 2 device in order to forward the data onward?",
+        "type": "TEST",
+        "options": [
+          "source MAC address",
+          "source IP address",
+          "destination MAC address",
+          "Ethernet type",
+          "destination IP address"
+        ],
+        "correctAnswers": ["destination MAC address"],
+        "explanation": "Topic 9.1.1: A Layer 2 device (switch) uses the destination MAC address to decide which port to use for forwarding[cite: 1, 492, 496]."
+      }
+    ]
+  },
+  {
+    "id": 111,
+    "title": "Basic Router Configuration",
+    "theoryContent": "Tip: Learn the essential steps to set up a Cisco router, including security banners, management access via SSH, and how to save your configuration to NVRAM.",
+    "rewardXp": 120,
+    "rewardGold": 40,
+    "branchName": "Router",
+    "orderIndex": 7,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [110],
+    "questions": [
+      {
+        "questionText": "What is the fastest way a network administrator could test whether a banner is properly configured?",
+        "type": "TEST",
+        "options": [
+          "Reboot the device.",
+          "Enter CTRL-Z at the privileged mode prompt.",
+          "Exit global configuration mode.",
+          "Exit privileged EXEC mode and press Enter."
+        ],
+        "correctAnswers": ["Exit privileged EXEC mode and press Enter."],
+        "explanation": "Topic 10.1.1: Typing 'exit' at the privileged EXEC prompt and pressing Enter will display the banner message for testing[cite: 1, 498, 506]."
+      },
+      {
+        "questionText": "A router boots and enters setup mode. What is the reason for this?",
+        "type": "TEST",
+        "options": [
+          "The IOS image is corrupt.",
+          "Cisco IOS is missing from flash memory.",
+          "The configuration file is missing from NVRAM.",
+          "The POST process has detected hardware failure."
+        ],
+        "correctAnswers": ["The configuration file is missing from NVRAM."],
+        "explanation": "Topic 10.1.1: If the startup-config file cannot be found in NVRAM, the router defaults to setup mode[cite: 1, 511, 514]."
+      },
+      {
+        "questionText": "What is the effect of the 'ip default-gateway 172.16.100.1' command on a switch?",
+        "type": "TEST",
+        "options": [
+          "The switch will have a management interface with that address.",
+          "The switch can be remotely managed from a host on another network.",
+          "The switch can only communicate with hosts on the 172.16.100.0 network.",
+          "The switch is limited to sending frames only to that gateway."
+        ],
+        "correctAnswers": ["The switch can be remotely managed from a host on another network."],
+        "explanation": "Topic 10.3.2: Configuring a default gateway allows a switch to communicate with and be managed from devices outside its local network[cite: 1, 517, 521]."
+      },
+      {
+        "questionText": "What happens when the 'transport input ssh' command is entered on switch vty lines?",
+        "type": "TEST",
+        "options": [
+          "The SSH client on the switch is enabled.",
+          "Communication between the switch and remote users is encrypted.",
+          "The switch requires a username/password for remote access.",
+          "The switch requires proprietary client software."
+        ],
+        "correctAnswers": ["Communication between the switch and remote users is encrypted."],
+        "explanation": "Topic 10.1.1: This command ensures that all inbound remote management connections use SSH, which encrypts the data[cite: 1, 524, 528]."
+      },
+      {
+        "questionText": "What is the effect of using the 'copy running-config startup-config' command?",
+        "type": "TEST",
+        "options": [
+          "The contents of ROM will change.",
+          "The contents of RAM will change.",
+          "The contents of NVRAM will change.",
+          "The contents of flash will change."
+        ],
+        "correctAnswers": ["The contents of NVRAM will change."],
+        "explanation": "Topic 10.1.1: This command saves the current configuration from RAM into NVRAM as the startup-config[cite: 1, 532, 535]."
+      },
+      {
+        "questionText": "What will happen if the default gateway address is incorrectly configured on a host?",
+        "type": "TEST",
+        "options": [
+          "The host cannot communicate with local hosts.",
+          "The switch will not forward any packets from the host.",
+          "The host must use ARP to find the gateway.",
+          "The host cannot communicate with hosts in other networks."
+        ],
+        "correctAnswers": ["The host cannot communicate with hosts in other networks."],
+        "explanation": "Topic 10.3.1: A host needs a correct default gateway to send messages to remote networks; without it, it's limited to the local network[cite: 1, 541, 548]."
+      }
+    ]
+  },
+  {
+    "id": 112,
+    "title": "Miniboss: The Routing Revenant",
+    "theoryContent": "The third major challenge! ⚔️ Prove your mastery of the Network Layer, Address Resolution (ARP), and Basic Router Configuration. 15 questions, no hints. Good luck!",
+    "rewardXp": 500,
+    "rewardGold": 200,
+    "branchName": "Arena",
+    "orderIndex": 8,
+    "type": "BOSS",
+    "bossName": "Routing Revenant",
+    "bossAvatarUrl": "/assets/bosses/dragon.png",
+    "timeLimitSeconds": 300,
+    "prerequisiteTaskIds": [111],
+    "questions": [
+      {
+        "questionText": "What is a basic characteristic of the IP protocol?",
+        "type": "TEST",
+        "options": ["connectionless", "media dependent", "user data segmentation", "reliable end-to-end delivery"],
+        "correctAnswers": ["connectionless"],
+        "explanation": "IP is a connectionless protocol that does not require initial exchange of control information."
+      },
+      {
+        "questionText": "Which field in the IPv4 header is used to prevent a packet from traversing a network endlessly?",
+        "type": "TEST",
+        "options": ["Time-to-Live", "Sequence Number", "Acknowledgment Number", "Differentiated Services"],
+        "correctAnswers": ["Time-to-Live"],
+        "explanation": "The TTL field limits the lifetime of a packet in the network."
+      },
+      {
+        "questionText": "What IPv4 header field identifies the upper layer protocol carried in the packet?",
+        "type": "TEST",
+        "options": ["Protocol", "Identification", "Version", "Differentiated Services"],
+        "correctAnswers": ["Protocol"],
+        "explanation": "The Protocol field identifies the upper-layer protocol."
+      },
+      {
+        "questionText": "What information does the loopback test provide?",
+        "type": "TEST",
+        "options": ["The TCP/IP stack on the device is working correctly.", "The device has end-to-end connectivity.", "DHCP is working correctly.", "The Ethernet cable is working correctly."],
+        "correctAnswers": ["The TCP/IP stack on the device is working correctly."],
+        "explanation": "The loopback test verifies that the host NIC, drivers, and TCP/IP stack are functioning."
+      },
+      {
+        "questionText": "What routing table entry has a next hop address associated with a destination network?",
+        "type": "TEST",
+        "options": ["directly-connected routes", "local routes", "remote routes", "C and L source routes"],
+        "correctAnswers": ["remote routes"],
+        "explanation": "Remote routes will have a next hop IP address."
+      },
+      {
+        "questionText": "When transporting data from real-time applications, which field in the IPv6 header can be used to inform the routers and switches to maintain the same path?",
+        "type": "TEST",
+        "options": ["Next Header", "Flow Label", "Traffic Class", "Differentiated Services"],
+        "correctAnswers": ["Flow Label"],
+        "explanation": "The Flow Label provides a special service for real-time applications to maintain the same path."
+      },
+      {
+        "questionText": "What statement describes the function of the Address Resolution Protocol?",
+        "type": "TEST",
+        "options": ["ARP is used to discover the IP address of any host on a different network.", "ARP is used to discover the IP address of any host on the local network.", "ARP is used to discover the MAC address of any host on a different network.", "ARP is used to discover the MAC address of any host on the local network."],
+        "correctAnswers": ["ARP is used to discover the MAC address of any host on the local network."],
+        "explanation": "ARP discovers the MAC address of a host on the same local network."
+      },
+      {
+        "questionText": "Which statement describes the treatment of ARP requests on the local link?",
+        "type": "TEST",
+        "options": ["They must be forwarded by all routers on the local network.", "They are received and processed by every device on the local network.", "They are dropped by all switches on the local network.", "They are received and processed only by the target device."],
+        "correctAnswers": ["They are received and processed by every device on the local network."],
+        "explanation": "ARP requests are sent as a broadcast to all devices on the local link."
+      },
+      {
+        "questionText": "A network technician issues the 'arp -d *' command on a PC. What is the result?",
+        "type": "TEST",
+        "options": ["The ARP cache is cleared.", "The current content of the ARP cache is displayed.", "The detailed information of the ARP cache is displayed.", "The ARP cache is synchronized with the router interface."],
+        "correctAnswers": ["The ARP cache is cleared."],
+        "explanation": "The 'arp -d *' command clears the ARP cache."
+      },
+      {
+        "questionText": "What is the aim of an ARP spoofing attack?",
+        "type": "TEST",
+        "options": ["to flood the network with ARP reply broadcasts", "to fill switch MAC address tables with bogus addresses", "to associate IP addresses to the wrong MAC address", "to overwhelm network hosts with ARP requests"],
+        "correctAnswers": ["to associate IP addresses to the wrong MAC address"],
+        "explanation": "ARP spoofing associates a legitimate IP address with a malicious MAC address."
+      },
+      {
+        "questionText": "Where are IPv4 address to Layer 2 Ethernet address mappings maintained on a host computer?",
+        "type": "TEST",
+        "options": ["neighbor table", "ARP cache", "routing table", "MAC address table"],
+        "correctAnswers": ["ARP cache"],
+        "explanation": "The ARP cache stores these mappings."
+      },
+      {
+        "questionText": "A router boots and enters setup mode. What is the reason for this?",
+        "type": "TEST",
+        "options": ["The IOS image is corrupt.", "Cisco IOS is missing from flash memory.", "The configuration file is missing from NVRAM.", "The POST process has detected hardware failure."],
+        "correctAnswers": ["The configuration file is missing from NVRAM."],
+        "explanation": "If the router cannot locate the startup-config in NVRAM, it enters setup mode."
+      },
+      {
+        "questionText": "What happens when the 'transport input ssh' command is entered on the switch vty lines?",
+        "type": "TEST",
+        "options": ["The SSH client on the switch is enabled.", "Communication between the switch and remote users is encrypted.", "The switch requires a username/password combination for remote access.", "The switch requires remote connections via a proprietary client software."],
+        "correctAnswers": ["Communication between the switch and remote users is encrypted."],
+        "explanation": "SSH encrypts inbound connections on the vty lines."
+      },
+      {
+        "questionText": "What is the effect of using the 'copy running-config startup-config' command on a router?",
+        "type": "TEST",
+        "options": ["The contents of ROM will change.", "The contents of RAM will change.", "The contents of NVRAM will change.", "The contents of flash will change."],
+        "correctAnswers": ["The contents of NVRAM will change."],
+        "explanation": "This command saves the configuration into NVRAM."
+      },
+      {
+        "questionText": "What will happen if the default gateway address is incorrectly configured on a host?",
+        "type": "TEST",
+        "options": ["The host cannot communicate with other hosts in the local network.", "The switch will not forward packets initiated by the host.", "The host will have to use ARP to determine the correct address of the default gateway.", "The host cannot communicate with hosts in other networks."],
+        "correctAnswers": ["The host cannot communicate with hosts in other networks."],
+        "explanation": "An incorrect default gateway prevents communication outside the local network."
+      }
+    ]
+  }
+  ,
+  {
+    "id": 113,
+    "title": "IPv4 Addressing",
+    "theoryContent": "Tip: Master the art of subnetting, masks, and address classes. Learn how to calculate usable hosts and understand different transmission types like broadcast and multicast.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Addressing",
+    "orderIndex": 9,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [112],
+    "questions": [
+      {
+        "questionText": "What is the prefix length notation for the subnet mask 255.255.255.224?",
+        "type": "TEST",
+        "options": ["/25", "/26", "/27", "/28"],
+        "correctAnswers": ["/27"],
+        "explanation": "Topic 11.1.3: The binary format for 255.255.255.224 has 27 consecutive 1s, making it a /27 prefix[cite: 556, 557]."
+      },
+      {
+        "questionText": "How many valid host addresses are available on an IPv4 subnet with a /26 mask?",
+        "type": "TEST",
+        "options": ["254", "190", "192", "62"],
+        "correctAnswers": ["62"],
+        "explanation": "Topic 11.5.2: A /26 prefix provides 6 host bits (2^6 = 64). Subtracting the network and broadcast addresses leaves 62 usable hosts[cite: 562, 580]."
+      },
+      {
+        "questionText": "How many bits must be borrowed from the host portion to accommodate a router with five connected networks?",
+        "type": "TEST",
+        "options": ["two", "three", "four", "five"],
+        "correctAnswers": ["three"],
+        "explanation": "Topic 11.5.2: Using the formula 2^n, borrowing 3 bits provides 8 subnets, which is enough for 5 networks[cite: 567, 572]."
+      },
+      {
+        "questionText": "Which subnet mask would be used to accommodate at least 126 hosts?",
+        "type": "TEST",
+        "options": ["255.255.255.0", "255.255.255.128", "255.255.255.224", "255.255.255.240"],
+        "correctAnswers": ["255.255.255.128"],
+        "explanation": "Topic 11.5.2: The mask 255.255.255.128 provides 7 host bits, allowing for 126 usable host addresses (128 - 2)[cite: 595, 599]."
+      },
+      {
+        "questionText": "A host is transmitting a broadcast. Which host or hosts will receive it?",
+        "type": "TEST",
+        "options": ["all hosts in the same subnet", "a specially defined group of hosts", "the closest neighbor", "all hosts on the Internet"],
+        "correctAnswers": ["all hosts in the same subnet"],
+        "explanation": "Topic 11.2.2: A broadcast is delivered to every host within the same network/subnet[cite: 602, 607]."
+      },
+      {
+        "questionText": "Which address prefix range is reserved for IPv4 multicast?",
+        "type": "TEST",
+        "options": ["240.0.0.0 – 254.255.255.255", "224.0.0.0 – 239.255.255.255", "169.254.0.0 – 169.254.255.255", "127.0.0.0 – 127.255.255.255"],
+        "correctAnswers": ["224.0.0.0 – 239.255.255.255"],
+        "explanation": "Topic 11.2.3: Multicast IPv4 addresses use the reserved Class D range of 224.0.0.0 to 239.255.255.255[cite: 610, 614]."
+      },
+      {
+        "questionText": "A message is sent to all hosts on a remote network. Which type of message is it?",
+        "type": "TEST",
+        "options": ["limited broadcast", "multicast", "directed broadcast", "unicast"],
+        "correctAnswers": ["directed broadcast"],
+        "explanation": "Topic 11.2.2: A directed broadcast is a message sent to all hosts on a specific nonlocal network[cite: 618, 621]."
+      }
+    ]
+  },
+  {
+    "id": 114,
+    "title": "IPv6 Addressing",
+    "theoryContent": "Tip: Explore the 128-bit address space. Understand link-local addresses, Global Unicast, Anycast, and automated configuration methods like SLAAC.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Addressing",
+    "orderIndex": 9,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [112],
+    "questions": [
+      {
+        "questionText": "Which address is a valid IPv6 link-local unicast address?",
+        "type": "TEST",
+        "options": ["FEC8:1::FFFF", "FD80::1:1234", "FE80::1:4545:6578:ABC1", "FC90:5678:4251:FFFF"],
+        "correctAnswers": ["FE80::1:4545:6578:ABC1"],
+        "explanation": "Topic 12.4.3: IPv6 Link-Local Addresses (LLAs) are in the fe80::/10 range[cite: 630, 635]."
+      },
+      {
+        "questionText": "Assuming no subnetting into the interface ID, how many subnets can be created from a /48 prefix?",
+        "type": "TEST",
+        "options": ["16", "256", "4096", "65536"],
+        "correctAnswers": ["65536"],
+        "explanation": "Topic 12.8.1: With a /48 prefix, there are 16 bits available for subnetting (up to bit 64), yielding 65,536 subnets[cite: 641, 643]."
+      },
+      {
+        "questionText": "What type of IPv6 address is FE80::1?",
+        "type": "TEST",
+        "options": ["loopback", "link-local", "multicast", "global unicast"],
+        "correctAnswers": ["link-local"],
+        "explanation": "Topic 12.3.7: Link-local addresses start with FE80::/10 and allow communication between directly connected devices[cite: 654, 658, 659]."
+      },
+      {
+        "questionText": "What is used in the EUI-64 process to create an IPv6 interface ID?",
+        "type": "TEST",
+        "options": ["the MAC address", "a random 64-bit address", "DHCPv6 server data", "IPv4 address"],
+        "correctAnswers": ["the MAC address"],
+        "explanation": "Topic 12.5.6: The EUI-64 process uses the 48-bit MAC address and adds 16 bits (FF:FE) to create a 64-bit ID[cite: 661, 666, 667]."
+      },
+      {
+        "questionText": "Which type of IPv6 address refers to a single unicast address assigned to multiple hosts?",
+        "type": "TEST",
+        "options": ["unique local", "global unicast", "link-local", "anycast"],
+        "correctAnswers": ["anycast"],
+        "explanation": "Topic 12.3.1: An anycast address is any unicast IPv6 address that is assigned to multiple devices[cite: 699, 701]."
+      },
+      {
+        "questionText": "Which service provides dynamic global IPv6 addressing without a server keeping records?",
+        "type": "TEST",
+        "options": ["stateful DHCPv6", "SLAAC", "static addressing", "stateless DHCPv6"],
+        "correctAnswers": ["SLAAC"],
+        "explanation": "Topic 12.5.2: Stateless Address Autoconfiguration (SLAAC) allows a PC to create its own global address using router prefixes[cite: 704, 708, 709]."
+      }
+    ]
+  },
+  {
+    "id": 115,
+    "title": "ICMP Protocol",
+    "theoryContent": "Tip: Learn about the network's feedback mechanism. Study ICMP messages for reachability, Hop Limit/TTL exhaustion, and diagnostics.",
+    "rewardXp": 120,
+    "rewardGold": 40,
+    "branchName": "Diagnostics",
+    "orderIndex": 10,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [113, 114],
+    "questions": [
+      {
+        "questionText": "Which protocol is used by the traceroute command to send and receive echo-requests and replies?",
+        "type": "TEST",
+        "options": ["SNMP", "ICMP", "Telnet", "TCP"],
+        "correctAnswers": ["ICMP"],
+        "explanation": "Topic 13.2.1: Traceroute uses the Internet Control Message Protocol (ICMP) for diagnostics[cite: 713, 717]."
+      },
+      {
+        "questionText": "Which ICMPv6 message is sent when the hop limit field of a packet reaches zero?",
+        "type": "TEST",
+        "options": ["network unreachable", "time exceeded", "protocol unreachable", "port unreachable"],
+        "correctAnswers": ["time exceeded"],
+        "explanation": "Topic 13.2.5: If the hop limit reaches zero, a router sends a 'time exceeded' message back to the source[cite: 720, 725]."
+      },
+      {
+        "questionText": "What is the purpose of ICMP messages?",
+        "type": "TEST",
+        "options": ["to inform about topology changes", "to ensure delivery", "to provide feedback of IP packet transmissions", "to monitor DNS resolution"],
+        "correctAnswers": ["to provide feedback of IP packet transmissions"],
+        "explanation": "Topic 13.1.1: ICMP provides feedback about issues related to the processing of IP packets[cite: 737, 740]."
+      },
+      {
+        "questionText": "What source IP address does a router use by default when issuing a traceroute?",
+        "type": "TEST",
+        "options": ["highest configured IP", "loopback IP", "IP of the outbound interface", "lowest configured IP"],
+        "correctAnswers": ["IP of the outbound interface"],
+        "explanation": "Topic 13.2.5: By default, a router uses the IP address of the exit interface as the source[cite: 744, 747]."
+      },
+      {
+        "questionText": "In a ping command, what does a response code of 1 typically represent?",
+        "type": "TEST",
+        "options": ["host unreachable", "beyond scope", "address unreachable", "administratively prohibited"],
+        "correctAnswers": ["host unreachable"],
+        "explanation": "Topic 13.1.3: In ICMP unreachable codes, code 1 represents that the host is unreachable[cite: 750]."
+      }
+    ]
+  },
+  {
+    "id": 116,
+    "title": "Miniboss: The Addressing Archon",
+    "theoryContent": "The ultimate test of your addressing skills! ⚔️ Prove your mastery of IPv4, IPv6, and ICMP diagnostics. 15 questions, no hints. Defeat the Archon to proceed!",
+    "rewardXp": 600,
+    "rewardGold": 250,
+    "branchName": "Arena",
+    "orderIndex": 11,
+    "type": "BOSS",
+    "bossName": "Addressing Archon",
+    "bossAvatarUrl": "/assets/bosses/lich.png",
+    "timeLimitSeconds": 400,
+    "prerequisiteTaskIds": [115],
+    "questions": [
+      {
+        "questionText": "What prefix length corresponds to the mask 255.255.255.224?",
+        "type": "TEST",
+        "options": ["/25", "/26", "/27", "/28"],
+        "correctAnswers": ["/27"],
+        "explanation": "255.255.255.224 is a /27 subnet."
+      },
+      {
+        "questionText": "How many usable host addresses are in a /26 subnet?",
+        "type": "TEST",
+        "options": ["64", "62", "30", "126"],
+        "correctAnswers": ["62"],
+        "explanation": "A /26 subnet has 64 total addresses, minus network and broadcast."
+      },
+      {
+        "questionText": "How many bits must be borrowed to create at least 5 subnets?",
+        "type": "TEST",
+        "options": ["2", "3", "4", "5"],
+        "correctAnswers": ["3"],
+        "explanation": "2^3 = 8, which is the minimum bits to support 5 networks."
+      },
+      {
+        "questionText": "Which mask supports exactly 126 usable hosts?",
+        "type": "TEST",
+        "options": ["255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224"],
+        "correctAnswers": ["255.255.255.128"],
+        "explanation": "128 addresses - 2 = 126 hosts."
+      },
+      {
+        "questionText": "Which range is reserved for IPv4 multicast addresses?",
+        "type": "TEST",
+        "options": ["127.0.0.0/8", "169.254.0.0/16", "224.0.0.0 to 239.255.255.255", "240.0.0.0/4"],
+        "correctAnswers": ["224.0.0.0 to 239.255.255.255"],
+        "explanation": "Multicast uses Class D addresses."
+      },
+      {
+        "questionText": "Which IPv6 address is a link-local address?",
+        "type": "TEST",
+        "options": ["2001:db8::1", "FE80::1", "FF02::1", "::1"],
+        "correctAnswers": ["FE80::1"],
+        "explanation": "Link-local addresses start with FE80."
+      },
+      {
+        "questionText": "How many subnets can be created from a /48 IPv6 prefix using standard /64 subnets?",
+        "type": "TEST",
+        "options": ["16", "256", "4096", "65536"],
+        "correctAnswers": ["65536"],
+        "explanation": "64 - 48 = 16 bits for subnets, 2^16 = 65,536."
+      },
+      {
+        "questionText": "What does the EUI-64 process use to generate an interface ID?",
+        "type": "TEST",
+        "options": ["MAC address", "IP address", "Host name", "Serial number"],
+        "correctAnswers": ["MAC address"],
+        "explanation": "EUI-64 embeds the MAC address into the IPv6 ID."
+      },
+      {
+        "questionText": "Which IPv6 address type is assigned to multiple hosts to reach the 'nearest' one?",
+        "type": "TEST",
+        "options": ["Unicast", "Multicast", "Anycast", "Broadcast"],
+        "correctAnswers": ["Anycast"],
+        "explanation": "Anycast routes to the closest member of a group."
+      },
+      {
+        "questionText": "What protocol does the 'ping' command use?",
+        "type": "TEST",
+        "options": ["TCP", "UDP", "ICMP", "ARP"],
+        "correctAnswers": ["ICMP"],
+        "explanation": "Ping uses ICMP echo requests and replies."
+      },
+      {
+        "questionText": "Which ICMP message is triggered when a router drops a packet due to a zero Hop Limit?",
+        "type": "TEST",
+        "options": ["Destination Unreachable", "Redirect", "Source Quench", "Time Exceeded"],
+        "correctAnswers": ["Time Exceeded"],
+        "explanation": "Time Exceeded is sent when TTL/Hop Limit expires."
+      },
+      {
+        "questionText": "What is the primary purpose of ICMP?",
+        "type": "TEST",
+        "options": ["Data transfer", "Network feedback", "Address resolution", "Routing"],
+        "correctAnswers": ["Network feedback"],
+        "explanation": "ICMP provides error reporting and diagnostic feedback."
+      },
+      {
+        "questionText": "Which protocol is used to map a known IP to an unknown MAC address on a local network?",
+        "type": "TEST",
+        "options": ["DNS", "DHCP", "ARP", "ICMP"],
+        "correctAnswers": ["ARP"],
+        "explanation": "ARP resolves IP addresses to MAC addresses."
+      },
+      {
+        "questionText": "What happens to an ARP request on a local network?",
+        "type": "TEST",
+        "options": ["Dropped by switch", "Sent to gateway only", "Broadcast to all devices", "Unicast to target"],
+        "correctAnswers": ["Broadcast to all devices"],
+        "explanation": "ARP requests are Layer 2 broadcasts."
+      },
+      {
+        "questionText": "What command clears the ARP cache on a Windows machine?",
+        "type": "TEST",
+        "options": ["arp -a", "arp -s", "arp -d *", "netstat -r"],
+        "correctAnswers": ["arp -d *"],
+        "explanation": "The -d flag deletes entries from the ARP table."
+      }
+    ]
+  },
+  {
+    "id": 117,
+    "title": "Transport Layer",
+    "theoryContent": "Tip: This layer is all about reliable (TCP) and fast (UDP) data delivery. Pay attention to window sizes, sequence numbers, and port assignments.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Transport",
+    "orderIndex": 12,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [116],
+    "questions": [
+      {
+        "questionText": "A PC is downloading a large file from a server. The TCP window is 1000 bytes. The server sends 100-byte segments. How many segments will the server send before requiring an acknowledgment?",
+        "type": "TEST",
+        "options": ["1 segment", "10 segments", "100 segments", "1000 segments"],
+        "correctAnswers": ["10 segments"],
+        "explanation": "Topic 14.6.5: With a 1000-byte window, the host accepts data until all 1000 bytes (10 segments of 100 bytes) are received before acknowledging."
+      },
+      {
+        "questionText": "What factor determines TCP window size?",
+        "type": "TEST",
+        "options": ["amount of data to be transmitted", "number of services included", "amount of data the destination can process at once", "source capability"],
+        "correctAnswers": ["amount of data the destination can process at once"],
+        "explanation": "Topic 14.6.5: It is determined by how much data the destination device is able to accept and process at one time."
+      },
+      {
+        "questionText": "What does a client do when it has UDP datagrams to send?",
+        "type": "TEST",
+        "options": ["It just sends the datagrams.", "It queries the server first.", "It sends a simplified handshake.", "It sends a segment with the SYN flag."],
+        "correctAnswers": ["It just sends the datagrams."],
+        "explanation": "Topic 14.1.5: UDP is connectionless; the client just sends the datagrams without a handshake."
+      },
+      {
+        "questionText": "What information is used by TCP to reassemble and reorder received segments?",
+        "type": "TEST",
+        "options": ["port numbers", "sequence numbers", "acknowledgment numbers", "fragment numbers"],
+        "correctAnswers": ["sequence numbers"],
+        "explanation": "Topic 14.6.1: TCP uses sequence numbers in the header to reassemble segments into the correct order."
+      },
+      {
+        "questionText": "Which protocol or service uses UDP for client-to-server and TCP for server-to-server communication?",
+        "type": "TEST",
+        "options": ["HTTP", "FTP", "DNS", "SMTP"],
+        "correctAnswers": ["DNS"],
+        "explanation": "Topic 14.4.3: DNS uses UDP for queries and TCP for communication between two DNS servers."
+      },
+      {
+        "questionText": "Why does HTTP use TCP as the transport layer protocol?",
+        "type": "TEST",
+        "options": ["fastest speed", "best-effort protocol", "errors can be tolerated", "reliable delivery is required"],
+        "correctAnswers": ["reliable delivery is required"],
+        "explanation": "Topic 14.1.6: Web page requests require reliability and completeness, which TCP guarantees."
+      },
+      {
+        "questionText": "What kind of port must be requested from IANA for use with a specific application?",
+        "type": "TEST",
+        "options": ["registered port", "private port", "dynamic port", "source port"],
+        "correctAnswers": ["registered port"],
+        "explanation": "Topic 14.4.3: Registered ports (1024-49151) are assigned by IANA for specific processes or applications."
+      }
+    ]
+  },
+  {
+    "id": 118,
+    "title": "Application Layer",
+    "theoryContent": "Tip: Explore the protocols that interface directly with users, such as HTTP, SMB, and DNS, and understand different network models like Client-Server vs. P2P.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Application",
+    "orderIndex": 12,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [116],
+    "questions": [
+      {
+        "questionText": "What is true about the Server Message Block (SMB) protocol?",
+        "type": "TEST",
+        "options": ["Different types have different formats.", "Clients establish long-term connections.", "SMB cannot authenticate sessions.", "SMB uses FTP for communication."],
+        "correctAnswers": ["Clients establish long-term connections."],
+        "explanation": "Topic 15.5.2: Clients establish long-term connections to servers to access shared resources."
+      },
+      {
+        "questionText": "What is the function of the HTTP GET message?",
+        "type": "TEST",
+        "options": ["request an HTML page", "send error information", "upload content", "retrieve email via port 110"],
+        "correctAnswers": ["request an HTML page"],
+        "explanation": "Topic 15.3.2: The GET command is used by clients to request data from a web server."
+      },
+      {
+        "questionText": "Which OSI layer provides the interface between applications and the underlying network?",
+        "type": "TEST",
+        "options": ["application", "presentation", "session", "transport"],
+        "correctAnswers": ["application"],
+        "explanation": "Topic 15.1.1: The application layer is closest to the end user and provides this interface."
+      },
+      {
+        "questionText": "Which networking model is used when an author uploads a chapter to a file server?",
+        "type": "TEST",
+        "options": ["peer-to-peer", "master-slave", "client/server", "point-to-point"],
+        "correctAnswers": ["client/server"],
+        "explanation": "Topic 15.2.1: In this model, a device assumes the role of a server to provide a service like file storage."
+      },
+      {
+        "questionText": "What is a key characteristic of the peer-to-peer (P2P) networking model?",
+        "type": "TEST",
+        "options": ["wireless networking", "social networking without Internet", "using a central print server", "resource sharing without a dedicated server"],
+        "correctAnswers": ["resource sharing without a dedicated server"],
+        "explanation": "Topic 15.2.2: P2P allows data and resource sharing without the need for a dedicated server."
+      },
+      {
+        "questionText": "Which layer in the TCP/IP model handles formatting, compressing, and encrypting data?",
+        "type": "TEST",
+        "options": ["internetwork", "session", "presentation", "application"],
+        "correctAnswers": ["application"],
+        "explanation": "Topic 15.1.1: The TCP/IP application layer combines the functions of the OSI application, presentation, and session layers."
+      },
+      {
+        "questionText": "Which application layer protocol uses message types such as GET, PUT, and POST?",
+        "type": "TEST",
+        "options": ["DNS", "DHCP", "SMTP", "HTTP"],
+        "correctAnswers": ["HTTP"],
+        "explanation": "Topic 15.3.2: HTTP uses these commands to manage data exchange with web servers."
+      }
+    ]
+  },
+  {
+    "id": 119,
+    "title": "Network Security",
+    "theoryContent": "Tip: Learn to identify common threats like viruses and worms, and understand defense mechanisms like firewalls and AAA services.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Security",
+    "orderIndex": 13,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [117, 118],
+    "questions": [
+      {
+        "questionText": "What is the difference between a virus and a worm?",
+        "type": "TEST",
+        "options": ["Viruses self-replicate; worms do not.", "Worms self-replicate; viruses do not.", "Worms require a host file.", "Viruses hide in programs; worms do not."],
+        "correctAnswers": ["Worms self-replicate; viruses do not."],
+        "explanation": "Topic 16.2.1: Worms self-replicate and exploit vulnerabilities without user participation."
+      },
+      {
+        "questionText": "Which type of attack involves an adversary attempting to identify network vulnerabilities?",
+        "type": "TEST",
+        "options": ["reconnaissance", "DoS", "dictionary", "man-in-the-middle"],
+        "correctAnswers": ["reconnaissance"],
+        "explanation": "Topic 16.2.2: Reconnaissance involves searching for vulnerabilities in the target network."
+      },
+      {
+        "questionText": "What is the purpose of the network security authentication function?",
+        "type": "TEST",
+        "options": ["require users to prove identity", "determine accessible resources", "keep track of actions", "provide challenge questions"],
+        "correctAnswers": ["require users to prove identity"],
+        "explanation": "Topic 16.3.4: Authentication requires users to prove who they are."
+      },
+      {
+        "questionText": "Which firewall feature ensures incoming packets are legitimate responses to internal requests?",
+        "type": "TEST",
+        "options": ["stateful packet inspection", "URL filtering", "application filtering", "packet filtering"],
+        "correctAnswers": ["stateful packet inspection"],
+        "explanation": "Topic 16.3.6: Stateful packet inspection checks if incoming packets respond to valid internal requests."
+      },
+      {
+        "questionText": "Which command mitigates brute-force password attacks against a router?",
+        "type": "TEST",
+        "options": ["exec-timeout 30", "service password-encryption", "banner motd $", "login block-for"],
+        "correctAnswers": ["login block-for"],
+        "explanation": "Topic 16.4.3: This command limits failed login attempts within a specified period."
+      },
+      {
+        "questionText": "What feature of SSH makes it more secure than Telnet?",
+        "type": "TEST",
+        "options": ["IPsec support", "stronger passwords", "random ports", "encryption of data and login info"],
+        "correctAnswers": ["encryption of data and login info"],
+        "explanation": "Topic 16.4.4: SSH provides encryption for both authentication and transmitted data."
+      },
+      {
+        "questionText": "What is the role of an Intrusion Prevention System (IPS)?",
+        "type": "TEST",
+        "options": ["real-time attack blocking", "connecting threat info", "authenticating traffic", "filtering websites"],
+        "correctAnswers": ["real-time attack blocking"],
+        "explanation": "Topic 16.3.4: An IPS provides real-time detection and blocking of malicious attacks."
+      }
+    ]
+  },
+  {
+    "id": 120,
+    "title": "Network Troubleshooting",
+    "theoryContent": "Tip: Final linear stage! Focus on diagnostic tools like ping, traceroute, and Cisco IOS verification commands.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Maintenance",
+    "orderIndex": 14,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [119],
+    "questions": [
+      {
+        "questionText": "What is the purpose of using a protocol analyzer utility?",
+        "type": "TEST",
+        "options": ["identify traffic sources", "capture bandwidth requirements", "document and analyze traffic patterns", "establish security baselines"],
+        "correctAnswers": ["document and analyze traffic patterns"],
+        "explanation": "Topic 17.3.2: It helps administrators understand the type and amount of traffic crossing each segment."
+      },
+      {
+        "questionText": "How do you send a ping message specifying a custom source address in Cisco IOS?",
+        "type": "TEST",
+        "options": ["use interface config mode", "issue ping without a destination IP", "use basic ping", "shutdown other interfaces"],
+        "correctAnswers": ["issue ping without a destination IP"],
+        "explanation": "Topic 17.4.2: This enters extended ping mode, allowing the use of source IP addresses."
+      },
+      {
+        "questionText": "A technician pings local hosts and the gateway, but all fail. What can be determined for sure?",
+        "type": "TEST",
+        "options": ["The NIC is bad.", "TCP/IP is disabled.", "The router is down.", "Nothing can be determined for sure."],
+        "correctAnswers": ["Nothing can be determined for sure."],
+        "explanation": "Topic 17.4.1: Devices might be blocking pings; further investigation is always needed."
+      },
+      {
+        "questionText": "What is the purpose of the '-6' option in the Windows 'tracert' command?",
+        "type": "TEST",
+        "options": ["force IPv6", "limit to 6 hops", "set 6ms timeout", "send 6 probes"],
+        "correctAnswers": ["force IPv6"],
+        "explanation": "Topic 17.4.3: The -6 option forces the trace to use the IPv6 protocol."
+      },
+      {
+        "questionText": "Which command reveals the IP address, host name, and IOS version of neighboring Cisco devices?",
+        "type": "TEST",
+        "options": ["show version", "show ip route", "show interfaces", "show cdp neighbors detail"],
+        "correctAnswers": ["show cdp neighbors detail"],
+        "explanation": "Topic 17.5.6: This command provides detailed information about adjacent Cisco network devices."
+      },
+      {
+        "questionText": "Which command allows log messages to be displayed on remote sessions (Telnet/SSH)?",
+        "type": "TEST",
+        "options": ["debug all", "logging synchronous", "show running-config", "terminal monitor"],
+        "correctAnswers": ["terminal monitor"],
+        "explanation": "Topic 17.6.4: Log messages are only sent to the console by default; 'terminal monitor' sends them to VTY lines."
+      },
+      {
+        "questionText": "What information can be verified using the 'show version' command?",
+        "type": "TEST",
+        "options": ["routing protocols", "configuration register value", "interface status", "administrative distance"],
+        "correctAnswers": ["configuration register value"],
+        "explanation": "Topic 17.5.5: This command displays system hardware, software info, and the config register."
+      }
+    ]
+  },
+  {
+    "id": 121,
+    "title": "Final Boss: Network Overlord",
+    "theoryContent": "The ultimate challenge! ⚔️ Prove your absolute mastery over every concept in the Computer Networks course. From basic topologies to advanced troubleshooting, this is your final test. 35 questions. No hints. Show what you've learned!",
+    "rewardXp": 2000,
+    "rewardGold": 1000,
+    "branchName": "Arena",
+    "orderIndex": 15,
+    "type": "BOSS",
+    "bossName": "Network Overlord",
+    "bossAvatarUrl": "/assets/bosses/overlord.png",
+    "timeLimitSeconds": 1200,
+    "prerequisiteTaskIds": [120],
+    "questions": [
+      {
+        "questionText": "During a routine inspection, a technician discovered that software that was installed on a computer was secretly collecting data about websites that were visited by users of the computer. Which type of threat is affecting this computer?",
+        "type": "TEST",
+        "options": ["DoS attack", "identity theft", "spyware", "zero-day attack"],
+        "correctAnswers": ["spyware"],
+        "explanation": "Spyware is software that is installed on a network device and that collects information secretly."
+      },
+      {
+        "questionText": "Which term refers to a network that provides secure access to the corporate offices by suppliers, customers and collaborators?",
+        "type": "TEST",
+        "options": ["Internet", "intranet", "extranet", "extendednet"],
+        "correctAnswers": ["extranet"],
+        "explanation": "Extranets provide secure and safe access to suppliers, customers, and collaborators."
+      },
+      {
+        "questionText": "Which interface allows remote management of a Layer 2 switch?",
+        "type": "TEST",
+        "options": ["the AUX interface", "the console port interface", "the switch virtual interface", "the first Ethernet port interface"],
+        "correctAnswers": ["the switch virtual interface"],
+        "explanation": "In a Layer 2 switch, the switch virtual interface (SVI) provides a means for remotely managing the device."
+      },
+      {
+        "questionText": "What action can the technician take to discard the changes and work with the file in NVRAM?",
+        "type": "TEST",
+        "options": ["Issue the reload command without saving the running configuration.", "Delete the vlan.dat file and reboot the device.", "Close and reopen the terminal emulation software.", "Issue the copy startup-config running-config command."],
+        "correctAnswers": ["Issue the reload command without saving the running configuration."],
+        "explanation": "Rebooting the router without saving the running configuration restores the startup-config from NVRAM."
+      },
+      {
+        "questionText": "Which name is assigned to the transport layer PDU?",
+        "type": "TEST",
+        "options": ["bits", "data", "frame", "packet", "segment"],
+        "correctAnswers": ["segment"],
+        "explanation": "The Protocol Data Unit (PDU) at the transport layer is called a segment."
+      },
+      {
+        "questionText": "What process involves placing one PDU inside of another PDU?",
+        "type": "TEST",
+        "options": ["encapsulation", "encoding", "segmentation", "flow control"],
+        "correctAnswers": ["encapsulation"],
+        "explanation": "When a message is placed inside of another message, this is known as encapsulation."
+      },
+      {
+        "questionText": "Why are two strands of fiber used for a single fiber optic connection?",
+        "type": "TEST",
+        "options": ["The two strands allow the data to travel for longer distances without degrading.", "They prevent crosstalk from causing interference on the connection.", "They increase the speed at which the data can travel.", "They allow for full-duplex connectivity."],
+        "correctAnswers": ["They allow for full-duplex connectivity."],
+        "explanation": "Two strands are used to allow data to travel in both directions simultaneously (full-duplex)."
+      },
+      {
+        "questionText": "What does the term 'attenuation' mean in data communication?",
+        "type": "TEST",
+        "options": ["loss of signal strength as distance increases", "time for a signal to reach its destination", "leakage of signals from one cable pair to another", "strengthening of a signal by a networking device"],
+        "correctAnswers": ["loss of signal strength as distance increases"],
+        "explanation": "Attenuation refers to the deterioration or loss of signal strength as the signal travels further."
+      },
+      {
+        "questionText": "What is the function of the CRC value that is found in the FCS field of a frame?",
+        "type": "TEST",
+        "options": ["to verify the integrity of the received frame", "to verify the physical address in the frame", "to verify the logical address in the frame", "to compute the checksum header for the data field in the frame"],
+        "correctAnswers": ["to verify the integrity of the received frame"],
+        "explanation": "The CRC value in the FCS field is compared to the computed CRC to verify the integrity of the frame."
+      },
+      {
+        "questionText": "What is contained in the trailer of a data-link frame?",
+        "type": "TEST",
+        "options": ["logical address", "physical address", "data", "error detection"],
+        "correctAnswers": ["error detection"],
+        "explanation": "The trailer in a data-link frame contains error detection information in the FCS field."
+      },
+      {
+        "questionText": "A Layer 2 switch is used to switch incoming frames from a 1000BASE-T port to a port connected to a 100Base-T network. Which method of memory buffering would work best for this task?",
+        "type": "TEST",
+        "options": ["port-based buffering", "level 1 cache buffering", "shared memory buffering", "fixed configuration buffering"],
+        "correctAnswers": ["shared memory buffering"],
+        "explanation": "Shared memory buffering is best for asymmetric switching where ports have different speeds."
+      },
+      {
+        "questionText": "Which frame forwarding method receives the entire frame and performs a CRC check to detect errors before forwarding the frame?",
+        "type": "TEST",
+        "options": ["cut-through switching", "store-and-forward switching", "fragment-free switching", "fast-forward switching"],
+        "correctAnswers": ["store-and-forward switching"],
+        "explanation": "Store-and-forward performs an error check by comparing the FCS value after the entire frame is received."
+      },
+      {
+        "questionText": "Which field in the IPv4 header is used to prevent a packet from traversing a network endlessly?",
+        "type": "TEST",
+        "options": ["Time-to-Live", "Sequence Number", "Acknowledgment Number", "Differentiated Services"],
+        "correctAnswers": ["Time-to-Live"],
+        "explanation": "The Time-to-Live (TTL) field limits the lifetime of a packet and prevents endless routing loops."
+      },
+      {
+        "questionText": "What IPv4 header field identifies the upper layer protocol carried in the packet?",
+        "type": "TEST",
+        "options": ["Protocol", "Identification", "Version", "Differentiated Services"],
+        "correctAnswers": ["Protocol"],
+        "explanation": "The Protocol field identifies the upper-layer protocol the packet is carrying."
+      },
+      {
+        "questionText": "What routing table entry has a next hop address associated with a destination network?",
+        "type": "TEST",
+        "options": ["directly-connected routes", "local routes", "remote routes", "C and L source routes"],
+        "correctAnswers": ["remote routes"],
+        "explanation": "Routing table entries for remote routes will have a next hop IP address."
+      },
+      {
+        "questionText": "Where are IPv4 address to Layer 2 Ethernet address mappings maintained on a host computer?",
+        "type": "TEST",
+        "options": ["neighbor table", "ARP cache", "routing table", "MAC address table"],
+        "correctAnswers": ["ARP cache"],
+        "explanation": "The ARP cache is used to store IPv4 addresses mapped to their Ethernet MAC addresses."
+      },
+      {
+        "questionText": "What is the aim of an ARP spoofing attack?",
+        "type": "TEST",
+        "options": ["to flood the network with ARP reply broadcasts", "to fill switch MAC address tables with bogus addresses", "to associate IP addresses to the wrong MAC address", "to overwhelm network hosts with ARP requests"],
+        "correctAnswers": ["to associate IP addresses to the wrong MAC address"],
+        "explanation": "In an ARP spoofing attack, a malicious host associates a legitimate IP address with its own MAC address."
+      },
+      {
+        "questionText": "A router boots and enters setup mode. What is the reason for this?",
+        "type": "TEST",
+        "options": ["The IOS image is corrupt.", "Cisco IOS is missing from flash memory.", "The configuration file is missing from NVRAM.", "The POST process has detected hardware failure."],
+        "correctAnswers": ["The configuration file is missing from NVRAM."],
+        "explanation": "If a router cannot locate the startup-config file in NVRAM, it will enter setup mode."
+      },
+      {
+        "questionText": "What is the effect of using the Router# copy running-config startup-config command on a router?",
+        "type": "TEST",
+        "options": ["The contents of ROM will change.", "The contents of RAM will change.", "The contents of NVRAM will change.", "The contents of flash will change."],
+        "correctAnswers": ["The contents of NVRAM will change."],
+        "explanation": "This command copies the running-config from RAM into NVRAM and saves it."
+      },
+      {
+        "questionText": "A site administrator has been told that a particular network at the site must accommodate 126 hosts. Which subnet mask would be used that contains the required number of host bits?",
+        "type": "TEST",
+        "options": ["255.255.255.0", "255.255.255.128", "255.255.255.224", "255.255.255.240"],
+        "correctAnswers": ["255.255.255.128"],
+        "explanation": "The mask of 255.255.255.128 results in 7 host bits, which provides exactly 126 usable host addresses."
+      },
+      {
+        "questionText": "Which address prefix range is reserved for IPv4 multicast?",
+        "type": "TEST",
+        "options": ["240.0.0.0 – 254.255.255.255", "224.0.0.0 – 239.255.255.255", "169.254.0.0 – 169.254.255.255", "127.0.0.0 – 127.255.255.255"],
+        "correctAnswers": ["224.0.0.0 – 239.255.255.255"],
+        "explanation": "Multicast IPv4 addresses use the reserved class D address range of 224.0.0.0 to 239.255.255.255."
+      },
+      {
+        "questionText": "What type of IPv6 address is FE80::1?",
+        "type": "TEST",
+        "options": ["loopback", "link-local", "multicast", "global unicast"],
+        "correctAnswers": ["link-local"],
+        "explanation": "Link-local IPv6 addresses start with FE80::/10."
+      },
+      {
+        "questionText": "What is used in the EUI-64 process to create an IPv6 interface ID on an IPv6 enabled interface?",
+        "type": "TEST",
+        "options": ["the MAC address of the IPv6 enabled interface", "a randomly generated 64-bit hexadecimal address", "an IPv6 address that is provided by a DHCPv6 server", "an IPv4 address that is configured on the interface"],
+        "correctAnswers": ["the MAC address of the IPv6 enabled interface"],
+        "explanation": "The EUI-64 process uses the MAC address of an interface to construct an interface ID."
+      },
+      {
+        "questionText": "Which type of IPv6 address refers to any unicast address that is assigned to multiple hosts?",
+        "type": "TEST",
+        "options": ["unique local", "global unicast", "link-local", "anycast"],
+        "correctAnswers": ["anycast"],
+        "explanation": "An anycast address is any unicast IPv6 address that is assigned to multiple devices."
+      },
+      {
+        "questionText": "Which protocol is used by the traceroute command to send and receive echo-requests and echo-replies?",
+        "type": "TEST",
+        "options": ["SNMP", "ICMP", "Telnet", "TCP"],
+        "correctAnswers": ["ICMP"],
+        "explanation": "Traceroute uses the ICMP (Internet Control Message Protocol) to send and receive messages."
+      },
+      {
+        "questionText": "What source IP address does a router use by default when the traceroute command is issued?",
+        "type": "TEST",
+        "options": ["the highest configured IP address on the router", "a loopback IP address", "the IP address of the outbound interface", "the lowest configured IP address on the router"],
+        "correctAnswers": ["the IP address of the outbound interface"],
+        "explanation": "By default, a router uses the IP address of the exit interface as the source IP address."
+      },
+      {
+        "questionText": "Which factor determines TCP window size?",
+        "type": "TEST",
+        "options": ["the amount of data to be transmitted", "the number of services included in the TCP segment", "the amount of data the destination can process at one time", "the amount of data the source is capable of sending at one time"],
+        "correctAnswers": ["the amount of data the destination can process at one time"],
+        "explanation": "Window size is determined by how much data the destination device is able to accept and process at one time."
+      },
+      {
+        "questionText": "What information is used by TCP to reassemble and reorder received segments?",
+        "type": "TEST",
+        "options": ["port numbers", "sequence numbers", "acknowledgment numbers", "fragment numbers"],
+        "correctAnswers": ["sequence numbers"],
+        "explanation": "TCP uses sequence numbers in the header of each segment to reassemble them into the correct order."
+      },
+      {
+        "questionText": "What is the function of the HTTP GET message?",
+        "type": "TEST",
+        "options": ["to request an HTML page from a web server", "to send error information from a web server to a web client", "to upload content to a web server from a web client", "to retrieve client email from an email server using TCP port 110"],
+        "correctAnswers": ["to request an HTML page from a web server"],
+        "explanation": "The GET message is used by clients to request data from the web server."
+      },
+      {
+        "questionText": "What is a key characteristic of the peer-to-peer networking model?",
+        "type": "TEST",
+        "options": ["wireless networking", "social networking without the Internet", "network printing using a print server", "resource sharing without a dedicated server"],
+        "correctAnswers": ["resource sharing without a dedicated server"],
+        "explanation": "The peer-to-peer (P2P) networking model allows resource sharing without a dedicated server."
+      },
+      {
+        "questionText": "What is the difference between a virus and a worm?",
+        "type": "TEST",
+        "options": ["Viruses self-replicate but worms do not.", "Worms self-replicate but viruses do not.", "Worms require a host file but viruses do not.", "Viruses hide in legitimate programs but worms do not."],
+        "correctAnswers": ["Worms self-replicate but viruses do not."],
+        "explanation": "Worms are able to self-replicate and exploit vulnerabilities without user participation."
+      },
+      {
+        "questionText": "What is the advantage of using SSH over Telnet?",
+        "type": "TEST",
+        "options": ["SSH is easier to use.", "SSH operates faster than Telnet.", "SSH provides secure communications to access hosts.", "SSH supports authentication for a connection request."],
+        "correctAnswers": ["SSH provides secure communications to access hosts."],
+        "explanation": "SSH encrypts network traffic between the client and remote hosts, providing a secure connection."
+      },
+      {
+        "questionText": "What is the purpose of a small company using a protocol analyzer utility to capture network traffic?",
+        "type": "TEST",
+        "options": ["to identify the source and destination of local network traffic", "to capture the Internet connection bandwidth requirement", "to document and analyze network traffic requirements on each network segment", "to establish a baseline for security analysis after the network is upgraded"],
+        "correctAnswers": ["to document and analyze network traffic requirements on each network segment"],
+        "explanation": "A protocol analyzer is used to document and analyze the network traffic pattern for each segment."
+      },
+      {
+        "questionText": "A network technician issues the C:> tracert -6 www.cisco.com command. What is the purpose of the -6 command option?",
+        "type": "TEST",
+        "options": ["It forces the trace to use IPv6.", "It limits the trace to only 6 hops.", "It sets a 6 milliseconds timeout for each replay.", "It sends 6 probes within each TTL time period."],
+        "correctAnswers": ["It forces the trace to use IPv6."],
+        "explanation": "The -6 option forces the trace to use the IPv6 protocol."
+      },
+      {
+        "questionText": "What information about a Cisco router can be verified using the show version command?",
+        "type": "TEST",
+        "options": ["the routing protocol version that is enabled", "the value of the configuration register", "the operational status of serial interfaces", "the administrative distance used to reach networks"],
+        "correctAnswers": ["the value of the configuration register"],
+        "explanation": "The value of the configuration register can be verified with the show version command."
+      }
+    ]
+  }
+
+]

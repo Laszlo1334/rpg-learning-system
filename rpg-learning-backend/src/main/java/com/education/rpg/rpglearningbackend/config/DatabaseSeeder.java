@@ -6,11 +6,20 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Configuration
 public class DatabaseSeeder {
@@ -21,8 +30,9 @@ public class DatabaseSeeder {
             CourseRepository courseRepository,
             TaskRepository taskRepository,
             ItemRepository itemRepository,
-            PasswordEncoder passwordEncoder
-    ) {
+            UserQuestionFailureRepository userQuestionFailureRepository,
+            CompletedTaskRepository completedTaskRepository,
+            PasswordEncoder passwordEncoder) {
         return args -> {
             System.out.println("🌱 Запуск модульної перевірки бази даних...");
 
@@ -47,7 +57,48 @@ public class DatabaseSeeder {
                 generateBranchedCourse(courses.get(2), 20, taskRepository);
             }
 
-            // 3. БЛОК МАГАЗИНУ (запускається завжди, але хелпери не дадуть створити дублікати)
+            // 1. Шукаємо старий курс. Якщо він є — видаляємо його.
+            courseRepository.findAll().stream()
+                    .filter(c -> "NET101".equals(c.getAccessCode()))
+                    .findFirst()
+                    .ifPresent(c -> {
+                        System.out.println("🧹 Видалення старого запису NET101...");
+
+                        // Course.tasks є LAZY, тому завантажуємо через репозиторій.
+                        // Task.questions є EAGER — завантажується автоматично.
+                        List<Task> courseTasks = taskRepository.findByCourseId(c.getId());
+
+                        if (!courseTasks.isEmpty()) {
+                            // Крок 1: видаляємо записи з user_question_failures
+                            List<Question> allCourseQuestions = courseTasks.stream()
+                                    .flatMap(t -> t.getQuestions().stream())
+                                    .collect(Collectors.toList());
+
+                            if (!allCourseQuestions.isEmpty()) {
+                                System.out.println("  ↳ Видалення " + allCourseQuestions.size()
+                                        + " записів з user_question_failures...");
+                                userQuestionFailureRepository.deleteByQuestionIn(allCourseQuestions);
+                            }
+
+                            // Крок 2: видаляємо записи з completed_tasks
+                            System.out.println("  ↳ Видалення " + courseTasks.size()
+                                    + " записів з completed_tasks...");
+                            completedTaskRepository.deleteByTaskIn(courseTasks);
+                        }
+
+                        // Крок 3: видаляємо курс (каскад CascadeType.ALL прибере tasks та questions)
+                        courseRepository.delete(c);
+                    });
+
+            // 2. Створюємо чистий курс та завантажуємо дані з JSON
+            System.out.println("✨ Додавання чистого курсу: Комп'ютерні мережі...");
+            User teacher = userRepository.findByEmail("teacher@rpg.com").orElseThrow();
+            Course networkCourse = createCourse("Комп'ютерні мережі", "Основи маршрутизації та OSI.", "NET101", teacher);
+            courseRepository.save(networkCourse);
+            loadTasksFromJson(networkCourse, taskRepository);
+
+            // 3. БЛОК МАГАЗИНУ (запускається завжди, але хелпери не дадуть створити
+            // дублікати)
             System.out.println("Перевірка та оновлення асортименту магазину...");
             generateShopItems(itemRepository);
 
@@ -78,9 +129,11 @@ public class DatabaseSeeder {
                 task.setTimeLimitSeconds(120);
             }
             task.setDynamicQuestionCount(isBoss ? 3 : 1);
-            if (prevTask != null) task.setPrerequisiteTaskIds(List.of(prevTask.getId()));
+            if (prevTask != null)
+                task.setPrerequisiteTaskIds(List.of(prevTask.getId()));
 
-            Question q = createTestQuestion(task, "Тестове питання для " + task.getTitle(), List.of("Варіант 1", "Варіант 2", "Варіант 3"), "Варіант 1");
+            Question q = createTestQuestion(task, "Тестове питання для " + task.getTitle(),
+                    List.of("Варіант 1", "Варіант 2", "Варіант 3"), "Варіант 1");
             task.setQuestions(List.of(q));
             taskRepository.save(task);
             prevTask = task;
@@ -92,9 +145,12 @@ public class DatabaseSeeder {
         Task root = new Task();
         root.setTitle("Вступ до " + course.getTitle());
         root.setTheoryContent("Основи основ.");
-        root.setRewardXp(50); root.setRewardGold(20);
-        root.setCourse(course); root.setBranchName("Старт");
-        root.setOrderIndex(1); root.setType(Task.TaskType.REGULAR);
+        root.setRewardXp(50);
+        root.setRewardGold(20);
+        root.setCourse(course);
+        root.setBranchName("Старт");
+        root.setOrderIndex(1);
+        root.setType(Task.TaskType.REGULAR);
         root.setQuestions(List.of(createTestQuestion(root, "Готові?", List.of("Так", "Ні"), "Так")));
         taskRepository.save(root);
 
@@ -105,71 +161,118 @@ public class DatabaseSeeder {
         while (remaining > 0) {
             int leftLen = Math.min(3, remaining / 2 + 1);
             int rightLen = Math.min(2, remaining / 2);
-            if (leftLen == 0) break;
+            if (leftLen == 0)
+                break;
 
             Task leftLast = currentDivergence;
-            for(int i=0; i<leftLen; i++) {
-                Task t = new Task(); t.setTitle("Гілка Практики " + order); t.setCourse(course); t.setBranchName("Практика");
-                t.setOrderIndex(order++); t.setType(Task.TaskType.REGULAR); t.setRewardXp(60); t.setRewardGold(20);
+            for (int i = 0; i < leftLen; i++) {
+                Task t = new Task();
+                t.setTitle("Гілка Практики " + order);
+                t.setCourse(course);
+                t.setBranchName("Практика");
+                t.setOrderIndex(order++);
+                t.setType(Task.TaskType.REGULAR);
+                t.setRewardXp(60);
+                t.setRewardGold(20);
                 t.setPrerequisiteTaskIds(List.of(leftLast.getId()));
                 t.setQuestions(List.of(createTestQuestion(t, "Питання", List.of("1", "2"), "1")));
-                taskRepository.save(t); leftLast = t; remaining--;
+                taskRepository.save(t);
+                leftLast = t;
+                remaining--;
             }
 
             Task rightLast = currentDivergence;
-            for(int i=0; i<rightLen; i++) {
-                Task t = new Task(); t.setTitle("Гілка Теорії " + order); t.setCourse(course); t.setBranchName("Теорія");
-                t.setOrderIndex(order++); t.setType(Task.TaskType.REGULAR); t.setRewardXp(60); t.setRewardGold(20);
+            for (int i = 0; i < rightLen; i++) {
+                Task t = new Task();
+                t.setTitle("Гілка Теорії " + order);
+                t.setCourse(course);
+                t.setBranchName("Теорія");
+                t.setOrderIndex(order++);
+                t.setType(Task.TaskType.REGULAR);
+                t.setRewardXp(60);
+                t.setRewardGold(20);
                 t.setPrerequisiteTaskIds(List.of(rightLast.getId()));
                 t.setQuestions(List.of(createTestQuestion(t, "Питання", List.of("1", "2"), "1")));
-                taskRepository.save(t); rightLast = t; remaining--;
+                taskRepository.save(t);
+                rightLast = t;
+                remaining--;
             }
 
             // Бос Злиття
             if (remaining > 0) {
-                Task boss = new Task(); boss.setTitle("Бос Злиття " + order); boss.setCourse(course); boss.setBranchName("Арена");
-                boss.setOrderIndex(order++); boss.setType(Task.TaskType.BOSS); boss.setRewardXp(300); boss.setRewardGold(150);
-                boss.setBossName("Хранитель Гілок"); boss.setBossAvatarUrl("/assets/bosses/golem.png");
+                Task boss = new Task();
+                boss.setTitle("Бос Злиття " + order);
+                boss.setCourse(course);
+                boss.setBranchName("Арена");
+                boss.setOrderIndex(order++);
+                boss.setType(Task.TaskType.BOSS);
+                boss.setRewardXp(300);
+                boss.setRewardGold(150);
+                boss.setBossName("Хранитель Гілок");
+                boss.setBossAvatarUrl("/assets/bosses/golem.png");
                 boss.setPrerequisiteTaskIds(List.of(leftLast.getId(), rightLast.getId()));
                 boss.setQuestions(List.of(createTestQuestion(boss, "Тест", List.of("Так", "Ні"), "Так")));
-                taskRepository.save(boss); currentDivergence = boss; remaining--;
+                taskRepository.save(boss);
+                currentDivergence = boss;
+                remaining--;
             }
         }
     }
 
     private Course createCourse(String title, String desc, String code, User author) {
-        Course c = new Course(); c.setTitle(title); c.setDescription(desc); c.setAccessCode(code); c.setAuthor(author); return c;
+        Course c = new Course();
+        c.setTitle(title);
+        c.setDescription(desc);
+        c.setAccessCode(code);
+        c.setAuthor(author);
+        return c;
     }
 
     private Question createTestQuestion(Task task, String text, List<String> options, String correctAnswer) {
-        Question q = new Question(); q.setTask(task); q.setQuestionText(text); q.setType(Question.QuestionType.TEST);
-        q.setOptions(options); q.setCorrectAnswers(List.of(correctAnswer)); q.setExplanation("Уважно перегляньте теорію."); return q;
+        Question q = new Question();
+        q.setTask(task);
+        q.setQuestionText(text);
+        q.setType(Question.QuestionType.TEST);
+        q.setOptions(options);
+        q.setCorrectAnswers(List.of(correctAnswer));
+        q.setExplanation("Уважно перегляньте теорію.");
+        return q;
     }
 
     private void generateUsers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        User teacher = new User(); teacher.setUsername("Гендальф (Вчитель)"); teacher.setEmail("teacher@rpg.com");
-        teacher.setPassword(passwordEncoder.encode("12345678")); teacher.setRole(Role.TEACHER); teacher.setLevel(50);
+        User teacher = new User();
+        teacher.setUsername("Гендальф (Вчитель)");
+        teacher.setEmail("teacher@rpg.com");
+        teacher.setPassword(passwordEncoder.encode("12345678"));
+        teacher.setRole(Role.TEACHER);
+        teacher.setLevel(50);
         userRepository.save(teacher);
 
-        User student = new User(); student.setUsername("Фродо Багінс"); student.setEmail("student@rpg.com");
-        student.setPassword(passwordEncoder.encode("12345678")); student.setRole(Role.STUDENT); student.setLevel(2);
-        student.setCampfireLevel(1); student.setEnergy(100); student.setLastLoginDate(LocalDateTime.now());
+        User student = new User();
+        student.setUsername("Фродо Багінс");
+        student.setEmail("student@rpg.com");
+        student.setPassword(passwordEncoder.encode("12345678"));
+        student.setRole(Role.STUDENT);
+        student.setLevel(2);
+        student.setCampfireLevel(1);
+        student.setEnergy(100);
+        student.setLastLoginDate(LocalDateTime.now());
         userRepository.save(student);
-        
+
         // Фіктивні студенти для лідерборду
         String[] heroNames = {
-            "Сем Гемджі", "Піппін Тук", "Меррі Брендібак",
-            "Арагорн", "Леголас", "Гімлі",
-            "Боромір", "Фарамір", "Еовін",
-            "Галадріель", "Елронд", "Саруман"
+                "Сем Гемджі", "Піппін Тук", "Меррі Брендібак",
+                "Арагорн", "Леголас", "Гімлі",
+                "Боромір", "Фарамір", "Еовін",
+                "Галадріель", "Елронд", "Саруман"
         };
-        int[] privateIndexes = {3, 7};
+        int[] privateIndexes = { 3, 7 };
         Random seedRandom = new Random(42);
 
         for (int i = 0; i < heroNames.length; i++) {
-            int xp    = 100 + seedRandom.nextInt(4901);
+            int xp = 100 + seedRandom.nextInt(4901);
             int level = (xp / 1000) + 1;
-            int gold  = 50  + seedRandom.nextInt(751);
+            int gold = 50 + seedRandom.nextInt(751);
             boolean isPrivate = (i == privateIndexes[0] || i == privateIndexes[1]);
 
             User hero = new User();
@@ -192,39 +295,54 @@ public class DatabaseSeeder {
 
     private void generateShopItems(ItemRepository itemRepository) {
         // --- Розхідники (Consumables) ---
-        createConsumable(itemRepository, "Зілля Мудрості", "+50% XP на 30 хвилин.", 15, Item.CurrencyType.CRYSTAL, Item.EffectType.XP_BOOST, "/assets/items/potion_wisdom.png");
-        createConsumable(itemRepository, "Магніт Гобліна", "Подвійне золото на 60 хвилин.", 15, Item.CurrencyType.CRYSTAL, Item.EffectType.GOLD_BOOST, "/assets/items/goblin_magnet.png");
-        createConsumable(itemRepository, "Еліксир Бадьорості", "Миттєво відновлює 100 Енергії.", 20, Item.CurrencyType.CRYSTAL, Item.EffectType.ENERGY_REFILL, "/assets/items/elixir_vigor.png");
-        createConsumable(itemRepository, "Руна Захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL, Item.EffectType.SHIELD, "/assets/items/rune_protection.png");
+        createConsumable(itemRepository, "Зілля Мудрості", "+50% XP на 30 хвилин.", 15, Item.CurrencyType.CRYSTAL,
+                Item.EffectType.XP_BOOST, "/assets/items/potion_wisdom.png");
+        createConsumable(itemRepository, "Магніт Гобліна", "Подвійне золото на 60 хвилин.", 15,
+                Item.CurrencyType.CRYSTAL, Item.EffectType.GOLD_BOOST, "/assets/items/goblin_magnet.png");
+        createConsumable(itemRepository, "Еліксир Бадьорості", "Миттєво відновлює 100 Енергії.", 20,
+                Item.CurrencyType.CRYSTAL, Item.EffectType.ENERGY_REFILL, "/assets/items/elixir_vigor.png");
+        createConsumable(itemRepository, "Руна Захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL,
+                Item.EffectType.SHIELD, "/assets/items/rune_protection.png");
 
         // --- Аватари (AVATAR) ---
-        createEquipment(itemRepository, "Елронд", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE, "/assets/avatars/elrond.png");
-        createEquipment(itemRepository, "Гімлі", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE, "/assets/avatars/gimli.png");
+        createEquipment(itemRepository, "Елронд", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,
+                "/assets/avatars/elrond.png");
+        createEquipment(itemRepository, "Гімлі", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,
+                "/assets/avatars/gimli.png");
 
         // --- Голова (HEAD) ---
-        createEquipment(itemRepository, "Шолом Новачка", 200, Item.ItemSlot.HEAD, Item.ItemRarity.COMMON, "/assets/cosmetics/Head/head1.png");
+        createEquipment(itemRepository, "Шолом Новачка", 200, Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,
+                "/assets/cosmetics/Head/head1.png");
 
         // --- Тулуб (BODY) ---
-        createEquipment(itemRepository, "Мантія Учня", 300, Item.ItemSlot.BODY, Item.ItemRarity.COMMON, "/assets/cosmetics/Chest/chest1.png");
+        createEquipment(itemRepository, "Мантія Учня", 300, Item.ItemSlot.BODY, Item.ItemRarity.COMMON,
+                "/assets/cosmetics/Chest/chest1.png");
 
         // --- Руки (HANDS) ---
-        createEquipment(itemRepository, "Шкіряні Рукавиці", 150, Item.ItemSlot.HANDS, Item.ItemRarity.COMMON, "/assets/cosmetics/Hands/hands1.png");
+        createEquipment(itemRepository, "Шкіряні Рукавиці", 150, Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,
+                "/assets/cosmetics/Hands/hands1.png");
 
         // --- Ноги (LEGS) ---
-        createEquipment(itemRepository, "Чоботи Мандрівника", 150, Item.ItemSlot.LEGS, Item.ItemRarity.COMMON, "/assets/cosmetics/Legs/legs1.png");
+        createEquipment(itemRepository, "Чоботи Мандрівника", 150, Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,
+                "/assets/cosmetics/Legs/legs1.png");
 
         // --- Зброя (WEAPON) ---
-        createEquipment(itemRepository, "Гостра Сокира", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE, "/assets/weapons/axe_1.png");
-        createEquipment(itemRepository, "Лук Лісника", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE, "/assets/weapons/bow_1.png");
-        createEquipment(itemRepository, "Сталевий Меч", 600, Item.ItemSlot.WEAPON, Item.ItemRarity.EPIC, "/assets/weapons/sword_1.png");
+        createEquipment(itemRepository, "Гостра Сокира", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE,
+                "/assets/weapons/axe_1.png");
+        createEquipment(itemRepository, "Лук Лісника", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE,
+                "/assets/weapons/bow_1.png");
+        createEquipment(itemRepository, "Сталевий Меч", 600, Item.ItemSlot.WEAPON, Item.ItemRarity.EPIC,
+                "/assets/weapons/sword_1.png");
     }
 
     // ==========================================
     // ХЕЛПЕРИ ДЛЯ ПРЕДМЕТІВ МАГАЗИНУ
     // ==========================================
 
-    private void createEquipment(ItemRepository repo, String name, int price, Item.ItemSlot slot, Item.ItemRarity rarity, String assetUrl) {
-        if (repo.existsByName(name)) return; // Захист від дублікатів
+    private void createEquipment(ItemRepository repo, String name, int price, Item.ItemSlot slot,
+            Item.ItemRarity rarity, String assetUrl) {
+        if (repo.existsByName(name))
+            return; // Захист від дублікатів
         Item item = new Item();
         item.setName(name);
         item.setDescription("Елемент екіпірування героя.");
@@ -238,8 +356,10 @@ public class DatabaseSeeder {
         repo.save(item);
     }
 
-    private void createConsumable(ItemRepository repo, String name, String desc, int price, Item.CurrencyType currency, Item.EffectType effect, String assetUrl) {
-        if (repo.existsByName(name)) return; // Захист від дублікатів
+    private void createConsumable(ItemRepository repo, String name, String desc, int price, Item.CurrencyType currency,
+            Item.EffectType effect, String assetUrl) {
+        if (repo.existsByName(name))
+            return; // Захист від дублікатів
         Item item = new Item();
         item.setName(name);
         item.setDescription(desc);
@@ -251,5 +371,87 @@ public class DatabaseSeeder {
         item.setRarity(Item.ItemRarity.COMMON);
         item.setAssetUrl(assetUrl);
         repo.save(item);
+    }
+
+    // --- Метод читання JSON з двопрохідним збереженням для коректного ID-маппінгу
+    // ---
+    private void loadTasksFromJson(Course course, TaskRepository taskRepository) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        try (InputStream inputStream = getClass().getResourceAsStream("/data/networks.json")) {
+            if (inputStream == null) {
+                System.err.println("❌ Файл /data/networks.json не знайдено!");
+                return;
+            }
+
+            List<Task> tasks = mapper.readValue(inputStream, new TypeReference<List<Task>>() {
+            });
+
+            // Крок 1: Зберігаємо маппінг «старий JSON ID → список prerequisiteTaskIds»,
+            // а також впорядкований список oldIds (щоб потім зіставити з savedTasks за
+            // індексом),
+            // і обнуляємо ID, щоб Hibernate генерував нові.
+            Map<Long, List<Long>> oldPrerequisites = new HashMap<>();
+            List<Long> indexedOldIds = new ArrayList<>(); // Порядок відповідає tasks
+
+            for (Task task : tasks) {
+                Long oldId = task.getId(); // Зберігаємо JSON-шний ID (201, 202, …)
+                indexedOldIds.add(oldId); // Зберігаємо порядок до скидання ID
+
+                // Зберігаємо старі prerequisites перед тим, як скинути ID
+                oldPrerequisites.put(oldId, new ArrayList<>(task.getPrerequisiteTaskIds()));
+
+                // Обнуляємо ID — Hibernate згенерує новий
+                task.setId(null);
+
+                // Прив'язуємо завдання до курсу
+                task.setCourse(course);
+
+                // Відновлюємо двосторонній зв'язок із питаннями
+                if (task.getQuestions() != null) {
+                    task.getQuestions().forEach(q -> q.setTask(task));
+                }
+
+                // Тимчасово очищаємо prerequisites — заповнимо після першого збереження
+                task.setPrerequisiteTaskIds(new ArrayList<>());
+            }
+
+            // Крок 2: Перший saveAll — Hibernate генерує реальні ID.
+            // savedTasks повертається у тому ж порядку, що й tasks (специфікація JPA).
+            List<Task> savedTasks = taskRepository.saveAll(tasks);
+
+            // Крок 3: Будуємо маппінг «старий JSON ID → новий DB ID».
+            // indexedOldIds[i] відповідає savedTasks[i], бо порядок збережено.
+            Map<Long, Long> oldIdToNewId = new HashMap<>();
+            for (int i = 0; i < indexedOldIds.size(); i++) {
+                oldIdToNewId.put(indexedOldIds.get(i), savedTasks.get(i).getId());
+            }
+
+            // Крок 4: Оновлюємо prerequisiteTaskIds кожного завдання,
+            // замінюючи старі JSON ID на нові згенеровані DB ID.
+            for (int i = 0; i < savedTasks.size(); i++) {
+                Long oldId = indexedOldIds.get(i);
+                List<Long> oldPrereqs = oldPrerequisites.get(oldId);
+                if (oldPrereqs != null && !oldPrereqs.isEmpty()) {
+                    List<Long> newPrereqs = new ArrayList<>();
+                    for (Long oldPrereqId : oldPrereqs) {
+                        Long newPrereqId = oldIdToNewId.get(oldPrereqId);
+                        if (newPrereqId != null) {
+                            newPrereqs.add(newPrereqId);
+                        }
+                    }
+                    savedTasks.get(i).setPrerequisiteTaskIds(newPrereqs);
+                }
+            }
+
+            // Крок 5: Другий saveAll — зберігаємо оновлені prerequisiteTaskIds.
+            taskRepository.saveAll(savedTasks);
+            System.out.println("✅ Завдання для курсу '" + course.getTitle() + "' успішно завантажено з JSON!");
+
+        } catch (Exception e) {
+            System.err.println("❌ Помилка читання JSON: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
