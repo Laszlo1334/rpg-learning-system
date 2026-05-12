@@ -4,7 +4,7 @@ export type CurrencyType = 'GOLD' | 'CRYSTAL';
 export type ItemCategory = 'COSMETIC' | 'CONSUMABLE';
 export type ItemEffect = 'XP_BOOST' | 'GOLD_BOOST' | 'ENERGY_REFILL' | 'SHIELD' | 'NONE';
 export type ItemSlot = 'HEAD' | 'BODY' | 'HANDS' | 'LEGS' | 'WEAPON' | 'AVATAR' | 'NONE';
-export type ItemRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+export type ItemRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 export type SubmissionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface User {
@@ -114,6 +114,7 @@ export interface Item {
   slot: ItemSlot;
   rarity: ItemRarity;
   assetUrl: string | null;
+  attributeBonus: number; // ATK power for weapons; 0 for all other items
 }
 
 export interface InventoryEntry {

@@ -1,22 +1,32 @@
 package com.education.rpg.rpglearningbackend.service;
 
 import com.education.rpg.rpglearningbackend.dto.RegisterRequest;
+import com.education.rpg.rpglearningbackend.model.Inventory;
+import com.education.rpg.rpglearningbackend.model.Item;
 import com.education.rpg.rpglearningbackend.model.Role;
 import com.education.rpg.rpglearningbackend.model.User;
+import com.education.rpg.rpglearningbackend.repository.InventoryRepository;
+import com.education.rpg.rpglearningbackend.repository.ItemRepository;
 import com.education.rpg.rpglearningbackend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ItemRepository itemRepository;
+    private final InventoryRepository inventoryRepository;
 
-    // Ручний конструктор замість @RequiredArgsConstructor
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       ItemRepository itemRepository, InventoryRepository inventoryRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.itemRepository = itemRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     public User register(RegisterRequest request) {
@@ -40,8 +50,22 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
-        // Решта полів заповниться автоматично через @PrePersist або дефолтні значення
+        // Assign a default avatar so the leaderboard never shows a broken image
+        user.setAvatarUrl("/assets/default_avatar.png");
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Автоматично додаємо Базовий Аватар до інвентарю
+        Optional<Item> defaultAvatarOpt = itemRepository.findByName("Базовий Аватар");
+        if (defaultAvatarOpt.isPresent()) {
+            Inventory inventory = new Inventory();
+            inventory.setUser(savedUser);
+            inventory.setItem(defaultAvatarOpt.get());
+            inventory.setIsEquipped(true); // Автоматично одягаємо
+            inventory.setQuantity(1);
+            inventoryRepository.save(inventory);
+        }
+
+        return savedUser;
     }
 }

@@ -15,47 +15,51 @@ type SlotFilter = ItemSlot | 'ALL';
 
 // Backend effect → readable label
 const EFFECT_LABELS: Record<string, string> = {
-    XP_BOOST:      '🧪 XP ×1.5 for 30 min',
-    GOLD_BOOST:    '🧲 Gold ×2 for 60 min',
+    XP_BOOST: '🧪 XP ×1.5 for 30 min',
+    GOLD_BOOST: '🧲 Gold ×2 for 60 min',
     ENERGY_REFILL: '☕ Restore energy to 100',
-    SHIELD:        '🛡️ Shield for 1 run',
-    NONE:          '',
+    SHIELD: '🛡️ Shield for 1 run',
+    NONE: '',
 };
 
 // Rarity color map
 const RARITY_BORDER: Record<string, string> = {
-    COMMON:    'border-zinc-600',
-    RARE:      'border-blue-500',
-    EPIC:      'border-purple-500',
+    COMMON: 'border-zinc-600',
+    UNCOMMON: 'border-green-500',
+    RARE: 'border-blue-500',
+    EPIC: 'border-purple-500',
     LEGENDARY: 'border-yellow-400',
 };
 const RARITY_GLOW: Record<string, string> = {
-    COMMON:    '',
-    RARE:      'shadow-[0_0_12px_rgba(59,130,246,0.35)]',
-    EPIC:      'shadow-[0_0_12px_rgba(168,85,247,0.35)]',
+    COMMON: '',
+    UNCOMMON: 'shadow-[0_0_10px_rgba(34,197,94,0.30)]',
+    RARE: 'shadow-[0_0_12px_rgba(59,130,246,0.35)]',
+    EPIC: 'shadow-[0_0_12px_rgba(168,85,247,0.35)]',
     LEGENDARY: 'shadow-[0_0_16px_rgba(234,179,8,0.45)]',
 };
 const RARITY_LABEL: Record<string, string> = {
-    COMMON:    'Common',
-    RARE:      'Rare',
-    EPIC:      'Epic',
+    COMMON: 'Common',
+    UNCOMMON: 'Uncommon',
+    RARE: 'Rare',
+    EPIC: 'Epic',
     LEGENDARY: 'Legendary',
 };
 const RARITY_TEXT: Record<string, string> = {
-    COMMON:    'text-zinc-400',
-    RARE:      'text-blue-400',
-    EPIC:      'text-purple-400',
+    COMMON: 'text-zinc-400',
+    UNCOMMON: 'text-green-400',
+    RARE: 'text-blue-400',
+    EPIC: 'text-purple-400',
     LEGENDARY: 'text-yellow-400',
 };
 
 const SLOT_FILTERS: { label: string; value: SlotFilter }[] = [
-    { label: 'All',     value: 'ALL' },
+    { label: 'All', value: 'ALL' },
     { label: 'Avatars', value: 'AVATAR' },
-    { label: 'Head',    value: 'HEAD' },
-    { label: 'Body',    value: 'BODY' },
-    { label: 'Legs',    value: 'LEGS' },
-    { label: 'Hands',   value: 'HANDS' },
-    { label: 'Weapon',  value: 'WEAPON' },
+    { label: 'Head', value: 'HEAD' },
+    { label: 'Body', value: 'BODY' },
+    { label: 'Legs', value: 'LEGS' },
+    { label: 'Hands', value: 'HANDS' },
+    { label: 'Weapon', value: 'WEAPON' },
 ];
 
 export const ShopPage = () => {
@@ -141,38 +145,38 @@ export const ShopPage = () => {
         : tabFiltered;
 
     const tabClass = (tab: ActiveTab) =>
-        `flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${
-            activeTab === tab ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+        `flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === tab ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
         }`;
 
     const filterBtnClass = (val: SlotFilter) =>
-        `px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-            activeFilter === val
-                ? 'bg-purple-600 border-purple-500 text-white'
-                : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+        `px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${activeFilter === val
+            ? 'bg-purple-600 border-purple-500 text-white'
+            : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
         }`;
 
     // ─── Item Card ─────────────────────────────────────────────────
     const ItemCard = ({ item }: { item: Item }) => {
         const affordable = canAfford(item);
         const isBuying = buyingId === item.id;
-        const ownedQty  = getOwnedQuantity(item);
-        const isOwned   = inventory.some(inv => inv.item.id === item.id);
+        const ownedQty = getOwnedQuantity(item);
+        const isOwned = inventory.some(inv => inv.item.id === item.id);
         const rarity = item.rarity ?? 'COMMON';
 
         // Cosmetics that are already owned cannot be repurchased
         const isCosmeticOwned = item.category === 'COSMETIC' && isOwned;
-        const cardAffordable  = !isCosmeticOwned && affordable;
+        const cardAffordable = !isCosmeticOwned && affordable;
 
         return (
             <div
-                className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 ${
-                    isCosmeticOwned
-                        ? 'border-emerald-800/40 opacity-75'
-                        : cardAffordable
-                            ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
-                            : 'border-zinc-800/50 opacity-60'
-                }`}
+                className={`bg-zinc-900 border-2 rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 ${isCosmeticOwned
+                        ? 'border-emerald-700/60 opacity-75'
+                        : item.category === 'COSMETIC'
+                            ? `${RARITY_BORDER[rarity]} ${RARITY_GLOW[rarity]} ${!cardAffordable ? 'opacity-60' : 'hover:brightness-110'
+                            }`
+                            : cardAffordable
+                                ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
+                                : 'border-zinc-800/50 opacity-60'
+                    }`}
             >
                 {/* Icon with rarity border */}
                 <div className={`w-14 h-14 rounded-xl bg-zinc-800 border-2 ${RARITY_BORDER[rarity]} ${RARITY_GLOW[rarity]} flex items-center justify-center overflow-hidden`}>
@@ -200,6 +204,23 @@ export const ShopPage = () => {
                     {EFFECT_LABELS[item.effect] && (
                         <p className="text-xs text-blue-400 mt-2 font-bold">{EFFECT_LABELS[item.effect]}</p>
                     )}
+
+                    {/* ── Weapon ATK stat ─────────────────────────────── */}
+                    {item.slot === 'WEAPON' && item.attributeBonus > 0 && (
+                        <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/30">
+                            <span className="text-sm">⚔️</span>
+                            <span className="text-red-400 font-black text-sm">+{item.attributeBonus} ATK</span>
+                        </div>
+                    )}
+
+                    {/* ── Armor DEF stat (HEAD / BODY / HANDS / LEGS) ──── */}
+                    {(['HEAD', 'BODY', 'HANDS', 'LEGS'] as const).includes(item.slot as 'HEAD' | 'BODY' | 'HANDS' | 'LEGS')
+                        && item.attributeBonus > 0 && (
+                            <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-sky-500/10 border border-sky-500/30">
+                                <span className="text-sm">🛡️</span>
+                                <span className="text-sky-400 font-black text-sm">+{item.attributeBonus} DEF</span>
+                            </div>
+                        )}
                 </div>
 
                 {/* Owned quantity (consumables only) */}
@@ -214,7 +235,7 @@ export const ShopPage = () => {
                     <div className="flex items-center gap-1.5 font-black text-base">
                         {item.currencyType === 'GOLD'
                             ? <Coins size={14} className="text-yellow-400" />
-                            : <Gem   size={14} className="text-purple-400" />
+                            : <Gem size={14} className="text-purple-400" />
                         }
                         <span className={item.currencyType === 'GOLD' ? 'text-yellow-400' : 'text-purple-400'}>
                             {item.price}
@@ -230,9 +251,8 @@ export const ShopPage = () => {
                         <button
                             onClick={() => { if (cardAffordable && !isBuying) setItemToBuy(item); }}
                             disabled={!cardAffordable || isBuying}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${
-                                cardAffordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
-                            }`}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${cardAffordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
+                                }`}
                         >
                             {isBuying
                                 ? <Loader2 size={16} className="animate-spin" />
@@ -252,11 +272,10 @@ export const ShopPage = () => {
 
             {/* ── Toast ─────────────────────────────────────────────── */}
             {notification && (
-                <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm ${
-                    notification.type === 'success'
+                <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm ${notification.type === 'success'
                         ? 'bg-emerald-900 border border-emerald-700 text-emerald-200'
                         : 'bg-red-900 border border-red-700 text-red-200'
-                }`}>
+                    }`}>
                     <AlertCircle size={18} />
                     {notification.message}
                 </div>
@@ -287,7 +306,7 @@ export const ShopPage = () => {
                                     Spend&nbsp;
                                     {itemToBuy.currencyType === 'GOLD'
                                         ? <><Coins size={14} className="text-yellow-400" /><span className="text-yellow-400 font-bold">{itemToBuy.price} gold</span></>
-                                        : <><Gem   size={14} className="text-purple-400" /><span className="text-purple-400 font-bold">{itemToBuy.price} crystals</span></>
+                                        : <><Gem size={14} className="text-purple-400" /><span className="text-purple-400 font-bold">{itemToBuy.price} crystals</span></>
                                     }
                                 </p>
                             </div>

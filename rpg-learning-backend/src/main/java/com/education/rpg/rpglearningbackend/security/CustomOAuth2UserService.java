@@ -36,6 +36,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setEmail(email);
             newUser.setRole(Role.STUDENT);
             newUser.setPassword("");
+            newUser.setAvatarUrl("/assets/default_avatar.png");
 
             // --- Starter pack defaults so the DB does not fail on null fields ---
             newUser.setLevel(1);

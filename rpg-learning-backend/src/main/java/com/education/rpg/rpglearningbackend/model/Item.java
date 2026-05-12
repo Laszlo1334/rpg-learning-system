@@ -41,11 +41,11 @@ public class Item {
 
     // ── Effect (consumable mechanics) ─────────────────────────────
     public enum EffectType {
-        XP_BOOST,       // +50% XP for 30 min
-        GOLD_BOOST,     // ×2 Gold for 60 min
-        ENERGY_REFILL,  // instantly restore energy to 100
-        SHIELD,         // protect from one defeat
-        NONE            // cosmetics have no effect
+        XP_BOOST, // +50% XP for 30 min
+        GOLD_BOOST, // ×2 Gold for 60 min
+        ENERGY_REFILL, // instantly restore energy to 100
+        SHIELD, // protect from one defeat
+        NONE // cosmetics have no effect
     }
 
     @Enumerated(EnumType.STRING)
@@ -55,7 +55,7 @@ public class Item {
     // ── Cosmetic slot (for equip system) ─────────────────────────
     public enum ItemSlot {
         HEAD, BODY, HANDS, LEGS, WEAPON, AVATAR,
-        NONE  // consumables / items without a slot
+        NONE // consumables / items without a slot
     }
 
     @Enumerated(EnumType.STRING)
@@ -64,7 +64,7 @@ public class Item {
 
     // ── Rarity ────────────────────────────────────────────────────
     public enum ItemRarity {
-        COMMON, RARE, EPIC, LEGENDARY
+        COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
     }
 
     @Enumerated(EnumType.STRING)
@@ -72,4 +72,8 @@ public class Item {
     private ItemRarity rarity = ItemRarity.COMMON;
 
     private String assetUrl;
+
+    // ── Weapon power (ATK bonus) — 0 for all non-weapon items ────────
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer attributeBonus = 0;
 }

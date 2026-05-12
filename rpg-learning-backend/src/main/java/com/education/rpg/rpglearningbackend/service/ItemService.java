@@ -38,13 +38,15 @@ public class ItemService {
         // 3. ПЕРЕВІРКА ВАЛЮТИ ТА СПИСАННЯ
         if (item.getCurrencyType() == Item.CurrencyType.GOLD) {
             if (player.getGold() < item.getPrice()) {
-                throw new RuntimeException("Недостатньо Золота! Вам потрібно ще " + (item.getPrice() - player.getGold()) + " 🪙");
+                throw new RuntimeException(
+                        "Недостатньо Золота! Вам потрібно ще " + (item.getPrice() - player.getGold()) + " 🪙");
             }
             player.setGold(player.getGold() - item.getPrice());
 
         } else if (item.getCurrencyType() == Item.CurrencyType.CRYSTAL) {
             if (player.getCrystals() < item.getPrice()) {
-                throw new RuntimeException("Недостатньо Кристалів Невдачі! Робіть більше спроб. Вам потрібно ще " + (item.getPrice() - player.getCrystals()) + " 💎");
+                throw new RuntimeException("Недостатньо Кристалів Невдачі! Робіть більше спроб. Вам потрібно ще "
+                        + (item.getPrice() - player.getCrystals()) + " 💎");
             }
             player.setCrystals(player.getCrystals() - item.getPrice());
         }
@@ -95,4 +97,4 @@ public class ItemService {
 
         return inventoryRepository.save(inventoryEntry);
     }
-}
+}

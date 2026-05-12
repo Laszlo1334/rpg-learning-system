@@ -120,7 +120,8 @@ public class TaskService {
         }
 
         if (task.getQuestions() != null && !task.getQuestions().isEmpty()) {
-            // 1. Copy the list to avoid mutating the original data held in Hibernate's cache
+            // 1. Copy the list to avoid mutating the original data held in Hibernate's
+            // cache
             List<Question> allQuestions = new ArrayList<>(task.getQuestions());
 
             // 2. Determine how many questions to include
@@ -150,6 +151,5 @@ public class TaskService {
     public Task createTask(Task task) {
         return taskRepository.save(task);
     }
-
 
 }

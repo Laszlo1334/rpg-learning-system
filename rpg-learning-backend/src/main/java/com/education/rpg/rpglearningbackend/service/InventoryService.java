@@ -125,7 +125,8 @@ public class InventoryService {
 
         List<Inventory> equipped = inventoryRepository.findByUserIdAndIsEquippedTrue(userId);
 
-        // 1. If a specific item was targeted for replacement (crucial for dual-wielding independent slots)
+        // 1. If a specific item was targeted for replacement (crucial for dual-wielding
+        // independent slots)
         if (replaceId != null) {
             equipped.stream()
                     .filter(i -> i.getId().equals(replaceId))
@@ -134,8 +135,10 @@ public class InventoryService {
         }
 
         // 2. Clear other items in the same slot.
-        //    For non-weapon slots (including AVATAR) always unequip all — fixes the avatar stacking bug.
-        //    For weapons, only unequip if no specific target was given (fallback: displace oldest).
+        // For non-weapon slots (including AVATAR) always unequip all — fixes the avatar
+        // stacking bug.
+        // For weapons, only unequip if no specific target was given (fallback: displace
+        // oldest).
         if (slot != Item.ItemSlot.WEAPON) {
             equipped.stream()
                     .filter(i -> i.getItem().getSlot() == slot && !i.getId().equals(inventoryId))
@@ -144,7 +147,7 @@ public class InventoryService {
             // Fallback for weapons when no target specified: allow max 2, displace oldest
             List<Inventory> weapons = equipped.stream()
                     .filter(i -> i.getItem().getSlot() == Item.ItemSlot.WEAPON
-                              && !i.getId().equals(inventoryId))
+                            && !i.getId().equals(inventoryId))
                     .collect(Collectors.toList());
             if (weapons.size() >= 2) {
                 weapons.get(0).setIsEquipped(false);

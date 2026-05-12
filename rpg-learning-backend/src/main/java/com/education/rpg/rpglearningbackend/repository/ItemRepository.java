@@ -13,4 +13,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     // Перевірка існування предмета за назвою (захист від дублікатів у сідері)
     boolean existsByName(String name);
+
+    // Знайти предмет за назвою
+    java.util.Optional<Item> findByName(String name);
 }

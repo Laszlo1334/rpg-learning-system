@@ -266,6 +266,21 @@ public class DatabaseSeeder {
                 "Боромір", "Фарамір", "Еовін",
                 "Галадріель", "Елронд", "Саруман"
         };
+        // Mapping each hero to an existing PNG in /assets/avatars/
+        String[] heroAvatars = {
+                "/assets/avatars/boy.png",          // Сем Гемджі
+                "/assets/avatars/man.png",          // Піппін Тук
+                "/assets/avatars/man_2.png",        // Меррі Брендібак
+                "/assets/avatars/viking.png",       // Арагорн
+                "/assets/avatars/goblin_archer.png",// Леголас
+                "/assets/avatars/ogr_warrior.png",  // Гімлі
+                "/assets/avatars/knight.png",       // Боромір
+                "/assets/avatars/man_3.png",        // Фарамір
+                "/assets/avatars/lady.png",         // Еовін
+                "/assets/avatars/lady_ginger.png",  // Галадріель
+                "/assets/avatars/elder.png",        // Елронд
+                "/assets/avatars/mrmustage.png"     // Саруман
+        };
         int[] privateIndexes = { 3, 7 };
         Random seedRandom = new Random(42);
 
@@ -289,6 +304,7 @@ public class DatabaseSeeder {
             hero.setIsPublicProfile(!isPrivate);
             hero.setLastLoginDate(LocalDateTime.now().minusDays(seedRandom.nextInt(7)));
             hero.setTotalTasksCompleted(seedRandom.nextInt(15));
+            hero.setAvatarUrl(heroAvatars[i]);
             userRepository.save(hero);
         }
     }
@@ -304,35 +320,213 @@ public class DatabaseSeeder {
         createConsumable(itemRepository, "Руна Захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL,
                 Item.EffectType.SHIELD, "/assets/items/rune_protection.png");
 
-        // --- Аватари (AVATAR) ---
-        createEquipment(itemRepository, "Елронд", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,
-                "/assets/avatars/elrond.png");
-        createEquipment(itemRepository, "Гімлі", 1000, Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,
-                "/assets/avatars/gimli.png");
+        // --- Аватари (AVATAR) — всі шляхи відповідають реальним файлам у /assets/avatars/ ---
+        createEquipment(itemRepository, "Базовий Аватар",   0,    Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/default_avatar.png");
+        createEquipment(itemRepository, "Лицар",         300,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/knight.png");
+        createEquipment(itemRepository, "Старець",        500,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/elder.png");
+        createEquipment(itemRepository, "Вікінг",         700,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/viking.png");
+        createEquipment(itemRepository, "Вікінг-Бос",     1000, Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/viking_boss.png");
+        createEquipment(itemRepository, "Гоблін-Лучник",  600,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/goblin_archer.png");
+        createEquipment(itemRepository, "Гоблін-Воїн",    600,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/goblin_warrior.png");
+        createEquipment(itemRepository, "Огр-Воїн",       800,  Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/ogr_warrior.png");
+        createEquipment(itemRepository, "Дама",           500,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/lady.png");
+        createEquipment(itemRepository, "Рудоволоса",     700,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/lady_ginger.png");
+        createEquipment(itemRepository, "Голем",          1200, Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/golem.png");
+        createEquipment(itemRepository, "Кракен",         1500, Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/kraken.png");
+        createEquipment(itemRepository, "Білий Вовк",     1000, Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/white_wolf.png");
+        createEquipment(itemRepository, "Вовк",           800,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/wolf.png");
+        createEquipment(itemRepository, "Ведмідь",        900,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/bear.png");
+        createEquipment(itemRepository, "Носоріг",        900,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/rhino.png");
+        createEquipment(itemRepository, "Кабан",          600,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/boar.png");
+        createEquipment(itemRepository, "Злий Кабан",     1000, Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/evil_hog.png");
+        createEquipment(itemRepository, "Король Жаб",     1500, Item.ItemSlot.AVATAR, Item.ItemRarity.LEGENDARY, "/assets/avatars/frog_king.png");
+        createEquipment(itemRepository, "Супер-Жаба",     1000, Item.ItemSlot.AVATAR, Item.ItemRarity.EPIC,   "/assets/avatars/super_frog.png");
+        createEquipment(itemRepository, "Слиз",           400,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/slime.png");
+        createEquipment(itemRepository, "Слиз-Змій",      700,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/slime_snake.png");
+        createEquipment(itemRepository, "Павук",          800,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/spider.png");
+        createEquipment(itemRepository, "Крук",           900,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/raven.png");
+        createEquipment(itemRepository, "Мімік",          2000, Item.ItemSlot.AVATAR, Item.ItemRarity.LEGENDARY, "/assets/avatars/mimic.png");
+        createEquipment(itemRepository, "Барас",          2000, Item.ItemSlot.AVATAR, Item.ItemRarity.LEGENDARY, "/assets/avatars/barathrum.png");
+        createEquipment(itemRepository, "Золота Куля",    2500, Item.ItemSlot.AVATAR, Item.ItemRarity.LEGENDARY, "/assets/avatars/golden_ball.png");
+        createEquipment(itemRepository, "Черепаха",       500,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/turtle.png");
+        createEquipment(itemRepository, "Синій Крок",     700,  Item.ItemSlot.AVATAR, Item.ItemRarity.RARE,   "/assets/avatars/blue_croc.png");
+        createEquipment(itemRepository, "Мураха",         300,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON,   "/assets/avatars/ant.png");
+        createEquipment(itemRepository, "Кажан",          400,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON,   "/assets/avatars/bat.png");
+        // --- UNCOMMON avatars (10 previously unregistered files from /assets/avatars/) ---
+        createEquipment(itemRepository, "Хлопчик",        400,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/boy.png");
+        createEquipment(itemRepository, "Чоловік",        400,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/man.png");
+        createEquipment(itemRepository, "Чоловік II",     450,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/man_2.png");
+        createEquipment(itemRepository, "Чоловік III",    450,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/man_3.png");
+        createEquipment(itemRepository, "Жаба",           450,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/frog.png");
+        createEquipment(itemRepository, "Жаба II",        500,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/frog_2.png");
+        createEquipment(itemRepository, "Дика Свиня",     500,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/hog.png");
+        createEquipment(itemRepository, "Торговець",      550,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/seller.png");
+        createEquipment(itemRepository, "Морж",           550,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/swap.png");
+        createEquipment(itemRepository, "Чарівник",       550,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/mrmustage.png");
 
-        // --- Голова (HEAD) ---
-        createEquipment(itemRepository, "Шолом Новачка", 200, Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,
-                "/assets/cosmetics/Head/head1.png");
 
-        // --- Тулуб (BODY) ---
-        createEquipment(itemRepository, "Мантія Учня", 300, Item.ItemSlot.BODY, Item.ItemRarity.COMMON,
-                "/assets/cosmetics/Chest/chest1.png");
+        // --- Голова (HEAD) — 21 шоломів, тир: COMMON(+3,200g) UNCOMMON(+6,500g) RARE(+12,900g) EPIC(+20,1600g) LEGENDARY(+30,2500g) ---
+        createArmor(itemRepository, "Шолом Новачка",        200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head1.png",   3);
+        createArmor(itemRepository, "Залізний Шолом",       200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head2.png",   3);
+        createArmor(itemRepository, "Бойовий Шолом",        200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head3.png",   3);
+        createArmor(itemRepository, "Шолом Стражника",      200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head4.png",   3);
+        createArmor(itemRepository, "Шолом Лісника",        500,  Item.ItemSlot.HEAD, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Head/head5.png",   6);
+        createArmor(itemRepository, "Шолом Вартового",      500,  Item.ItemSlot.HEAD, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Head/head6.png",   6);
+        createArmor(itemRepository, "Шолом Мисливця",       500,  Item.ItemSlot.HEAD, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Head/head7.png",   6);
+        createArmor(itemRepository, "Шолом Рейнджера",      500,  Item.ItemSlot.HEAD, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Head/head8.png",   6);
+        createArmor(itemRepository, "Шолом Лицаря",         900,  Item.ItemSlot.HEAD, Item.ItemRarity.RARE,      "/assets/cosmetics/Head/head9.png",  12);
+        createArmor(itemRepository, "Шолом Воїна",          900,  Item.ItemSlot.HEAD, Item.ItemRarity.RARE,      "/assets/cosmetics/Head/head10.png", 12);
+        createArmor(itemRepository, "Сталевий Шолом",       900,  Item.ItemSlot.HEAD, Item.ItemRarity.RARE,      "/assets/cosmetics/Head/head11.png", 12);
+        createArmor(itemRepository, "Шолом Капітана",       900,  Item.ItemSlot.HEAD, Item.ItemRarity.RARE,      "/assets/cosmetics/Head/head12.png", 12);
+        createArmor(itemRepository, "Шолом Берсерка",       900,  Item.ItemSlot.HEAD, Item.ItemRarity.RARE,      "/assets/cosmetics/Head/head13.png", 12);
+        createArmor(itemRepository, "Шолом Командира",     1600,  Item.ItemSlot.HEAD, Item.ItemRarity.EPIC,      "/assets/cosmetics/Head/head14.png", 20);
+        createArmor(itemRepository, "Епічний Шолом",       1600,  Item.ItemSlot.HEAD, Item.ItemRarity.EPIC,      "/assets/cosmetics/Head/head15.png", 20);
+        createArmor(itemRepository, "Шолом Паладина",      1600,  Item.ItemSlot.HEAD, Item.ItemRarity.EPIC,      "/assets/cosmetics/Head/head16.png", 20);
+        createArmor(itemRepository, "Шолом Темного Лорда", 1600,  Item.ItemSlot.HEAD, Item.ItemRarity.EPIC,      "/assets/cosmetics/Head/head17.png", 20);
+        createArmor(itemRepository, "Шолом Короля",        2500,  Item.ItemSlot.HEAD, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Head/head18.png", 30);
+        createArmor(itemRepository, "Шолом Легенди",       2500,  Item.ItemSlot.HEAD, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Head/head19.png", 30);
+        createArmor(itemRepository, "Шолом Богатиря",      2500,  Item.ItemSlot.HEAD, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Head/head20.png", 30);
+        createArmor(itemRepository, "Корона Воїна",        3000,  Item.ItemSlot.HEAD, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Head/head21.png", 35);
 
-        // --- Руки (HANDS) ---
-        createEquipment(itemRepository, "Шкіряні Рукавиці", 150, Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,
-                "/assets/cosmetics/Hands/hands1.png");
+        // --- Тулуб (BODY) — 20 нагрудників, COMMON(+5,300g) UNCOMMON(+10,700g) RARE(+18,1200g) EPIC(+28,2000g) LEGENDARY(+40,3200g) ---
+        createArmor(itemRepository, "Мантія Учня",            300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest1.png",   5);
+        createArmor(itemRepository, "Шкіряна Броня",          300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest2.png",   5);
+        createArmor(itemRepository, "Броня Рекрута",          300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest3.png",   5);
+        createArmor(itemRepository, "Броня Стражника",        300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest4.png",   5);
+        createArmor(itemRepository, "Броня Мисливця",         700,  Item.ItemSlot.BODY, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Chest/chest5.png",  10);
+        createArmor(itemRepository, "Кольчуга Воїна",         700,  Item.ItemSlot.BODY, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Chest/chest6.png",  10);
+        createArmor(itemRepository, "Броня Рейнджера",        700,  Item.ItemSlot.BODY, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Chest/chest7.png",  10);
+        createArmor(itemRepository, "Броня Вартового",        700,  Item.ItemSlot.BODY, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Chest/chest8.png",  10);
+        createArmor(itemRepository, "Сталева Броня",         1200,  Item.ItemSlot.BODY, Item.ItemRarity.RARE,      "/assets/cosmetics/Chest/chest9.png",  18);
+        createArmor(itemRepository, "Лицарська Броня",       1200,  Item.ItemSlot.BODY, Item.ItemRarity.RARE,      "/assets/cosmetics/Chest/chest10.png", 18);
+        createArmor(itemRepository, "Броня Командира",       1200,  Item.ItemSlot.BODY, Item.ItemRarity.RARE,      "/assets/cosmetics/Chest/chest11.png", 18);
+        createArmor(itemRepository, "Броня Берсерка",        1200,  Item.ItemSlot.BODY, Item.ItemRarity.RARE,      "/assets/cosmetics/Chest/chest12.png", 18);
+        createArmor(itemRepository, "Броня Капітана",        1200,  Item.ItemSlot.BODY, Item.ItemRarity.RARE,      "/assets/cosmetics/Chest/chest13.png", 18);
+        createArmor(itemRepository, "Епічна Броня",          2000,  Item.ItemSlot.BODY, Item.ItemRarity.EPIC,      "/assets/cosmetics/Chest/chest14.png", 28);
+        createArmor(itemRepository, "Броня Паладина",        2000,  Item.ItemSlot.BODY, Item.ItemRarity.EPIC,      "/assets/cosmetics/Chest/chest15.png", 28);
+        createArmor(itemRepository, "Броня Темного Лорда",   2000,  Item.ItemSlot.BODY, Item.ItemRarity.EPIC,      "/assets/cosmetics/Chest/chest16.png", 28);
+        createArmor(itemRepository, "Броня Архімага",        2000,  Item.ItemSlot.BODY, Item.ItemRarity.EPIC,      "/assets/cosmetics/Chest/chest17.png", 28);
+        createArmor(itemRepository, "Броня Короля",          3200,  Item.ItemSlot.BODY, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Chest/chest18.png", 40);
+        createArmor(itemRepository, "Броня Легенди",         3200,  Item.ItemSlot.BODY, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Chest/chest19.png", 40);
+        createArmor(itemRepository, "Броня Богатиря",        3200,  Item.ItemSlot.BODY, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Chest/chest20.png", 40);
 
-        // --- Ноги (LEGS) ---
-        createEquipment(itemRepository, "Чоботи Мандрівника", 150, Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,
-                "/assets/cosmetics/Legs/legs1.png");
+        // --- Руки (HANDS) — 20 рукавиць, COMMON(+2,150g) UNCOMMON(+5,400g) RARE(+10,800g) EPIC(+16,1400g) LEGENDARY(+25,2200g) ---
+        createArmor(itemRepository, "Шкіряні Рукавиці",       150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands1.png",   2);
+        createArmor(itemRepository, "Рукавиці Учня",          150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands2.png",   2);
+        createArmor(itemRepository, "Рукавиці Рекрута",       150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands3.png",   2);
+        createArmor(itemRepository, "Рукавиці Стражника",     150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands4.png",   2);
+        createArmor(itemRepository, "Рукавиці Мисливця",      400,  Item.ItemSlot.HANDS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Hands/hands5.png",   5);
+        createArmor(itemRepository, "Рукавиці Вартового",     400,  Item.ItemSlot.HANDS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Hands/hands6.png",   5);
+        createArmor(itemRepository, "Рукавиці Рейнджера",     400,  Item.ItemSlot.HANDS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Hands/hands7.png",   5);
+        createArmor(itemRepository, "Залізні Рукавиці",       400,  Item.ItemSlot.HANDS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Hands/hands8.png",   5);
+        createArmor(itemRepository, "Сталеві Рукавиці",       800,  Item.ItemSlot.HANDS, Item.ItemRarity.RARE,      "/assets/cosmetics/Hands/hands9.png",  10);
+        createArmor(itemRepository, "Рукавиці Воїна",         800,  Item.ItemSlot.HANDS, Item.ItemRarity.RARE,      "/assets/cosmetics/Hands/hands10.png", 10);
+        createArmor(itemRepository, "Рукавиці Лицаря",        800,  Item.ItemSlot.HANDS, Item.ItemRarity.RARE,      "/assets/cosmetics/Hands/hands11.png", 10);
+        createArmor(itemRepository, "Рукавиці Командира",     800,  Item.ItemSlot.HANDS, Item.ItemRarity.RARE,      "/assets/cosmetics/Hands/hands12.png", 10);
+        createArmor(itemRepository, "Рукавиці Берсерка",      800,  Item.ItemSlot.HANDS, Item.ItemRarity.RARE,      "/assets/cosmetics/Hands/hands13.png", 10);
+        createArmor(itemRepository, "Рукавиці Паладина",     1400,  Item.ItemSlot.HANDS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Hands/hands14.png", 16);
+        createArmor(itemRepository, "Рукавиці Архімага",     1400,  Item.ItemSlot.HANDS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Hands/hands15.png", 16);
+        createArmor(itemRepository, "Рукавиці Темного Лорда",1400,  Item.ItemSlot.HANDS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Hands/hands16.png", 16);
+        createArmor(itemRepository, "Епічні Рукавиці",       1400,  Item.ItemSlot.HANDS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Hands/hands17.png", 16);
+        createArmor(itemRepository, "Рукавиці Короля",       2200,  Item.ItemSlot.HANDS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Hands/hands18.png", 25);
+        createArmor(itemRepository, "Рукавиці Легенди",      2200,  Item.ItemSlot.HANDS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Hands/hands19.png", 25);
+        createArmor(itemRepository, "Рукавиці Богатиря",     2200,  Item.ItemSlot.HANDS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Hands/hands20.png", 25);
 
-        // --- Зброя (WEAPON) ---
-        createEquipment(itemRepository, "Гостра Сокира", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE,
-                "/assets/weapons/axe_1.png");
-        createEquipment(itemRepository, "Лук Лісника", 500, Item.ItemSlot.WEAPON, Item.ItemRarity.RARE,
-                "/assets/weapons/bow_1.png");
-        createEquipment(itemRepository, "Сталевий Меч", 600, Item.ItemSlot.WEAPON, Item.ItemRarity.EPIC,
-                "/assets/weapons/sword_1.png");
+        // --- Ноги (LEGS) — 20 чобіт, COMMON(+2,150g) UNCOMMON(+5,400g) RARE(+10,800g) EPIC(+16,1400g) LEGENDARY(+25,2200g) ---
+        createArmor(itemRepository, "Чоботи Мандрівника",     150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs1.png",   2);
+        createArmor(itemRepository, "Чоботи Рекрута",         150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs2.png",   2);
+        createArmor(itemRepository, "Шкіряні Чоботи",         150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs3.png",   2);
+        createArmor(itemRepository, "Чоботи Стражника",       150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs4.png",   2);
+        createArmor(itemRepository, "Чоботи Мисливця",        400,  Item.ItemSlot.LEGS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Legs/legs5.png",   5);
+        createArmor(itemRepository, "Чоботи Вартового",       400,  Item.ItemSlot.LEGS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Legs/legs6.png",   5);
+        createArmor(itemRepository, "Чоботи Рейнджера",       400,  Item.ItemSlot.LEGS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Legs/legs7.png",   5);
+        createArmor(itemRepository, "Залізні Чоботи",         400,  Item.ItemSlot.LEGS, Item.ItemRarity.UNCOMMON,  "/assets/cosmetics/Legs/legs8.png",   5);
+        createArmor(itemRepository, "Сталеві Чоботи",         800,  Item.ItemSlot.LEGS, Item.ItemRarity.RARE,      "/assets/cosmetics/Legs/legs9.png",  10);
+        createArmor(itemRepository, "Чоботи Воїна",           800,  Item.ItemSlot.LEGS, Item.ItemRarity.RARE,      "/assets/cosmetics/Legs/legs10.png", 10);
+        createArmor(itemRepository, "Чоботи Лицаря",          800,  Item.ItemSlot.LEGS, Item.ItemRarity.RARE,      "/assets/cosmetics/Legs/legs11.png", 10);
+        createArmor(itemRepository, "Чоботи Командира",       800,  Item.ItemSlot.LEGS, Item.ItemRarity.RARE,      "/assets/cosmetics/Legs/legs12.png", 10);
+        createArmor(itemRepository, "Чоботи Берсерка",        800,  Item.ItemSlot.LEGS, Item.ItemRarity.RARE,      "/assets/cosmetics/Legs/legs13.png", 10);
+        createArmor(itemRepository, "Чоботи Паладина",       1400,  Item.ItemSlot.LEGS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Legs/legs14.png", 16);
+        createArmor(itemRepository, "Чоботи Архімага",       1400,  Item.ItemSlot.LEGS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Legs/legs15.png", 16);
+        createArmor(itemRepository, "Чоботи Темного Лорда",  1400,  Item.ItemSlot.LEGS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Legs/legs16.png", 16);
+        createArmor(itemRepository, "Епічні Чоботи",         1400,  Item.ItemSlot.LEGS, Item.ItemRarity.EPIC,      "/assets/cosmetics/Legs/legs17.png", 16);
+        createArmor(itemRepository, "Чоботи Короля",         2200,  Item.ItemSlot.LEGS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Legs/legs18.png", 25);
+        createArmor(itemRepository, "Чоботи Легенди",        2200,  Item.ItemSlot.LEGS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Legs/legs19.png", 25);
+        createArmor(itemRepository, "Чоботи Богатиря",       2200,  Item.ItemSlot.LEGS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Legs/legs20.png", 25);
+
+        // --- Зброя (WEAPON) — всі 57 файлів із /assets/weapons/ ---
+        // Suffix _1=COMMON(+5, 500g)  _2=UNCOMMON(+10, 1000g)  _3=RARE(+20, 1800g)
+        //        _4=EPIC(+35, 3000g)  _5=LEGENDARY(+50, 4500g)
+
+        // Axes
+        createWeapon(itemRepository, "Сокира Новачка",   500,  Item.ItemRarity.COMMON,    "/assets/weapons/axe_1.png",   5);
+        createWeapon(itemRepository, "Бойова Сокира",     1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/axe_2.png",  10);
+        createWeapon(itemRepository, "Сталева Сокира",    1800, Item.ItemRarity.RARE,      "/assets/weapons/axe_3.png",  20);
+        createWeapon(itemRepository, "Рунічна Сокира",    3000, Item.ItemRarity.EPIC,      "/assets/weapons/axe_4.png",  35);
+        createWeapon(itemRepository, "Сокира Зберігача",  4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/axe_5.png",  50);
+        // Bows
+        createWeapon(itemRepository, "Лук Лісника",       500,  Item.ItemRarity.COMMON,    "/assets/weapons/bow_1.png",   5);
+        createWeapon(itemRepository, "Мисливський Лук",   1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/bow_2.png",  10);
+        createWeapon(itemRepository, "Ельфійський Лук",   1800, Item.ItemRarity.RARE,      "/assets/weapons/bow_3.png",  20);
+        createWeapon(itemRepository, "Лук Грому",         3000, Item.ItemRarity.EPIC,      "/assets/weapons/bow_4.png",  35);
+        createWeapon(itemRepository, "Лук Долі",          4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/bow_5.png",  50);
+        // Crossbows
+        createWeapon(itemRepository, "Арбалет Новачка",   500,  Item.ItemRarity.COMMON,    "/assets/weapons/crossbow_1.png",   5);
+        createWeapon(itemRepository, "Бойовий Арбалет",   1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/crossbow_2.png",  10);
+        createWeapon(itemRepository, "Арбалет Снайпера",  1800, Item.ItemRarity.RARE,      "/assets/weapons/crossbow_3.png",  20);
+        createWeapon(itemRepository, "Рунічний Арбалет",  3000, Item.ItemRarity.EPIC,      "/assets/weapons/crossbow_4.png",  35);
+        createWeapon(itemRepository, "Арбалет Смерті",    4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/crossbow_5.png",  50);
+        // Daggers
+        createWeapon(itemRepository, "Кинджал Злодія",    500,  Item.ItemRarity.COMMON,    "/assets/weapons/dagger_1.png",   5);
+        createWeapon(itemRepository, "Бойовий Кинджал",   1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/dagger_2.png",  10);
+        createWeapon(itemRepository, "Кинджал Асасина",   1800, Item.ItemRarity.RARE,      "/assets/weapons/dagger_3.png",  20);
+        createWeapon(itemRepository, "Рунічний Кинджал",  3000, Item.ItemRarity.EPIC,      "/assets/weapons/dagger_4.png",  35);
+        createWeapon(itemRepository, "Кинджал Тіні",      4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/dagger_5.png",  50);
+        // Forks (only 3 tiers available on disk)
+        createWeapon(itemRepository, "Тризуб Рибалки",    500,  Item.ItemRarity.COMMON,    "/assets/weapons/fork_1.png",   5);
+        createWeapon(itemRepository, "Бойовий Тризуб",    1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/fork_2.png",  10);
+        createWeapon(itemRepository, "Тризуб Нептуна",    1800, Item.ItemRarity.RARE,      "/assets/weapons/fork_3.png",  20);
+        // Halberds
+        createWeapon(itemRepository, "Алебарда Охорони",  500,  Item.ItemRarity.COMMON,    "/assets/weapons/halberd_1.png",   5);
+        createWeapon(itemRepository, "Бойова Алебарда",   1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/halberd_2.png",  10);
+        createWeapon(itemRepository, "Лицарська Алебарда",1800, Item.ItemRarity.RARE,      "/assets/weapons/halberd_3.png",  20);
+        createWeapon(itemRepository, "Алебарда Короля",   3000, Item.ItemRarity.EPIC,      "/assets/weapons/halberd_4.png",  35);
+        createWeapon(itemRepository, "Алебарда Чемпіона", 4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/halberd_5.png",  50);
+        // Scythes
+        createWeapon(itemRepository, "Коса Фермера",      500,  Item.ItemRarity.COMMON,    "/assets/weapons/scythe_1.png",   5);
+        createWeapon(itemRepository, "Бойова Коса",       1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/scythe_2.png",  10);
+        createWeapon(itemRepository, "Коса Жниваря",      1800, Item.ItemRarity.RARE,      "/assets/weapons/scythe_3.png",  20);
+        createWeapon(itemRepository, "Рунічна Коса",      3000, Item.ItemRarity.EPIC,      "/assets/weapons/scythe_4.png",  35);
+        createWeapon(itemRepository, "Коса Смерті",       4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/scythe_5.png",  50);
+        // Spears
+        createWeapon(itemRepository, "Спис Мисливця",     500,  Item.ItemRarity.COMMON,    "/assets/weapons/spear_1.png",   5);
+        createWeapon(itemRepository, "Бойовий Спис",      1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/spear_2.png",  10);
+        createWeapon(itemRepository, "Спис Рейнджера",    1800, Item.ItemRarity.RARE,      "/assets/weapons/spear_3.png",  20);
+        createWeapon(itemRepository, "Рунічний Спис",     3000, Item.ItemRarity.EPIC,      "/assets/weapons/spear_4.png",  35);
+        createWeapon(itemRepository, "Спис Воїна",        4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/spear_5.png",  50);
+        // Staves
+        createWeapon(itemRepository, "Посох Учня",        500,  Item.ItemRarity.COMMON,    "/assets/weapons/staff_1.png",   5);
+        createWeapon(itemRepository, "Бойовий Посох",     1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/staff_2.png",  10);
+        createWeapon(itemRepository, "Посох Мага",        1800, Item.ItemRarity.RARE,      "/assets/weapons/staff_3.png",  20);
+        createWeapon(itemRepository, "Рунічний Посох",    3000, Item.ItemRarity.EPIC,      "/assets/weapons/staff_4.png",  35);
+        createWeapon(itemRepository, "Посох Архімага",    4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/staff_5.png",  50);
+        // Swords (6 tiers — sword_6 is a special 2nd Legendary)
+        createWeapon(itemRepository, "Меч Новачка",       500,  Item.ItemRarity.COMMON,    "/assets/weapons/sword_1.png",   5);
+        createWeapon(itemRepository, "Бойовий Меч",       1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/sword_2.png",  10);
+        createWeapon(itemRepository, "Лицарський Меч",    1800, Item.ItemRarity.RARE,      "/assets/weapons/sword_3.png",  20);
+        createWeapon(itemRepository, "Рунічний Меч",      3000, Item.ItemRarity.EPIC,      "/assets/weapons/sword_4.png",  35);
+        createWeapon(itemRepository, "Меч Чемпіона",      4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/sword_5.png",  50);
+        createWeapon(itemRepository, "Меч Долі",          5000, Item.ItemRarity.LEGENDARY, "/assets/weapons/sword_6.png",  55);
+        // Wands
+        createWeapon(itemRepository, "Паличка Учня",      500,  Item.ItemRarity.COMMON,    "/assets/weapons/wand_1.png",   5);
+        createWeapon(itemRepository, "Бойова Паличка",    1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/wand_2.png",  10);
+        createWeapon(itemRepository, "Паличка Мага",      1800, Item.ItemRarity.RARE,      "/assets/weapons/wand_3.png",  20);
+        createWeapon(itemRepository, "Рунічна Паличка",   3000, Item.ItemRarity.EPIC,      "/assets/weapons/wand_4.png",  35);
+        createWeapon(itemRepository, "Паличка Архімага",  4500, Item.ItemRarity.LEGENDARY, "/assets/weapons/wand_5.png",  50);
+        // Shields (3 tiers; placed in HANDS slot)
+        createShield(itemRepository, "Щит Новачка",       500,  Item.ItemRarity.COMMON,    "/assets/weapons/shield_1.png",  5);
+        createShield(itemRepository, "Лицарський Щит",    1000, Item.ItemRarity.UNCOMMON,  "/assets/weapons/shield_2.png", 10);
+        createShield(itemRepository, "Щит Короля",        1800, Item.ItemRarity.RARE,      "/assets/weapons/shield_3.png", 20);
     }
 
     // ==========================================
@@ -353,6 +547,61 @@ public class DatabaseSeeder {
         item.setSlot(slot);
         item.setRarity(rarity);
         item.setAssetUrl(assetUrl);
+        item.setAttributeBonus(0);
+        repo.save(item);
+    }
+
+    /** Armor item (HEAD/BODY/HANDS/LEGS): gives DEF bonus */
+    private void createArmor(ItemRepository repo, String name, int price,
+            Item.ItemSlot slot, Item.ItemRarity rarity, String assetUrl, int def) {
+        if (repo.existsByName(name)) return;
+        Item item = new Item();
+        item.setName(name);
+        item.setDescription("🛡️ +" + def + " DEF");
+        item.setPrice(price);
+        item.setCurrencyType(Item.CurrencyType.GOLD);
+        item.setCategory(Item.ItemCategory.COSMETIC);
+        item.setEffect(Item.EffectType.NONE);
+        item.setSlot(slot);
+        item.setRarity(rarity);
+        item.setAssetUrl(assetUrl);
+        item.setAttributeBonus(def);
+        repo.save(item);
+    }
+
+    /** Weapon item: sets slot=WEAPON, category=COSMETIC, attributeBonus=atk */
+    private void createWeapon(ItemRepository repo, String name, int price,
+            Item.ItemRarity rarity, String assetUrl, int atk) {
+        if (repo.existsByName(name)) return;
+        Item item = new Item();
+        item.setName(name);
+        item.setDescription("Зброя героя. ⚔2️ +" + atk + " ATK");
+        item.setPrice(price);
+        item.setCurrencyType(Item.CurrencyType.GOLD);
+        item.setCategory(Item.ItemCategory.COSMETIC);
+        item.setEffect(Item.EffectType.NONE);
+        item.setSlot(Item.ItemSlot.WEAPON);
+        item.setRarity(rarity);
+        item.setAssetUrl(assetUrl);
+        item.setAttributeBonus(atk);
+        repo.save(item);
+    }
+
+    /** Shield item: slots into HANDS, but carries an ATK/DEF bonus like a weapon */
+    private void createShield(ItemRepository repo, String name, int price,
+            Item.ItemRarity rarity, String assetUrl, int def) {
+        if (repo.existsByName(name)) return;
+        Item item = new Item();
+        item.setName(name);
+        item.setDescription("🛡️ +" + def + " DEF");
+        item.setPrice(price);
+        item.setCurrencyType(Item.CurrencyType.GOLD);
+        item.setCategory(Item.ItemCategory.COSMETIC);
+        item.setEffect(Item.EffectType.NONE);
+        item.setSlot(Item.ItemSlot.HANDS);
+        item.setRarity(rarity);
+        item.setAssetUrl(assetUrl);
+        item.setAttributeBonus(def);
         repo.save(item);
     }
 

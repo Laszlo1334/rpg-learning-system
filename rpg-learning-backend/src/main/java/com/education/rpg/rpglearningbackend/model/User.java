@@ -39,6 +39,16 @@ public class User {
     @Column(nullable = false)
     private Integer currentXp = 0;
 
+    public void setCurrentXp(Integer currentXp) {
+        this.currentXp = currentXp;
+        this.level = (currentXp / 1000) + 1;
+    }
+
+    public void setCurrentXp(Long currentXp) {
+        this.currentXp = currentXp.intValue();
+        this.level = (int) (currentXp / 1000) + 1;
+    }
+
     @Column(nullable = false)
     private Integer gold = 0; // Поточний баланс монет (для Ачіверів)
 
