@@ -1,5 +1,6 @@
 // src/pages/ShopPage.tsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { shopService } from '@/services/shopService';
@@ -12,13 +13,51 @@ import {
 
 type ActiveTab = 'COSMETIC' | 'CONSUMABLE';
 type SlotFilter = ItemSlot | 'ALL';
+type SortOption = 'RARITY' | 'PRICE_ASC' | 'PRICE_DESC' | 'ALPHABETICAL';
+
+const rarityWeights: Record<string, number> = {
+    COMMON: 1,
+    UNCOMMON: 2,
+    RARE: 3,
+    EPIC: 4,
+    LEGENDARY: 5,
+};
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+    { value: 'RARITY', label: 'Рідкість (Common → Legendary)' },
+    { value: 'PRICE_ASC', label: 'Ціна: Найменша → Найбільша' },
+    { value: 'PRICE_DESC', label: 'Ціна: Найбільша → Найменша' },
+    { value: 'ALPHABETICAL', label: 'Алфавітний (A → Я)' },
+];
+
+function sortShopItems(items: Item[], sortBy: SortOption): Item[] {
+    const sorted = [...items];
+    switch (sortBy) {
+        case 'RARITY':
+            return sorted.sort(
+                (a, b) =>
+                    (rarityWeights[a.rarity ?? 'COMMON'] ?? 0) -
+                    (rarityWeights[b.rarity ?? 'COMMON'] ?? 0),
+            );
+        case 'PRICE_ASC':
+            return sorted.sort((a, b) => a.price - b.price);
+        case 'PRICE_DESC':
+            return sorted.sort((a, b) => b.price - a.price);
+        case 'ALPHABETICAL':
+            return sorted.sort((a, b) =>
+                a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+            );
+        default:
+            return sorted;
+    }
+}
 
 // Backend effect → readable label
 const EFFECT_LABELS: Record<string, string> = {
-    XP_BOOST: '🧪 XP ×1.5 for 30 min',
-    GOLD_BOOST: '🧲 Gold ×2 for 60 min',
-    ENERGY_REFILL: '☕ Restore energy to 100',
-    SHIELD: '🛡️ Shield for 1 run',
+    XP_BOOST: '🧪 Досвід ×1.5 на 30 хв',
+    GOLD_BOOST: '🧲 Золото ×2 на 60 хв',
+    ENERGY_REFILL: '☕ Енергія до 100%',
+    SHIELD: '🛡️ Щит на 1 проходження',
     NONE: '',
 };
 
@@ -53,13 +92,13 @@ const RARITY_TEXT: Record<string, string> = {
 };
 
 const SLOT_FILTERS: { label: string; value: SlotFilter }[] = [
-    { label: 'All', value: 'ALL' },
-    { label: 'Avatars', value: 'AVATAR' },
-    { label: 'Head', value: 'HEAD' },
-    { label: 'Body', value: 'BODY' },
-    { label: 'Legs', value: 'LEGS' },
-    { label: 'Hands', value: 'HANDS' },
-    { label: 'Weapon', value: 'WEAPON' },
+    { label: 'Усе', value: 'ALL' },
+    { label: 'Аватар', value: 'AVATAR' },
+    { label: 'Голова', value: 'HEAD' },
+    { label: 'Тіло', value: 'BODY' },
+    { label: 'Ноги', value: 'LEGS' },
+    { label: 'Руки', value: 'HANDS' },
+    { label: 'Зброя', value: 'WEAPON' },
 ];
 
 export const ShopPage = () => {
@@ -74,6 +113,7 @@ export const ShopPage = () => {
     // ─── UI state ──────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<ActiveTab>('CONSUMABLE');
     const [activeFilter, setActiveFilter] = useState<SlotFilter>('ALL');
+    const [sortBy, setSortBy] = useState<SortOption>('RARITY');
     const [buyingId, setBuyingId] = useState<number | null>(null);
     const [itemToBuy, setItemToBuy] = useState<Item | null>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -118,10 +158,10 @@ export const ShopPage = () => {
                 inventoryService.getInventory(),
             ]);
             setInventory(newInventory);
-            setNotification({ type: 'success', message: `"${boughtItem.name}" added to inventory! ✅` });
+            setNotification({ type: 'success', message: `"${boughtItem.name}" додано до інвентарю! ✅` });
         } catch (err: unknown) {
             const raw = err instanceof Error ? err.message : '';
-            setNotification({ type: 'error', message: raw || 'Purchase failed. Please try again.' });
+            setNotification({ type: 'error', message: raw || 'Помилка покупки. Спробуйте ще раз.' });
         } finally {
             setBuyingId(null);
         }
@@ -143,6 +183,11 @@ export const ShopPage = () => {
     const filteredItems = activeTab === 'COSMETIC' && activeFilter !== 'ALL'
         ? tabFiltered.filter(i => i.slot === activeFilter)
         : tabFiltered;
+
+    const sortedItems = useMemo(
+        () => sortShopItems(filteredItems, sortBy),
+        [filteredItems, sortBy],
+    );
 
     const tabClass = (tab: ActiveTab) =>
         `flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === tab ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
@@ -169,13 +214,13 @@ export const ShopPage = () => {
         return (
             <div
                 className={`bg-zinc-900 border-2 rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 ${isCosmeticOwned
-                        ? 'border-emerald-700/60 opacity-75'
-                        : item.category === 'COSMETIC'
-                            ? `${RARITY_BORDER[rarity]} ${RARITY_GLOW[rarity]} ${!cardAffordable ? 'opacity-60' : 'hover:brightness-110'
-                            }`
-                            : cardAffordable
-                                ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
-                                : 'border-zinc-800/50 opacity-60'
+                    ? 'border-emerald-700/60 opacity-75'
+                    : item.category === 'COSMETIC'
+                        ? `${RARITY_BORDER[rarity]} ${RARITY_GLOW[rarity]} ${!cardAffordable ? 'opacity-60' : 'hover:brightness-110'
+                        }`
+                        : cardAffordable
+                            ? 'border-zinc-800 hover:border-zinc-600 hover:shadow-lg'
+                            : 'border-zinc-800/50 opacity-60'
                     }`}
             >
                 {/* Icon with rarity border */}
@@ -205,28 +250,12 @@ export const ShopPage = () => {
                         <p className="text-xs text-blue-400 mt-2 font-bold">{EFFECT_LABELS[item.effect]}</p>
                     )}
 
-                    {/* ── Weapon ATK stat ─────────────────────────────── */}
-                    {item.slot === 'WEAPON' && item.attributeBonus > 0 && (
-                        <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/30">
-                            <span className="text-sm">⚔️</span>
-                            <span className="text-red-400 font-black text-sm">+{item.attributeBonus} ATK</span>
-                        </div>
-                    )}
-
-                    {/* ── Armor DEF stat (HEAD / BODY / HANDS / LEGS) ──── */}
-                    {(['HEAD', 'BODY', 'HANDS', 'LEGS'] as const).includes(item.slot as 'HEAD' | 'BODY' | 'HANDS' | 'LEGS')
-                        && item.attributeBonus > 0 && (
-                            <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-sky-500/10 border border-sky-500/30">
-                                <span className="text-sm">🛡️</span>
-                                <span className="text-sky-400 font-black text-sm">+{item.attributeBonus} DEF</span>
-                            </div>
-                        )}
                 </div>
 
                 {/* Owned quantity (consumables only) */}
                 {item.category === 'CONSUMABLE' && (
                     <p className="text-xs text-zinc-500">
-                        In inventory: <span className={ownedQty > 0 ? 'text-green-400 font-bold' : ''}>{ownedQty} pcs.</span>
+                        В інвентарі: <span className={ownedQty > 0 ? 'text-green-400 font-bold' : ''}>{ownedQty} шт.</span>
                     </p>
                 )}
 
@@ -245,11 +274,16 @@ export const ShopPage = () => {
                     {/* Owned badge for cosmetics already in inventory */}
                     {isCosmeticOwned ? (
                         <span className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm bg-emerald-900/50 border border-emerald-700/50 text-emerald-400 cursor-not-allowed">
-                            <CheckCircle size={14} /> Owned
+                            <CheckCircle size={14} />
+                            Вже придбано
                         </span>
                     ) : (
                         <button
-                            onClick={() => { if (cardAffordable && !isBuying) setItemToBuy(item); }}
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (cardAffordable && !isBuying) setItemToBuy(item);
+                            }}
                             disabled={!cardAffordable || isBuying}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${cardAffordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
                                 }`}
@@ -258,7 +292,7 @@ export const ShopPage = () => {
                                 ? <Loader2 size={16} className="animate-spin" />
                                 : <ShoppingCart size={16} />
                             }
-                            {isBuying ? 'Buying...' : cardAffordable ? 'Buy' : 'Not enough funds'}
+                            {isBuying ? 'Виконується покупка...' : cardAffordable ? 'Придбати' : 'Недостатньо коштів'}
                         </button>
                     )}
                 </div>
@@ -273,40 +307,63 @@ export const ShopPage = () => {
             {/* ── Toast ─────────────────────────────────────────────── */}
             {notification && (
                 <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm ${notification.type === 'success'
-                        ? 'bg-emerald-900 border border-emerald-700 text-emerald-200'
-                        : 'bg-red-900 border border-red-700 text-red-200'
+                    ? 'bg-emerald-900 border border-emerald-700 text-emerald-200'
+                    : 'bg-red-900 border border-red-700 text-red-200'
                     }`}>
                     <AlertCircle size={18} />
                     {notification.message}
                 </div>
             )}
 
-            {/* ── Confirmation Modal ────────────────────────────────── */}
-            {itemToBuy && (
+            {/* ── Confirmation Modal (portal → document.body) ─────── */}
+            {itemToBuy && createPortal(
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                    className="fixed top-0 left-0 w-screen h-[100dvh] z-[100] bg-black/80 flex items-center justify-center p-4 overscroll-none"
+                    style={{ pointerEvents: 'auto' }}
                     onClick={() => setItemToBuy(null)}
+                    onWheel={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onTouchMove={(e) => e.stopPropagation()}
                 >
                     <div
                         className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-black text-white">Confirm Purchase</h3>
+                            <h3 className="text-lg font-black text-white">Підтвердження покупки</h3>
                             <button onClick={() => setItemToBuy(null)} className="text-zinc-500 hover:text-white transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
 
                         <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 mb-5 flex items-center gap-3">
-                            <span className="text-3xl">{itemToBuy.category === 'COSMETIC' ? '✨' : '🧪'}</span>
+                            {itemToBuy.assetUrl ? (
+                                <img
+                                    src={itemToBuy.assetUrl}
+                                    alt={itemToBuy.name}
+                                    className="w-8 h-8 object-contain shrink-0"
+                                    style={{ imageRendering: 'pixelated' }}
+                                />
+                            ) : (
+                                <span className="text-3xl shrink-0">{itemToBuy.category === 'COSMETIC' ? '✨' : '🧪'}</span>
+                            )}
                             <div>
                                 <p className="font-black text-white">{itemToBuy.name}</p>
                                 <p className="text-sm text-zinc-500 flex items-center gap-1 mt-0.5">
-                                    Spend&nbsp;
                                     {itemToBuy.currencyType === 'GOLD'
-                                        ? <><Coins size={14} className="text-yellow-400" /><span className="text-yellow-400 font-bold">{itemToBuy.price} gold</span></>
-                                        : <><Gem size={14} className="text-purple-400" /><span className="text-purple-400 font-bold">{itemToBuy.price} crystals</span></>
+                                        ? (
+                                            <>
+                                                Витратити&nbsp;
+                                                <Coins size={14} className="text-yellow-400" />
+                                                <span className="text-yellow-400 font-bold">{itemToBuy.price} золота</span>
+                                            </>
+                                        )
+                                        : (
+                                            <>
+                                                Витратити&nbsp;
+                                                <Gem size={14} className="text-purple-400" />
+                                                <span className="text-purple-400 font-bold">{itemToBuy.price} кристалів</span>
+                                            </>
+                                        )
                                     }
                                 </p>
                             </div>
@@ -317,17 +374,18 @@ export const ShopPage = () => {
                                 onClick={() => setItemToBuy(null)}
                                 className="flex-1 py-2.5 rounded-xl font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
                             >
-                                Cancel
+                                Скасувати
                             </button>
                             <button
                                 onClick={handleConfirmBuy}
                                 className="flex-1 py-2.5 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center justify-center gap-2"
                             >
-                                <CheckCircle size={16} /> Confirm
+                                <CheckCircle size={16} /> Підтвердити
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body,
             )}
 
             {/* ── Page Header ───────────────────────────────────────── */}
@@ -341,8 +399,8 @@ export const ShopPage = () => {
                         <ArrowLeft size={22} />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-black text-white">Guild Shop</h1>
-                        <p className="text-zinc-500 text-sm">Spend your gold and crystals wisely</p>
+                        <h1 className="text-2xl font-black text-white">Магазин</h1>
+                        <p className="text-zinc-500 text-sm">Витрачай золото та кристали з розумом</p>
                     </div>
                 </div>
 
@@ -364,42 +422,64 @@ export const ShopPage = () => {
                     onClick={() => { setActiveTab('CONSUMABLE'); setActiveFilter('ALL'); }}
                     className={tabClass('CONSUMABLE')}
                 >
-                    <FlaskConical size={16} /> Consumables
+                    <FlaskConical size={16} /> Витратні предмети
                 </button>
                 <button
                     onClick={() => { setActiveTab('COSMETIC'); setActiveFilter('ALL'); }}
                     className={tabClass('COSMETIC')}
                 >
-                    <Shirt size={16} /> Cosmetics
+                    <Shirt size={16} /> Косметика
                 </button>
             </div>
 
-            {/* ── Slot filter (visible only for COSMETIC tab) ────────── */}
-            {activeTab === 'COSMETIC' && (
-                <div className="flex flex-wrap gap-2">
-                    {SLOT_FILTERS.map(f => (
-                        <button
-                            key={f.value}
-                            onClick={() => setActiveFilter(f.value)}
-                            className={filterBtnClass(f.value)}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
-                </div>
-            )}
+            {/* ── Slot filter + sort ─────────────────────────────────── */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                {activeTab === 'COSMETIC' ? (
+                    <div className="flex flex-wrap gap-2">
+                        {SLOT_FILTERS.map(f => (
+                            <button
+                                key={f.value}
+                                onClick={() => setActiveFilter(f.value)}
+                                className={filterBtnClass(f.value)}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <span className="text-xs text-zinc-600 font-bold uppercase tracking-wider">
+                        Сортувати
+                    </span>
+                )}
+
+                <label className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-bold text-zinc-500 hidden sm:inline">Сортувати</span>
+                    <select
+                        value={sortBy}
+                        onChange={e => setSortBy(e.target.value as SortOption)}
+                        aria-label="Sort shop items"
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-900 border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-zinc-200 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all cursor-pointer min-w-[11rem] sm:min-w-[13rem]"
+                    >
+                        {SORT_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value} className="bg-zinc-900 text-zinc-200">
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+            </div>
 
             {/* ── Content ───────────────────────────────────────────── */}
             {isLoading ? (
                 <div className="flex items-center justify-center py-20 gap-3 text-zinc-500">
                     <Loader2 size={24} className="animate-spin" />
-                    <span className="font-bold">Loading items...</span>
+                    <span className="font-bold">Завантаження...</span>
                 </div>
-            ) : filteredItems.length === 0 ? (
-                <div className="py-20 text-center text-zinc-500 font-bold">Nothing here yet 🧹</div>
+            ) : sortedItems.length === 0 ? (
+                <div className="py-20 text-center text-zinc-500 font-bold">Нічого немає 🧹</div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredItems.map(item => <ItemCard key={item.id} item={item} />)}
+                    {sortedItems.map(item => <ItemCard key={item.id} item={item} />)}
                 </div>
             )}
         </div>
