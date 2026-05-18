@@ -92,7 +92,7 @@ export const StudentDashboard = () => {
   const [inventory, setInventory] = useState<InventoryEntry[]>([]);
   const [isInventoryLoading, setIsInventoryLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
-  const [itemToUse, setItemToUse] = useState<{ id: number, name: string, description: string } | null>(null);
+  const [itemToUse, setItemToUse] = useState<{ id: number; name: string; description: string; assetUrl: string | null } | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<ItemSlot | null>(null);
   const [replaceItemId, setReplaceItemId] = useState<number | null>(null);
 
@@ -120,8 +120,8 @@ export const StudentDashboard = () => {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const handleUseItem = useCallback(async (inventoryId: number, itemName: string, itemDescription: string) => {
-    setItemToUse({ id: inventoryId, name: itemName, description: itemDescription });
+  const handleUseItem = useCallback(async (inventoryId: number, itemName: string, itemDescription: string, assetUrl: string | null) => {
+    setItemToUse({ id: inventoryId, name: itemName, description: itemDescription, assetUrl });
   }, []);
 
   if (isLoading) {
@@ -330,15 +330,27 @@ export const StudentDashboard = () => {
       {itemToUse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-zinc-700 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
-            <div className="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-purple-500/30">
-              <Sparkles size={32} />
+            <div className="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-purple-500/30 overflow-hidden">
+              {itemToUse.assetUrl ? (
+                <img
+                  src={itemToUse.assetUrl}
+                  alt={itemToUse.name}
+                  className="w-10 h-10 object-contain"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              ) : (
+                <Sparkles size={32} />
+              )}
             </div>
-            <h3 className="text-2xl font-black text-white mb-2">Use item?</h3>
-            <p className="text-zinc-400 mb-2">You are about to use: <span className="text-purple-400 font-bold">{itemToUse.name}</span>. This action cannot be undone.</p>
+            <h3 className="text-2xl font-black text-white mb-2">Використати предмет?</h3>
+            <p className="text-zinc-400 mb-2">
+              Ви збираєтесь використати: <span className="text-purple-400 font-bold">{itemToUse.name}</span>.
+            </p>
+            <p className="text-sm text-zinc-500 mb-2">Цю дію неможливо скасувати.</p>
             <p className="text-sm font-bold text-zinc-500 mb-8 max-w-xs mx-auto italic">{itemToUse.description}</p>
             <div className="flex gap-4">
               <button onClick={() => setItemToUse(null)} className="flex-1 py-3 rounded-xl font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
-                Cancel
+                Скасувати
               </button>
               <button onClick={async () => {
                 try {
@@ -348,7 +360,7 @@ export const StudentDashboard = () => {
                   window.location.reload();
                 } catch (e) { console.error(e); }
               }} className="flex-1 py-3 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all">
-                Use
+                Використати
               </button>
             </div>
           </div>

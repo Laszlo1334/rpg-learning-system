@@ -8,5 +8,6 @@ public class LeaderboardDto {
     private String username;
     private Integer level;
     private Long xp;
+    private Integer lifetimeGold;
     private String avatarUrl;
 }

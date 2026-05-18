@@ -3,9 +3,9 @@ import { api } from './api';
 import type { LeaderboardDto, CourseLeaderboardDto } from '@/types';
 
 export const leaderboardService = {
-    // Топ-10 гравців за загальним XP (тільки isPublicProfile = true)
-    getGlobalLeaderboard: async (): Promise<LeaderboardDto[]> => {
-        const response = await api.get<LeaderboardDto[]>('/leaderboard/global');
+    // Топ-10 гравців за загальним XP або золотом (тільки isPublicProfile = true)
+    getGlobalLeaderboard: async (sortBy: 'xp' | 'gold' = 'xp'): Promise<LeaderboardDto[]> => {
+        const response = await api.get<LeaderboardDto[]>(`/leaderboard/global?sortBy=${sortBy}`);
         return response.data;
     },
 

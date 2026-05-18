@@ -139,6 +139,7 @@ export interface LeaderboardDto {
   username: string;
   level: number;
   xp: number;
+  lifetimeGold?: number;
   avatarUrl: string | null;
 }
 

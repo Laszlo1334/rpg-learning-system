@@ -34,6 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Для Глобального Лідерборду
     List<User> findTop10ByIsPublicProfileTrueOrderByCurrentXpDesc();
+    List<User> findTop10ByIsPublicProfileTrueOrderByLifetimeGoldDesc();
 
     // --- НОВЕ: МІКРО-ЛІДЕРБОРД ДЛЯ КОНКРЕТНОГО КУРСУ ---
     @Query("SELECT new com.education.rpg.rpglearningbackend.dto.CourseLeaderboardDto(u.id, u.username, SUM(t.rewardXp)) " +

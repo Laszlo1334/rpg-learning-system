@@ -26,9 +26,9 @@ public class LeaderboardController {
     private final LeaderboardService leaderboardService;
 
     @GetMapping("/global")
-    @Operation(summary = "Global Leaderboard", description = "Top 10 players by total XP")
-    public ResponseEntity<List<LeaderboardDto>> getGlobalLeaderboard() {
-        return ResponseEntity.ok(leaderboardService.getGlobalLeaderboard());
+    @Operation(summary = "Global Leaderboard", description = "Top 10 players by total XP or Lifetime Gold")
+    public ResponseEntity<List<LeaderboardDto>> getGlobalLeaderboard(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "xp") String sortBy) {
+        return ResponseEntity.ok(leaderboardService.getGlobalLeaderboard(sortBy));
     }
 
     @GetMapping("/course/{courseId}")

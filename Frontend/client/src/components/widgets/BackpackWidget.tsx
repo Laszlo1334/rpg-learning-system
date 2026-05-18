@@ -4,7 +4,7 @@ import type { InventoryEntry } from '@/types';
 
 interface BackpackWidgetProps {
     inventory: InventoryEntry[];
-    onUseItem: (inventoryId: number, itemName: string, itemDescription: string) => Promise<void>;
+    onUseItem: (inventoryId: number, itemName: string, itemDescription: string, assetUrl: string | null) => Promise<void>;
     isLoading?: boolean;
 }
 
@@ -87,7 +87,7 @@ export const BackpackWidget = ({ inventory, onUseItem, isLoading = false }: Back
                             </span>
 
                             <button
-                                onClick={() => onUseItem(entry.id, entry.item.name, entry.item.description)}
+                                onClick={() => onUseItem(entry.id, entry.item.name, entry.item.description, entry.item.assetUrl)}
                                 className="flex-shrink-0 flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 rounded-lg px-2.5 py-1.5 text-[11px] font-black transition-all duration-200 opacity-0 group-hover:opacity-100"
                                 title="Застосувати"
                             >

@@ -33,15 +33,22 @@ public class LeaderboardService {
         return leaderboard;
     }
 
-    public List<com.education.rpg.rpglearningbackend.dto.LeaderboardDto> getGlobalLeaderboard() {
-        return userRepository.findTop10ByIsPublicProfileTrueOrderByCurrentXpDesc()
-                .stream()
+    public List<com.education.rpg.rpglearningbackend.dto.LeaderboardDto> getGlobalLeaderboard(String sortBy) {
+        List<com.education.rpg.rpglearningbackend.model.User> topUsers;
+        if ("gold".equalsIgnoreCase(sortBy)) {
+            topUsers = userRepository.findTop10ByIsPublicProfileTrueOrderByLifetimeGoldDesc();
+        } else {
+            topUsers = userRepository.findTop10ByIsPublicProfileTrueOrderByCurrentXpDesc();
+        }
+
+        return topUsers.stream()
                 .map(user -> {
                     com.education.rpg.rpglearningbackend.dto.LeaderboardDto dto = new com.education.rpg.rpglearningbackend.dto.LeaderboardDto();
                     dto.setId(user.getId());
                     dto.setUsername(user.getUsername());
                     dto.setLevel(user.getLevel());
                     dto.setXp(Long.valueOf(user.getCurrentXp()));
+                    dto.setLifetimeGold(user.getLifetimeGold() != null ? user.getLifetimeGold() : 0);
                     
                     List<com.education.rpg.rpglearningbackend.model.Inventory> equippedItems = inventoryRepository.findByUserIdAndIsEquippedTrue(user.getId());
                     String equippedAvatarUrl = equippedItems.stream()
