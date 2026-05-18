@@ -52,6 +52,11 @@ public class AuthService {
         user.setRole(role);
         // Assign a default avatar so the leaderboard never shows a broken image
         user.setAvatarUrl("/assets/default_avatar.png");
+        user.setTotalLoginDays(0);
+        user.setLongestLoginStreak(0);
+        user.setTotalPlayTimeSeconds(0L);
+        user.setCurrentFlawlessStreak(0);
+        user.setLongestFlawlessStreak(0);
 
         User savedUser = userRepository.save(user);
 

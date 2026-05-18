@@ -19,6 +19,7 @@ public class ItemService {
     private final UserRepository userRepository;
     private final InventoryRepository inventoryRepository;
     private final TransactionHistoryRepository transactionHistoryRepository;
+    private final ActivityLogService activityLogService;
 
     // Отримати список усіх товарів у магазині
     public List<Item> getAllItems() {
@@ -94,6 +95,10 @@ public class ItemService {
 
         log.info("Гравець {} успішно купив предмет: {} за {} {}",
                 player.getEmail(), item.getName(), item.getPrice(), item.getCurrencyType());
+
+        activityLogService.log(player, ActionType.ITEM_BOUGHT,
+                String.format("{\"itemId\":%d,\"itemName\":\"%s\",\"price\":%d,\"currency\":\"%s\"}",
+                        item.getId(), item.getName().replace("\"", "\\\""), item.getPrice(), item.getCurrencyType()));
 
         return inventoryRepository.save(inventoryEntry);
     }

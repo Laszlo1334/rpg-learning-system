@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { taskService } from '@/services/taskService';
 import { arenaService } from '@/services/arenaService';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
-import type { TaskDto, AnswerResponse } from '@/types';
+import type { TaskDto, AnswerResponse, RunCompletionRequest } from '@/types';
 import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff, Shield, BookOpen } from 'lucide-react';
 
 export const ArenaPage = () => {
@@ -22,6 +22,9 @@ export const ArenaPage = () => {
     const [hearts, setHearts] = useState(3);
     const [earnedCrystals, setEarnedCrystals] = useState(0);
     const [failedQuestionIds, setFailedQuestionIds] = useState<number[]>([]);
+    const [attemptsTaken, setAttemptsTaken] = useState(1);
+    const [hintsUsed, setHintsUsed] = useState(false);
+    const runStartTimeRef = useRef<number | null>(null);
 
     const [isChecking, setIsChecking] = useState(false);
     const [feedback, setFeedback] = useState<AnswerResponse | null>(null);
@@ -53,6 +56,7 @@ export const ArenaPage = () => {
                     if (data.type === 'BOSS' && data.bossMetadata?.timeLimitSeconds) {
                         setTimeLeft(data.bossMetadata.timeLimitSeconds);
                     }
+                    runStartTimeRef.current = Date.now();
                 }
             } catch (error) {
                 navigate('/courses', { state: { error: 'Завдання заблоковано' } });
@@ -115,6 +119,7 @@ export const ArenaPage = () => {
                 setIsSuccess(true);
             } else {
                 // ── Wrong answer ──────────────────────────────────────────
+                setAttemptsTaken(prev => prev + 1);
                 setIsShaking(true);
                 setTimeout(() => setIsShaking(false), 500);
 
@@ -199,7 +204,17 @@ export const ArenaPage = () => {
 
         if (task) {
             try {
-                const payload = { taskId: task.id, isVictory, failedQuestionIds };
+                const timeSpentSeconds = runStartTimeRef.current
+                    ? Math.floor((Date.now() - runStartTimeRef.current) / 1000)
+                    : 0;
+                const payload: RunCompletionRequest = {
+                    taskId: task.id,
+                    isVictory,
+                    failedQuestionIds,
+                    attemptsTaken,
+                    hintsUsed,
+                    timeSpentSeconds,
+                };
                 console.log('[ArenaPage] Sending finishRun:', payload);
                 await arenaService.finishRun(payload);
             } catch (error) {
@@ -208,7 +223,7 @@ export const ArenaPage = () => {
         }
         // Update player profile (XP, Gold, Crystals) after run completion
         await refreshUser();
-    }, [task, failedQuestionIds, refreshUser]);
+    }, [task, failedQuestionIds, attemptsTaken, hintsUsed, refreshUser]);
 
     if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-bold">Preparing Arena...</div>;
     if (!task || !currentQuestion) return <div className="min-h-screen bg-zinc-950 p-8 text-center text-red-400">Task not found.</div>;
@@ -252,7 +267,10 @@ export const ArenaPage = () => {
                         {/* Theory toggle button — hidden during boss runs */}
                         {!isBoss && (
                             <button
-                                onClick={() => setIsTheoryVisible(v => !v)}
+                                onClick={() => {
+                                    if (!isTheoryVisible) setHintsUsed(true);
+                                    setIsTheoryVisible(v => !v);
+                                }}
                                 className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors border border-zinc-700 text-sm font-bold"
                             >
                                 {isTheoryVisible ? <EyeOff size={16} /> : <BookOpen size={16} />}

@@ -50,6 +50,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setLifetimeCrystals(0);
             newUser.setTotalTasksCompleted(0);
             newUser.setTotalFailures(0);
+            newUser.setTotalLoginDays(1);
+            newUser.setLongestLoginStreak(1);
+            newUser.setTotalPlayTimeSeconds(0L);
+            newUser.setCurrentFlawlessStreak(0);
+            newUser.setLongestFlawlessStreak(0);
             newUser.setLastLoginDate(LocalDateTime.now());
 
             userRepository.save(newUser);

@@ -12,4 +12,10 @@ public class RunCompletionRequest {
     private boolean isVictory;
     
     private List<Long> failedQuestionIds;
+
+    private Integer attemptsTaken;
+
+    private Boolean hintsUsed;
+
+    private Long timeSpentSeconds;
 }

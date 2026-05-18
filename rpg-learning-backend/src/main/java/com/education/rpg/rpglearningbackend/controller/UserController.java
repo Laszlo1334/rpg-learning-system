@@ -58,6 +58,11 @@ public class UserController {
                     .lifetimeCrystals(user.getLifetimeCrystals())
                     .totalTasksCompleted(user.getTotalTasksCompleted())
                     .totalFailures(user.getTotalFailures())
+                    .totalLoginDays(user.getTotalLoginDays())
+                    .longestLoginStreak(user.getLongestLoginStreak())
+                    .totalPlayTimeSeconds(user.getTotalPlayTimeSeconds())
+                    .currentFlawlessStreak(user.getCurrentFlawlessStreak())
+                    .longestFlawlessStreak(user.getLongestFlawlessStreak())
                     .build();
             return ResponseEntity.ok(dto);
         } catch (RuntimeException e) {
@@ -125,4 +130,4 @@ public class UserController {
 
         return ResponseEntity.ok().build();
     }
-}
+}

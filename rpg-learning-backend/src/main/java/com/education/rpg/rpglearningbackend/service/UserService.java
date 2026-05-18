@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ActivityLogService activityLogService;
 
     // Метод для отримання таблиці лідерів
     public List<LeaderboardDto> getLeaderboard() {
@@ -46,6 +47,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
 
         LocalDateTime now = LocalDateTime.now();
+
+        activityLogService.recordLogin(user);
 
         // 1. ЛОГІКА БАГАТТЯ: Зменшуємо рівень, якщо минуло більше 48 годин з останнього входу
         if (user.getLastLoginDate() != null) {

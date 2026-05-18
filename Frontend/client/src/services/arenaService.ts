@@ -1,6 +1,6 @@
 // src/services/arenaService.ts
 import { api } from './api';
-import type { AnswerResponse } from '@/types';
+import type { AnswerResponse, RunCompletionRequest } from '@/types';
 
 export const arenaService = {
     // Відправляє відповідь на бекенд для перевірки
@@ -10,7 +10,7 @@ export const arenaService = {
     },
 
     // Відправляє результати проходження (перемога/поразка та помилки)
-    finishRun: async (data: { taskId: number; isVictory: boolean; failedQuestionIds: number[] }): Promise<void> => {
+    finishRun: async (data: RunCompletionRequest): Promise<void> => {
         await api.post('/arena/finish-run', data);
     }
 };

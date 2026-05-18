@@ -37,6 +37,12 @@ export interface User {
   lifetimeCrystals: number;
   totalTasksCompleted: number;
   totalFailures: number;
+
+  totalLoginDays: number;
+  longestLoginStreak: number;
+  totalPlayTimeSeconds: number;
+  currentFlawlessStreak: number;
+  longestFlawlessStreak: number;
 }
 
 export interface UserStatsDto {
@@ -101,6 +107,9 @@ export interface RunCompletionRequest {
   taskId: number;
   isVictory: boolean;
   failedQuestionIds: number[];
+  attemptsTaken: number;
+  hintsUsed: boolean;
+  timeSpentSeconds: number;
 }
 
 export interface Item {

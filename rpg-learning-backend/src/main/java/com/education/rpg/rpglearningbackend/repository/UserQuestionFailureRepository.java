@@ -6,10 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserQuestionFailureRepository extends JpaRepository<UserQuestionFailure, Long> {
 
     boolean existsByUserIdAndQuestionId(Long userId, Long questionId);
+
+    Optional<UserQuestionFailure> findByUserIdAndQuestionId(Long userId, Long questionId);
 
     /**
      * Bulk-deletes all failure records whose question is in the given list.

@@ -86,4 +86,21 @@ public class User {
 
     @Column(nullable = false)
     private Integer totalFailures = 0; // Ключова метрика для аналізу "Продуктивної невдачі"
+
+    // --- Analytics: login & engagement ---
+    @Column(nullable = false)
+    private Integer totalLoginDays = 0;
+
+    @Column(nullable = false)
+    private Integer longestLoginStreak = 0;
+
+    @Column(nullable = false)
+    private Long totalPlayTimeSeconds = 0L;
+
+    // --- Analytics: flawless task streaks ---
+    @Column(nullable = false)
+    private Integer currentFlawlessStreak = 0;
+
+    @Column(nullable = false)
+    private Integer longestFlawlessStreak = 0;
 }

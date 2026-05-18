@@ -2,7 +2,8 @@
 import { useAuthStore } from '@/store/authStore';
 import {
     X, Target, Skull, Coins, Gem, Crosshair,
-    BookOpen, Shield, FlaskConical, Magnet, Coffee, Sparkles, CalendarDays
+    BookOpen, Shield, FlaskConical, Magnet, Coffee, Sparkles, CalendarDays,
+    Flame, LogIn, Clock, Trophy
 } from 'lucide-react';
 
 interface PlayerChronicleModalProps {
@@ -21,6 +22,16 @@ const parseBuffDate = (dateStr?: string) => {
 const isBuffActive = (dateString: string | null): boolean => {
     if (!dateString) return false;
     return parseBuffDate(dateString) > new Date();
+};
+
+/** Formats total seconds into a readable playtime string */
+const formatPlayTime = (totalSeconds: number): string => {
+    if (totalSeconds <= 0) return '0m';
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${totalSeconds}s`;
 };
 
 /** Форматує ISO-дату в читабельний вигляд або "Немає даних" */
@@ -50,8 +61,8 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
 
     const accuracyColor =
         accuracy >= 75 ? 'from-green-500 to-emerald-400' :
-        accuracy >= 50 ? 'from-yellow-500 to-amber-400' :
-                         'from-red-500 to-orange-400';
+            accuracy >= 50 ? 'from-yellow-500 to-amber-400' :
+                'from-red-500 to-orange-400';
 
     // Активні бафи
     const buffs = [
@@ -245,6 +256,53 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                                 )}
                             </div>
                         )}
+                    </div>
+
+                    {/* ══════════════════════════════════
+                        SECTION: Engagement & Streaks
+                    ══════════════════════════════════ */}
+                    <div>
+                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                            <Trophy size={11} /> Залученість та Серії
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-2.5">
+                            <div className="bg-zinc-950 border border-amber-500/20 rounded-2xl p-4 col-span-2 hover:border-amber-500/40 transition-colors">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Flame size={18} className="text-amber-400" />
+                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">Бездоганна серія</span>
+                                </div>
+                                <p className="text-2xl font-black text-white">
+                                    {user.currentFlawlessStreak ?? 0}
+                                    <span className="text-sm font-bold text-zinc-500 ml-2">/ {user.longestFlawlessStreak ?? 0} рекорд</span>
+                                </p>
+                                <p className="text-[11px] text-zinc-500 mt-1">Поточна безперервна серія правильних відповідей · кращий результат за весь час</p>
+                            </div>
+
+                            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 text-center hover:border-blue-500/40 transition-colors">
+                                <div className="flex justify-center mb-1.5"><LogIn size={22} className="text-blue-400" /></div>
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Серія входів</p>
+                                <p className="text-2xl font-black text-white">{user.longestLoginStreak ?? 0}</p>
+                                <p className="text-[10px] text-zinc-600 mt-0.5">днів поспіль</p>
+                            </div>
+
+                            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 text-center hover:border-emerald-500/40 transition-colors">
+                                <div className="flex justify-center mb-1.5"><CalendarDays size={22} className="text-emerald-400" /></div>
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Активних днів</p>
+                                <p className="text-2xl font-black text-white">{user.totalLoginDays ?? 0}</p>
+                                <p className="text-[10px] text-zinc-600 mt-0.5">унікальних входів</p>
+                            </div>
+
+                            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 col-span-2 hover:border-purple-500/40 transition-colors">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Clock size={18} className="text-purple-400" />
+                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">Загальний час гри</span>
+                                    </div>
+                                    <p className="text-xl font-black text-white">{formatPlayTime(user.totalPlayTimeSeconds ?? 0)}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* ══════════════════════════════════

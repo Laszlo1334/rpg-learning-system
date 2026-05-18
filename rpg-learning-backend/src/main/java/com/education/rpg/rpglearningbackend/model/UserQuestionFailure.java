@@ -31,8 +31,19 @@ public class UserQuestionFailure {
 
     private LocalDateTime failedAt;
 
+    @Column(nullable = false)
+    private Integer failureCount = 1;
+
+    @Column(length = 1024)
+    private String lastWrongAnswer;
+
     @PrePersist
     protected void onCreate() {
-        this.failedAt = LocalDateTime.now();
+        if (this.failedAt == null) {
+            this.failedAt = LocalDateTime.now();
+        }
+        if (this.failureCount == null) {
+            this.failureCount = 1;
+        }
     }
 }

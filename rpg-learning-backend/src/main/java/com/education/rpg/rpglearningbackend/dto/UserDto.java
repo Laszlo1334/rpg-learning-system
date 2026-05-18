@@ -36,4 +36,10 @@ public class UserDto {
     private Integer lifetimeCrystals;
     private Integer totalTasksCompleted;
     private Integer totalFailures;
+
+    private Integer totalLoginDays;
+    private Integer longestLoginStreak;
+    private Long totalPlayTimeSeconds;
+    private Integer currentFlawlessStreak;
+    private Integer longestFlawlessStreak;
 }
