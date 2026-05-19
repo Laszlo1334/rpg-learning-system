@@ -3,6 +3,7 @@ package com.education.rpg.rpglearningbackend.controller;
 import com.education.rpg.rpglearningbackend.dto.AnswerRequest;
 import com.education.rpg.rpglearningbackend.dto.AnswerResponse;
 import com.education.rpg.rpglearningbackend.dto.RunCompletionRequest;
+import com.education.rpg.rpglearningbackend.dto.RunCompletionResponse;
 import com.education.rpg.rpglearningbackend.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +31,11 @@ public class ArenaController {
     }
 
     @PostMapping("/finish-run")
-    public ResponseEntity<String> finishRun(@RequestBody RunCompletionRequest request,
+    public ResponseEntity<RunCompletionResponse> finishRun(@RequestBody RunCompletionRequest request,
                                             @AuthenticationPrincipal OAuth2User principal) {
         // Беремо email гравця з його Google-сесії
         String email = principal.getAttribute("email");
-        submissionService.processRunCompletion(email, request);
-        return ResponseEntity.ok("Результати забігу збережено!");
+        RunCompletionResponse response = submissionService.processRunCompletion(email, request);
+        return ResponseEntity.ok(response);
     }
 }

@@ -14,6 +14,8 @@ public interface UserQuestionFailureRepository extends JpaRepository<UserQuestio
 
     Optional<UserQuestionFailure> findByUserIdAndQuestionId(Long userId, Long questionId);
 
+    int countByUserIdAndQuestion_TaskId(Long userId, Long taskId);
+
     /**
      * Bulk-deletes all failure records whose question is in the given list.
      * Called by DatabaseSeeder before removing a course to satisfy the FK constraint

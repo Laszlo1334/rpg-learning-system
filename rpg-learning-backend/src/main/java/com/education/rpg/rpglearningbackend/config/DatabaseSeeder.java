@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -57,44 +58,17 @@ public class DatabaseSeeder {
                 generateBranchedCourse(courses.get(2), 20, taskRepository);
             }
 
-            // 1. Шукаємо старий курс. Якщо він є — видаляємо його.
-            courseRepository.findAll().stream()
+            // 1. Шукаємо старий курс. Якщо він є — використовуємо його, інакше створюємо новий
+            Course networkCourse = courseRepository.findAll().stream()
                     .filter(c -> "NET101".equals(c.getAccessCode()))
                     .findFirst()
-                    .ifPresent(c -> {
-                        System.out.println("🧹 Видалення старого запису NET101...");
-
-                        // Course.tasks є LAZY, тому завантажуємо через репозиторій.
-                        // Task.questions є EAGER — завантажується автоматично.
-                        List<Task> courseTasks = taskRepository.findByCourseId(c.getId());
-
-                        if (!courseTasks.isEmpty()) {
-                            // Крок 1: видаляємо записи з user_question_failures
-                            List<Question> allCourseQuestions = courseTasks.stream()
-                                    .flatMap(t -> t.getQuestions().stream())
-                                    .collect(Collectors.toList());
-
-                            if (!allCourseQuestions.isEmpty()) {
-                                System.out.println("  ↳ Видалення " + allCourseQuestions.size()
-                                        + " записів з user_question_failures...");
-                                userQuestionFailureRepository.deleteByQuestionIn(allCourseQuestions);
-                            }
-
-                            // Крок 2: видаляємо записи з completed_tasks
-                            System.out.println("  ↳ Видалення " + courseTasks.size()
-                                    + " записів з completed_tasks...");
-                            completedTaskRepository.deleteByTaskIn(courseTasks);
-                        }
-
-                        // Крок 3: видаляємо курс (каскад CascadeType.ALL прибере tasks та questions)
-                        courseRepository.delete(c);
+                    .orElseGet(() -> {
+                        System.out.println("✨ Додавання нового курсу: Комп'ютерні мережі...");
+                        User teacher = userRepository.findByEmail("teacher@rpg.com").orElseThrow();
+                        Course newCourse = createCourse("Комп'ютерні мережі", "Основи маршрутизації та OSI.", "NET101", teacher);
+                        return courseRepository.save(newCourse);
                     });
 
-            // 2. Створюємо чистий курс та завантажуємо дані з JSON
-            System.out.println("✨ Додавання чистого курсу: Комп'ютерні мережі...");
-            User teacher = userRepository.findByEmail("teacher@rpg.com").orElseThrow();
-            Course networkCourse = createCourse("Комп'ютерні мережі", "Основи маршрутизації та OSI.", "NET101", teacher);
-            courseRepository.save(networkCourse);
             loadTasksFromJson(networkCourse, taskRepository);
 
             // 3. БЛОК МАГАЗИНУ (запускається завжди, але хелпери не дадуть створити
@@ -311,13 +285,13 @@ public class DatabaseSeeder {
 
     private void generateShopItems(ItemRepository itemRepository) {
         // --- Розхідники (Consumables) ---
-        createConsumable(itemRepository, "Зілля Мудрості", "+50% XP на 30 хвилин.", 15, Item.CurrencyType.CRYSTAL,
+        createConsumable(itemRepository, "Бустер досвіду", "+50% XP на 30 хвилин.", 200, Item.CurrencyType.CRYSTAL,
                 Item.EffectType.XP_BOOST, "/assets/items/potion_wisdom.png");
-        createConsumable(itemRepository, "Магніт Гобліна", "Подвійне золото на 60 хвилин.", 15,
+        createConsumable(itemRepository, "Магніт гобліна", "Подвійне золото на 60 хвилин.", 150,
                 Item.CurrencyType.CRYSTAL, Item.EffectType.GOLD_BOOST, "/assets/items/goblin_magnet.png");
-        createConsumable(itemRepository, "Еліксир Бадьорості", "Миттєво відновлює 100 Енергії.", 20,
+        createConsumable(itemRepository, "Оновлення енергії", "Миттєво відновлює 100 Енергії.", 400,
                 Item.CurrencyType.CRYSTAL, Item.EffectType.ENERGY_REFILL, "/assets/items/elixir_vigor.png");
-        createConsumable(itemRepository, "Руна Захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL,
+        createConsumable(itemRepository, "Руна захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL,
                 Item.EffectType.SHIELD, "/assets/items/rune_protection.png");
 
         // --- Аватари (AVATAR) — всі шляхи відповідають реальним файлам у /assets/avatars/ ---
@@ -637,38 +611,86 @@ public class DatabaseSeeder {
             List<Task> tasks = mapper.readValue(inputStream, new TypeReference<List<Task>>() {
             });
 
+            List<Task> existingTasks = taskRepository.findByCourseId(course.getId());
+            Map<String, Task> existingTaskByTitle = existingTasks.stream()
+                    .collect(Collectors.toMap(Task::getTitle, t -> t, (t1, t2) -> t1));
+
             // Крок 1: Зберігаємо маппінг «старий JSON ID → список prerequisiteTaskIds»,
             // а також впорядкований список oldIds (щоб потім зіставити з savedTasks за
             // індексом),
             // і обнуляємо ID, щоб Hibernate генерував нові.
             Map<Long, List<Long>> oldPrerequisites = new HashMap<>();
             List<Long> indexedOldIds = new ArrayList<>(); // Порядок відповідає tasks
+            List<Task> tasksToSave = new ArrayList<>();
 
-            for (Task task : tasks) {
-                Long oldId = task.getId(); // Зберігаємо JSON-шний ID (201, 202, …)
+            for (Task jsonTask : tasks) {
+                Long oldId = jsonTask.getId(); // Зберігаємо JSON-шний ID (201, 202, …)
                 indexedOldIds.add(oldId); // Зберігаємо порядок до скидання ID
+                oldPrerequisites.put(oldId, new ArrayList<>(jsonTask.getPrerequisiteTaskIds()));
 
-                // Зберігаємо старі prerequisites перед тим, як скинути ID
-                oldPrerequisites.put(oldId, new ArrayList<>(task.getPrerequisiteTaskIds()));
+                Task existingTask = existingTaskByTitle.get(jsonTask.getTitle());
+                Task taskToPersist;
 
-                // Обнуляємо ID — Hibernate згенерує новий
-                task.setId(null);
+                if (existingTask != null) {
+                    // Upsert: update existing entity fields
+                    taskToPersist = existingTask;
+                    taskToPersist.setTheoryContent(jsonTask.getTheoryContent());
+                    taskToPersist.setBranchName(jsonTask.getBranchName());
+                    taskToPersist.setOrderIndex(jsonTask.getOrderIndex());
+                    taskToPersist.setIsTheoryHidden(jsonTask.getIsTheoryHidden());
+                    taskToPersist.setRewardXp(jsonTask.getRewardXp());
+                    taskToPersist.setRewardGold(jsonTask.getRewardGold());
+                    taskToPersist.setDynamicQuestionCount(jsonTask.getDynamicQuestionCount());
+                    taskToPersist.setType(jsonTask.getType());
+                    taskToPersist.setBossName(jsonTask.getBossName());
+                    taskToPersist.setBossAvatarUrl(jsonTask.getBossAvatarUrl());
+                    taskToPersist.setTimeLimitSeconds(jsonTask.getTimeLimitSeconds());
 
-                // Прив'язуємо завдання до курсу
-                task.setCourse(course);
-
-                // Відновлюємо двосторонній зв'язок із питаннями
-                if (task.getQuestions() != null) {
-                    task.getQuestions().forEach(q -> q.setTask(task));
+                    // Upsert questions
+                    if (jsonTask.getQuestions() != null) {
+                        Map<String, Question> existingQuestionByText = taskToPersist.getQuestions().stream()
+                                .collect(Collectors.toMap(Question::getQuestionText, q -> q, (q1, q2) -> q1));
+                        
+                        List<Question> updatedQuestions = new ArrayList<>();
+                        for (Question jsonQ : jsonTask.getQuestions()) {
+                            Question qToPersist;
+                            Question existingQ = existingQuestionByText.get(jsonQ.getQuestionText());
+                            if (existingQ != null) {
+                                qToPersist = existingQ;
+                                qToPersist.setType(jsonQ.getType());
+                                qToPersist.setOptions(jsonQ.getOptions());
+                                qToPersist.setCorrectAnswers(jsonQ.getCorrectAnswers());
+                                qToPersist.setExplanation(jsonQ.getExplanation());
+                            } else {
+                                qToPersist = jsonQ;
+                                qToPersist.setTask(taskToPersist);
+                            }
+                            updatedQuestions.add(qToPersist);
+                        }
+                        taskToPersist.getQuestions().clear();
+                        taskToPersist.getQuestions().addAll(updatedQuestions);
+                    }
+                } else {
+                    // New task
+                    taskToPersist = jsonTask;
+                    taskToPersist.setId(null);
+                    taskToPersist.setCourse(course);
+                    if (taskToPersist.getQuestions() != null) {
+                        taskToPersist.getQuestions().forEach(q -> {
+                            q.setId(null);
+                            q.setTask(taskToPersist);
+                        });
+                    }
                 }
 
                 // Тимчасово очищаємо prerequisites — заповнимо після першого збереження
-                task.setPrerequisiteTaskIds(new ArrayList<>());
+                taskToPersist.setPrerequisiteTaskIds(new ArrayList<>());
+                tasksToSave.add(taskToPersist);
             }
 
             // Крок 2: Перший saveAll — Hibernate генерує реальні ID.
             // savedTasks повертається у тому ж порядку, що й tasks (специфікація JPA).
-            List<Task> savedTasks = taskRepository.saveAll(tasks);
+            List<Task> savedTasks = taskRepository.saveAll(tasksToSave);
 
             // Крок 3: Будуємо маппінг «старий JSON ID → новий DB ID».
             // indexedOldIds[i] відповідає savedTasks[i], бо порядок збережено.

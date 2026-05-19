@@ -167,3 +167,16 @@ export interface CourseDto {
   rewardIcon?: string; // e.g. 'sword', 'shield', 'scroll'
 }
 
+export interface RunCompletionResponse {
+  message: string;
+  earnedXp: number;
+  earnedGold: number;
+  baseXp: number;
+  baseGold: number;
+  flawlessMultiplier: number;
+  campfireMultiplier: number;
+  xpBuffMultiplier: number;
+  goldBuffMultiplier: number;
+  energyMultiplier: number;
+}
+

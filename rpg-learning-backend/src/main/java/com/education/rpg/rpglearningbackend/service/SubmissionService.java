@@ -2,6 +2,7 @@ package com.education.rpg.rpglearningbackend.service;
 
 import com.education.rpg.rpglearningbackend.dto.AnswerResponse;
 import com.education.rpg.rpglearningbackend.dto.RunCompletionRequest;
+import com.education.rpg.rpglearningbackend.dto.RunCompletionResponse;
 import com.education.rpg.rpglearningbackend.model.ActionType;
 import com.education.rpg.rpglearningbackend.model.CompletedTask;
 import com.education.rpg.rpglearningbackend.model.Question;
@@ -84,6 +85,11 @@ public class SubmissionService {
                     .build();
         }
 
+        int priorFailuresInTask = userQuestionFailureRepository.countByUserIdAndQuestion_TaskId(student.getId(), question.getTask().getId());
+        int maxCrystals = 15;
+        int maxAwardableFailures = maxCrystals / CRYSTALS_PER_FIRST_FAILURE;
+        int crystalsToAward = (priorFailuresInTask < maxAwardableFailures) ? CRYSTALS_PER_FIRST_FAILURE : 0;
+
         userQuestionFailureRepository.save(
                 UserQuestionFailure.builder()
                         .user(student)
@@ -92,19 +98,22 @@ public class SubmissionService {
                         .lastWrongAnswer(userAnswer.trim())
                         .build()
         );
-        student.setCrystals(student.getCrystals() + CRYSTALS_PER_FIRST_FAILURE);
-        student.setLifetimeCrystals(student.getLifetimeCrystals() + CRYSTALS_PER_FIRST_FAILURE);
-        userRepository.save(student);
+
+        if (crystalsToAward > 0) {
+            student.setCrystals(student.getCrystals() + crystalsToAward);
+            student.setLifetimeCrystals(student.getLifetimeCrystals() + crystalsToAward);
+            userRepository.save(student);
+        }
 
         return AnswerResponse.builder()
                 .isCorrect(false)
                 .explanation(question.getExplanation())
-                .crystalsAwarded(CRYSTALS_PER_FIRST_FAILURE)
+                .crystalsAwarded(crystalsToAward)
                 .build();
     }
 
     @Transactional
-    public void processRunCompletion(String studentEmail, RunCompletionRequest request) {
+    public RunCompletionResponse processRunCompletion(String studentEmail, RunCompletionRequest request) {
         log.info("Run completion for {}, task: {}, victory: {}", studentEmail, request.getTaskId(), request.isVictory());
 
         User student = userRepository.findByEmail(studentEmail)
@@ -116,12 +125,30 @@ public class SubmissionService {
         boolean alreadyCompleted = completedTaskRepository.existsByTaskIdAndUserId(task.getId(), student.getId());
         LocalDateTime now = LocalDateTime.now();
 
+        if (!alreadyCompleted) {
+            int energyCost = (task.getType() == Task.TaskType.BOSS) ? 5 : 2;
+            int currentEnergy = student.getEnergy() != null ? student.getEnergy() : 0;
+            student.setEnergy(Math.max(0, currentEnergy - energyCost));
+        }
+
+        RunCompletionResponse responseDto = new RunCompletionResponse();
+        responseDto.setMessage("Результати забігу збережено!");
+
         if (request.isVictory()) {
             if (!alreadyCompleted) {
                 boolean flawless = isFlawlessAttempt(request);
                 int levelBefore = student.getLevel();
 
                 RewardOutcome outcome = grantRewards(student, task, now, flawless);
+                responseDto.setEarnedXp(outcome.finalXp());
+                responseDto.setEarnedGold(outcome.finalGold());
+                responseDto.setBaseXp(outcome.baseXp());
+                responseDto.setBaseGold(outcome.baseGold());
+                responseDto.setFlawlessMultiplier(outcome.flawlessMultiplier());
+                responseDto.setCampfireMultiplier(outcome.campfireMultiplier());
+                responseDto.setXpBuffMultiplier(outcome.xpBuffMultiplier());
+                responseDto.setGoldBuffMultiplier(outcome.goldBuffMultiplier());
+                responseDto.setEnergyMultiplier(outcome.energyMultiplier());
 
                 CompletedTask completedTask = buildCompletedTask(student, task, request);
                 completedTaskRepository.save(completedTask);
@@ -152,6 +179,8 @@ public class SubmissionService {
 
             student.setLastLoginDate(now);
             userRepository.save(student);
+
+            return responseDto;
         } else {
             student.setCurrentFlawlessStreak(0);
 
@@ -166,6 +195,8 @@ public class SubmissionService {
             }
 
             userRepository.save(student);
+
+            return responseDto;
         }
     }
 
@@ -188,30 +219,43 @@ public class SubmissionService {
         int baseXp = task.getRewardXp() != null ? task.getRewardXp() : 0;
         int baseGold = task.getRewardGold() != null ? task.getRewardGold() : 0;
 
-        double multiplier = 1.0;
         if (flawless) {
             int newStreak = student.getCurrentFlawlessStreak() + 1;
             student.setCurrentFlawlessStreak(newStreak);
             if (newStreak > student.getLongestFlawlessStreak()) {
                 student.setLongestFlawlessStreak(newStreak);
             }
-            multiplier = 1.0 + Math.min(student.getCurrentFlawlessStreak() * 0.1, 1.0);
         } else {
             student.setCurrentFlawlessStreak(0);
         }
 
-        int finalXp = (int) Math.round(baseXp * multiplier);
-        int finalGold = (int) Math.round(baseGold * multiplier);
+        // 1. Calculate Flawless Multiplier (e.g., +10% per flawless run, max +100%)
+        double flawlessMultiplier = flawless ? (1.0 + Math.min(student.getCurrentFlawlessStreak() * 0.1, 1.0)) : 1.0;
 
-        if (student.getXpBuffEndsAt() != null && student.getXpBuffEndsAt().isAfter(now)) {
-            finalXp = (int) (finalXp * 1.5);
-            log.info("XP buff applied after flawless multiplier. Result: {}", finalXp);
-        }
+        // 2. Calculate Campfire Multiplier
+        int campfireLevel = student.getCampfireLevel() != null ? student.getCampfireLevel() : 1;
+        double campfireMultiplier = switch (campfireLevel) {
+            case 2 -> 1.05;
+            case 3 -> 1.15;
+            case 4 -> 1.50;
+            case 5 -> 2.0;
+            default -> 1.0;
+        };
 
-        if (student.getGoldBuffEndsAt() != null && student.getGoldBuffEndsAt().isAfter(now)) {
-            finalGold = finalGold * 2;
-            log.info("Gold buff applied after flawless multiplier. Result: {}", finalGold);
-        }
+        // 3. Check Active Item Buffs (x2 multiplier)
+        double xpBuffMultiplier = (student.getXpBuffEndsAt() != null && now.isBefore(student.getXpBuffEndsAt())) ? 2.0 : 1.0;
+        double goldBuffMultiplier = (student.getGoldBuffEndsAt() != null && now.isBefore(student.getGoldBuffEndsAt())) ? 2.0 : 1.0;
+
+        // Check Rest Energy Multiplier (x1.5 if user has energy)
+        int currentEnergy = student.getEnergy() != null ? student.getEnergy() : 0;
+        double energyMultiplier = currentEnergy > 0 ? 1.5 : 1.0;
+
+        // 4. Apply Final Multipliers
+        int finalXp = (int) Math.round(baseXp * flawlessMultiplier * campfireMultiplier * xpBuffMultiplier * energyMultiplier);
+        int finalGold = (int) Math.round(baseGold * flawlessMultiplier * campfireMultiplier * goldBuffMultiplier * energyMultiplier);
+
+        log.info("Rewards calculated. Base XP: {}, Base Gold: {}. Multipliers -> Flawless: {}, Campfire: {}, XP Buff: {}, Gold Buff: {}, Energy: {}. Final XP: {}, Final Gold: {}",
+                baseXp, baseGold, flawlessMultiplier, campfireMultiplier, xpBuffMultiplier, goldBuffMultiplier, energyMultiplier, finalXp, finalGold);
 
         student.setCurrentXp(student.getCurrentXp() + finalXp);
         student.setGold(student.getGold() + finalGold);
@@ -219,14 +263,13 @@ public class SubmissionService {
         student.setTotalTasksCompleted(student.getTotalTasksCompleted() + 1);
         student.setLastTaskCompletionDate(now);
 
-        return new RewardOutcome(baseXp, baseGold, finalXp, finalGold, multiplier, flawless);
+        return new RewardOutcome(baseXp, baseGold, finalXp, finalGold, flawlessMultiplier, campfireMultiplier, xpBuffMultiplier, goldBuffMultiplier, energyMultiplier, flawless);
     }
 
     private String buildTaskCompletedDetails(Long taskId, RewardOutcome outcome, boolean flawless) {
         return String.format(
-                "{\"taskId\":%d,\"flawless\":%s,\"multiplier\":%.2f,\"baseXp\":%d,\"finalXp\":%d,\"baseGold\":%d,\"finalGold\":%d}",
-                taskId, flawless, outcome.multiplier(), outcome.baseXp(), outcome.finalXp(),
-                outcome.baseGold(), outcome.finalGold());
+                "{\"taskId\":%d,\"flawless\":%s,\"flawlessMultiplier\":%.2f,\"campfireMultiplier\":%.2f,\"xpBuffMultiplier\":%.2f,\"goldBuffMultiplier\":%.2f,\"energyMultiplier\":%.2f,\"baseXp\":%d,\"finalXp\":%d,\"baseGold\":%d,\"finalGold\":%d}",
+                taskId, flawless, outcome.flawlessMultiplier(), outcome.campfireMultiplier(), outcome.xpBuffMultiplier(), outcome.goldBuffMultiplier(), outcome.energyMultiplier(), outcome.baseXp(), outcome.finalXp(), outcome.baseGold(), outcome.finalGold());
     }
 
     private void handleProductiveFailure(User student, List<Long> failedQuestionIds) {
@@ -234,5 +277,5 @@ public class SubmissionService {
         student.setTotalFailures(student.getTotalFailures() + uniqueFails.size());
     }
 
-    private record RewardOutcome(int baseXp, int baseGold, int finalXp, int finalGold, double multiplier, boolean flawless) {}
+    private record RewardOutcome(int baseXp, int baseGold, int finalXp, int finalGold, double flawlessMultiplier, double campfireMultiplier, double xpBuffMultiplier, double goldBuffMultiplier, double energyMultiplier, boolean flawless) {}
 }

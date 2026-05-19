@@ -5,8 +5,8 @@ import { taskService } from '@/services/taskService';
 import { arenaService } from '@/services/arenaService';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
-import type { TaskDto, AnswerResponse, RunCompletionRequest } from '@/types';
-import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff, Shield, BookOpen } from 'lucide-react';
+import type { TaskDto, AnswerResponse, RunCompletionRequest, RunCompletionResponse } from '@/types';
+import { Heart, Gem, Flag, ChevronRight, ShieldAlert, Sparkles, Skull, Clock, Flame, EyeOff, Shield, BookOpen, Coins } from 'lucide-react';
 
 export const ArenaPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -35,6 +35,7 @@ export const ArenaPage = () => {
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isShaking, setIsShaking] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [runResult, setRunResult] = useState<RunCompletionResponse | null>(null);
 
     // Inline arena toast (avoids external library dependency)
     const [arenaToast, setArenaToast] = useState<{ message: string; type: 'shield' | 'crystal' | 'error' } | null>(null);
@@ -216,7 +217,10 @@ export const ArenaPage = () => {
                     timeSpentSeconds,
                 };
                 console.log('[ArenaPage] Sending finishRun:', payload);
-                await arenaService.finishRun(payload);
+                const response = await arenaService.finishRun(payload);
+                if (response) {
+                    setRunResult(response);
+                }
             } catch (error) {
                 console.error('[ArenaPage] finishRun error:', error);
             }
@@ -238,10 +242,10 @@ export const ArenaPage = () => {
             {/* ── Arena toast notification ──────────────────────────────── */}
             {arenaToast && (
                 <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all ${arenaToast.type === 'shield'
-                        ? 'bg-blue-900 border border-blue-600 text-blue-200'
-                        : arenaToast.type === 'crystal'
-                            ? 'bg-purple-900 border border-purple-600 text-purple-200'
-                            : 'bg-red-900 border border-red-700 text-red-200'
+                    ? 'bg-blue-900 border border-blue-600 text-blue-200'
+                    : arenaToast.type === 'crystal'
+                        ? 'bg-purple-900 border border-purple-600 text-purple-200'
+                        : 'bg-red-900 border border-red-700 text-red-200'
                     }`}>
                     {arenaToast.type === 'shield' && <Shield size={18} />}
                     {arenaToast.type === 'crystal' && <Gem size={18} />}
@@ -323,76 +327,76 @@ export const ArenaPage = () => {
                     {/* 2. Split panels container — Theory (left) + Questions (right) */}
                     <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto transition-all duration-500">
 
-                    {/* Theory panel — collapses smoothly when hidden */}
-                    <div className={`transition-all duration-500 overflow-hidden ${isTheoryVisible && !isBoss ? 'lg:w-1/2 opacity-100' : 'w-0 opacity-0 p-0'}`}>
-                        <div className={`border rounded-3xl p-6 overflow-y-auto max-h-[80vh] h-full ${isBoss ? 'bg-zinc-950/60 border-red-900/30' : 'bg-zinc-900 border-zinc-800'}`}>
-                            {isBoss ? (
-                                <div className="flex items-center gap-4 mb-6 border-b border-red-900/30 pb-4">
-                                    <div className="p-3 bg-red-950 border border-red-900/50 rounded-2xl">
-                                        <Skull className="text-red-500" size={32} />
+                        {/* Theory panel — collapses smoothly when hidden */}
+                        <div className={`transition-all duration-500 overflow-hidden ${isTheoryVisible && !isBoss ? 'lg:w-1/2 opacity-100' : 'w-0 opacity-0 p-0'}`}>
+                            <div className={`border rounded-3xl p-6 overflow-y-auto max-h-[80vh] h-full ${isBoss ? 'bg-zinc-950/60 border-red-900/30' : 'bg-zinc-900 border-zinc-800'}`}>
+                                {isBoss ? (
+                                    <div className="flex items-center gap-4 mb-6 border-b border-red-900/30 pb-4">
+                                        <div className="p-3 bg-red-950 border border-red-900/50 rounded-2xl">
+                                            <Skull className="text-red-500" size={32} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-black text-red-500">{task.bossMetadata?.bossName || 'Final Challenge'}</h2>
+                                            <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1 mt-1"><Flame size={14} /> {task.title}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h2 className="text-2xl font-black text-red-500">{task.bossMetadata?.bossName || 'Final Challenge'}</h2>
-                                        <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1 mt-1"><Flame size={14} /> {task.title}</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <h2 className="text-2xl font-black mb-4 text-purple-400">{task.title}</h2>
-                            )}
-                            <div className="prose prose-invert max-w-none text-zinc-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: task.theoryContent || '' }} />
-                        </div>
-                    </div>
-
-                    {/* Questions panel — expands to full width when theory is hidden */}
-                    <div className={`transition-all duration-500 flex flex-col ${isBoss || !isTheoryVisible ? 'w-full max-w-3xl mx-auto' : 'lg:w-1/2'}`}>
-
-                        <div className={`border rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center relative backdrop-blur-sm ${isBoss ? 'bg-zinc-950/80 border-red-900/30 shadow-[0_0_30px_rgba(220,38,38,0.05)]' : 'bg-zinc-900 border-zinc-800'}`}>
-                            <h3 className="text-xl md:text-2xl font-bold mb-8 text-center">{currentQuestion.questionText}</h3>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                {currentQuestion.options.map((option, idx) => {
-                                    const isSelected = selectedOption === option;
-                                    let btnClass = isBoss
-                                        ? "bg-zinc-950 border-red-900/30 hover:border-red-500 hover:bg-red-500/10 text-zinc-300"
-                                        : "bg-zinc-950 border-zinc-800 hover:border-purple-500 hover:bg-purple-500/5 text-zinc-300";
-
-                                    if (isSelected && feedback) {
-                                        if (feedback.isCorrect) btnClass = "bg-green-500/20 border-green-500 text-green-400 scale-105 shadow-[0_0_20px_rgba(34,197,94,0.3)] z-10";
-                                        else btnClass = "bg-red-500/20 border-red-500 text-red-400 opacity-50";
-                                    }
-
-                                    return (
-                                        <button
-                                            key={idx}
-                                            disabled={isChecking || runStatus !== 'playing' || showNextButton}
-                                            onClick={() => handleAnswer(option)}
-                                            className={`border p-5 rounded-2xl font-bold transition-all duration-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg ${btnClass}`}
-                                        >
-                                            {isSelected && isSuccess && <Sparkles size={20} className="animate-pulse" />}
-                                            {option}
-                                            {isSelected && isSuccess && <Sparkles size={20} className="animate-pulse" />}
-                                        </button>
-                                    );
-                                })}
+                                ) : (
+                                    <h2 className="text-2xl font-black mb-4 text-purple-400">{task.title}</h2>
+                                )}
+                                <div className="prose prose-invert max-w-none text-zinc-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: task.theoryContent || '' }} />
                             </div>
-
-                            {feedback && !feedback.isCorrect && feedback.explanation && (
-                                <div className="mt-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 animate-in fade-in slide-in-from-bottom-4">
-                                    <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Miss! Try again</p>
-                                    <p className="text-sm text-zinc-300">{feedback.explanation}</p>
-                                </div>
-                            )}
-
-                            {showNextButton && (
-                                <button
-                                    onClick={handleNextStep}
-                                    className="mt-8 w-full py-4 rounded-2xl font-black text-xl bg-white text-black hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-300"
-                                >
-                                    Continue <ChevronRight size={24} />
-                                </button>
-                            )}
                         </div>
-                    </div>
+
+                        {/* Questions panel — expands to full width when theory is hidden */}
+                        <div className={`transition-all duration-500 flex flex-col ${isBoss || !isTheoryVisible ? 'w-full max-w-3xl mx-auto' : 'lg:w-1/2'}`}>
+
+                            <div className={`border rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center relative backdrop-blur-sm ${isBoss ? 'bg-zinc-950/80 border-red-900/30 shadow-[0_0_30px_rgba(220,38,38,0.05)]' : 'bg-zinc-900 border-zinc-800'}`}>
+                                <h3 className="text-xl md:text-2xl font-bold mb-8 text-center">{currentQuestion.questionText}</h3>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    {currentQuestion.options.map((option, idx) => {
+                                        const isSelected = selectedOption === option;
+                                        let btnClass = isBoss
+                                            ? "bg-zinc-950 border-red-900/30 hover:border-red-500 hover:bg-red-500/10 text-zinc-300"
+                                            : "bg-zinc-950 border-zinc-800 hover:border-purple-500 hover:bg-purple-500/5 text-zinc-300";
+
+                                        if (isSelected && feedback) {
+                                            if (feedback.isCorrect) btnClass = "bg-green-500/20 border-green-500 text-green-400 scale-105 shadow-[0_0_20px_rgba(34,197,94,0.3)] z-10";
+                                            else btnClass = "bg-red-500/20 border-red-500 text-red-400 opacity-50";
+                                        }
+
+                                        return (
+                                            <button
+                                                key={idx}
+                                                disabled={isChecking || runStatus !== 'playing' || showNextButton}
+                                                onClick={() => handleAnswer(option)}
+                                                className={`border p-5 rounded-2xl font-bold transition-all duration-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg ${btnClass}`}
+                                            >
+                                                {isSelected && isSuccess && <Sparkles size={20} className="animate-pulse" />}
+                                                {option}
+                                                {isSelected && isSuccess && <Sparkles size={20} className="animate-pulse" />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {feedback && !feedback.isCorrect && feedback.explanation && (
+                                    <div className="mt-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 animate-in fade-in slide-in-from-bottom-4">
+                                        <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Miss! Try again</p>
+                                        <p className="text-sm text-zinc-300">{feedback.explanation}</p>
+                                    </div>
+                                )}
+
+                                {showNextButton && (
+                                    <button
+                                        onClick={handleNextStep}
+                                        className="mt-8 w-full py-4 rounded-2xl font-black text-xl bg-white text-black hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-300"
+                                    >
+                                        Continue <ChevronRight size={24} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
                     </div> {/* end: split panels container */}
                 </main>
@@ -405,11 +409,54 @@ export const ArenaPage = () => {
                                     <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
                                         {isBoss ? <Skull size={40} /> : <Flag size={40} />}
                                     </div>
-                                    <h2 className="text-3xl font-black mb-2">{isBoss ? 'Boss Defeated!' : 'Victory!'}</h2>
-                                    <p className="text-zinc-400 mb-6">You have successfully cleared the dungeon.</p>
+                                    <h2 className="text-3xl font-black mb-2">{isBoss ? 'Boss Defeated!' : 'Перемога!'}</h2>
+                                    <p className="text-zinc-400 mb-6">Ви успішно пройшли завдання.</p>
+
+                                    {runResult && (
+                                        <div className="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-4 mb-6 text-sm text-left">
+                                            <div className="flex justify-between items-center py-1.5 border-b border-zinc-800/50">
+                                                <span className="text-zinc-400">Базова нагорода:</span>
+                                                <span className="flex items-center gap-1.5">
+                                                    <span className="text-blue-400 font-bold">+{runResult.baseXp} XP</span>
+                                                    <span className="text-yellow-400 font-bold flex items-center gap-0.5">+{runResult.baseGold} <Coins size={16} /></span>
+                                                </span>
+                                            </div>
+                                            {runResult.flawlessMultiplier > 1 && (
+                                                <div className="flex justify-between items-center py-1.5 border-b border-zinc-800/50">
+                                                    <span className="text-purple-400">Бонус без помилок:</span>
+                                                    <span className="font-bold text-purple-400">x{runResult.flawlessMultiplier.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {runResult.campfireMultiplier > 1 && (
+                                                <div className="flex justify-between items-center py-1.5 border-b border-zinc-800/50">
+                                                    <span className="text-orange-400">Бонус багаття:</span>
+                                                    <span className="font-bold text-orange-400">x{runResult.campfireMultiplier.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {runResult.xpBuffMultiplier > 1 && (
+                                                <div className="flex justify-between items-center py-1.5 border-b border-zinc-800/50">
+                                                    <span className="text-blue-400">Баф досвіду:</span>
+                                                    <span className="font-bold text-blue-400">x{runResult.xpBuffMultiplier.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {runResult.goldBuffMultiplier > 1 && (
+                                                <div className="flex justify-between items-center py-1.5 border-b border-zinc-800/50">
+                                                    <span className="text-yellow-400">Баф золота:</span>
+                                                    <span className="font-bold text-yellow-400">x{runResult.goldBuffMultiplier.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {runResult.energyMultiplier > 1 && (
+                                                <div className="flex justify-between items-center py-1.5">
+                                                    <span className="text-green-400">Бонус відпочинку:</span>
+                                                    <span className="font-bold text-green-400">x{runResult.energyMultiplier.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <div className="flex justify-center gap-4 mb-8">
-                                        <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-bold text-yellow-400">+{task.rewardGold} 🪙</div>
-                                        <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-bold text-blue-400">+{task.rewardXp} XP</div>
+                                        <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-bold text-yellow-400">+{runResult ? runResult.earnedGold : task.rewardGold} <Coins size={20} className="inline ml-1 mb-1" /></div>
+                                        <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-800 font-bold text-blue-400">+{runResult ? runResult.earnedXp : task.rewardXp} XP</div>
                                     </div>
                                 </>
                             ) : (
@@ -420,22 +467,22 @@ export const ArenaPage = () => {
                                         {runStatus === 'defeat' && <ShieldAlert size={40} />}
                                     </div>
                                     <h2 className="text-3xl font-black mb-2">
-                                        {runStatus === 'timeout' && 'Time is Up'}
-                                        {runStatus === 'cheated' && 'Focus Lost'}
-                                        {runStatus === 'defeat' && 'Defeated'}
+                                        {runStatus === 'timeout' && 'Час вичерпано'}
+                                        {runStatus === 'cheated' && 'Втрата фокусу'}
+                                        {runStatus === 'defeat' && 'Поразка'}
                                     </h2>
                                     <p className="text-zinc-400 mb-6">
-                                        {runStatus === 'timeout' && 'You ran out of time.'}
-                                        {runStatus === 'cheated' && 'You lost concentration. Do not switch away during a Boss fight!'}
-                                        {runStatus === 'defeat' && 'You made mistakes, but that is the path to knowledge!'}
+                                        {runStatus === 'timeout' && 'Ви не встигли вчасно.'}
+                                        {runStatus === 'cheated' && 'Ви втратили концентрацію. Не перемикайтеся під час битви з Босом!'}
+                                        {runStatus === 'defeat' && 'Ти припустився помилок, але це шлях до знань!'}
                                     </p>
                                     <div className="inline-flex items-center gap-2 bg-purple-500/20 px-6 py-3 rounded-xl border border-purple-500/30 font-bold text-purple-400 mb-8">
-                                        Earned: {earnedCrystals} <Gem size={20} />
+                                        Отримано: {earnedCrystals} <Gem size={20} />
                                     </div>
                                 </>
                             )}
                             <button onClick={() => navigate(task?.courseId ? `/courses/${task.courseId}/foyer` : '/courses')} className={`w-full py-4 rounded-2xl font-black text-lg transition-colors flex items-center justify-center gap-2 ${isBoss && runStatus !== 'victory' ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-white text-black hover:bg-zinc-200'}`}>
-                                {runStatus === 'victory' ? 'Continue' : 'Return to Map'} <ChevronRight size={24} />
+                                {runStatus === 'victory' ? 'Продовжити' : 'Повернутися на карту'} <ChevronRight size={24} />
                             </button>
                         </div>
                     </div>
