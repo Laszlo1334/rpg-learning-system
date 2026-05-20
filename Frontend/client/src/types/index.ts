@@ -59,7 +59,7 @@ export interface CourseProgressDto {
   totalTasks: number;
   completedTasks: number;
   progressPercentage: number;
-  status: 'new' | 'in_progress' | 'completed';
+  status: 'new' | 'in_progress' | 'completed' | 'locked';
 }
 
 export interface QuestionDto {
@@ -163,7 +163,7 @@ export interface CourseDto {
   description: string;
   totalTasks: number;
   completedTasks: number;
-  status: 'new' | 'in_progress' | 'completed';
+  status: 'new' | 'in_progress' | 'completed' | 'locked';
   rewardIcon?: string; // e.g. 'sword', 'shield', 'scroll'
 }
 
