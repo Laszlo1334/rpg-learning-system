@@ -126,7 +126,6 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
             onClick={e => { if (e.target === e.currentTarget) onClose(); }}
         >
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-
 <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800 bg-zinc-950/60 flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
@@ -148,6 +147,8 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                 {/* Scrollable body */}
                 <div className="overflow-y-auto flex-1 p-5 space-y-4">
 
+                {/* Section: combat stats */}
+                <div>
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <Target size={11} /> Бойова статистика
                         </p>
