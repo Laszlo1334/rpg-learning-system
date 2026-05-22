@@ -29,11 +29,9 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
-    // IMPORTANT: /memory and /course/{courseId} must be declared BEFORE /{id}.
-    // Spring matches routes top-to-bottom; if /{id} is first, the literal string
-    // "memory" would be parsed as a Long, causing a 400/404 conversion error.
-
-
+    // IMPORTANT: /course/{courseId} must be declared BEFORE /{id}.
+    // Spring matches routes top-to-bottom; if /{id} comes first, the literal path segment
+    // "course" is parsed as a Long, causing a 400/404 conversion error.
 
     @GetMapping("/course/{courseId}")
     @Operation(summary = "Course Skill Tree", description = "Returns course tasks with completed/locked statuses for the current player")

@@ -43,7 +43,6 @@ export const CoursesPage = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* 🏛️ Шапка Архітектури */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
         <div className="absolute -top-10 -right-10 text-purple-500/10">
           <Compass size={200} />
@@ -67,7 +66,6 @@ export const CoursesPage = () => {
         </div>
       </div>
 
-      {/* 🎛️ Фільтрація */}
       <div className="flex justify-center md:justify-start gap-3">
         {(['all', 'active', 'completed'] as const).map((f) => (
           <button
@@ -83,13 +81,12 @@ export const CoursesPage = () => {
         ))}
       </div>
 
-      {/* 🗂️ Сітка Карток */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map(course => {
-            const isLocked = course.status === 'locked'; // На випадок, якщо статус повернувся
+            const isLocked = course.status === 'locked';
             const isEmpty = course.totalTasks === 0;
             
-            // Кастомні попередження для конкретних курсів
+            // Show prerequisite warnings for specific courses
             let warningMessage = null;
             if (course.title.includes('Архітектура')) warningMessage = "⚠️ Вимагає розуміння ООП";
             else if (course.title.includes('Захист від темних')) warningMessage = "⚠️ Рекомендовано знання Java";

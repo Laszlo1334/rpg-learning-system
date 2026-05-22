@@ -1,12 +1,9 @@
-// src/App.tsx
-import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
-// Використовуємо наші нові зручні аліаси @/
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
 
-// Імпортуємо сторінки та Layout
+import { useEffect } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
 import { Login } from '@/pages/Login';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
@@ -18,15 +15,13 @@ import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { ShopPage } from '@/pages/ShopPage';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
-// Налаштовуємо маршрути з використанням Layout
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Login />, // Сторінка входу залишається на весь екран (без меню)
+    element: <Login />, // Login page renders full-screen, outside the shared header layout
   },
   {
-    // Цей блок відповідає за всі сторінки, де потрібен Header / Sidebar
-    // ProtectedRoute перевіряє авторизацію перед рендером будь-якого дочірнього маршруту
+    // All authenticated pages nest under ProtectedRoute, which guards against unauthenticated access
     path: '/',
     element: <ProtectedRoute />,
     children: [
@@ -71,7 +66,7 @@ const router = createBrowserRouter([
 function App() {
   const { isLoading, setUser, setLoading } = useAuthStore();
 
-  // Перевірка авторизації при першому завантаженні сайту
+  // Verify session on initial page load
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -87,8 +82,6 @@ function App() {
 
     checkAuth();
   }, [setUser, setLoading]);
-
-  // Показуємо екран завантаження, поки бекенд відповідає
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
@@ -97,7 +90,6 @@ function App() {
     );
   }
 
-  // Коли завантаження завершено - віддаємо керування Роутеру
   return <RouterProvider router={router} />;
 }
 

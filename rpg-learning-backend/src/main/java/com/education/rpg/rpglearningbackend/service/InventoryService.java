@@ -45,7 +45,7 @@ public class InventoryService {
             throw new RuntimeException("This item cannot be used this way!");
         }
 
-        // ── Apply buff effect ─────────────────────────────────────────
+        // Apply the item's buff effect to the player
         LocalDateTime now = LocalDateTime.now();
         switch (item.getEffect()) {
             case XP_BOOST:
@@ -77,7 +77,7 @@ public class InventoryService {
                 break;
         }
 
-        // ── Consume one unit ─────────────────────────────────────────
+        // Decrement quantity and remove the inventory entry when it reaches zero
         int currentQuantity = inventoryEntry.getQuantity();
         if (currentQuantity <= 1) {
             inventoryRepository.delete(inventoryEntry);
@@ -118,15 +118,14 @@ public class InventoryService {
 
         Item.ItemSlot slot = entry.getItem().getSlot();
 
-        // Items with NONE slot (consumables) cannot be equipped via this endpoint
+        // Consumables have slot NONE and must not go through this equip path
         if (slot == Item.ItemSlot.NONE) {
             throw new RuntimeException("This item has no equipment slot.");
         }
 
         List<Inventory> equipped = inventoryRepository.findByUserIdAndIsEquippedTrue(userId);
 
-        // 1. If a specific item was targeted for replacement (crucial for dual-wielding
-        // independent slots)
+        // Unequip the explicitly targeted item (needed for dual-weapon slot replacement)
         if (replaceId != null) {
             equipped.stream()
                     .filter(i -> i.getId().equals(replaceId))
@@ -134,17 +133,14 @@ public class InventoryService {
                     .ifPresent(i -> i.setIsEquipped(false));
         }
 
-        // 2. Clear other items in the same slot.
-        // For non-weapon slots (including AVATAR) always unequip all — fixes the avatar
-        // stacking bug.
-        // For weapons, only unequip if no specific target was given (fallback: displace
-        // oldest).
+        // For non-weapon slots (including AVATAR) always unequip everything in the slot;
+        // this prevents avatar stacking. For weapons, skip if a target was already replaced.
         if (slot != Item.ItemSlot.WEAPON) {
             equipped.stream()
                     .filter(i -> i.getItem().getSlot() == slot && !i.getId().equals(inventoryId))
                     .forEach(i -> i.setIsEquipped(false));
         } else if (replaceId == null) {
-            // Fallback for weapons when no target specified: allow max 2, displace oldest
+            // No explicit target: allow up to 2 weapons, displace the oldest one
             List<Inventory> weapons = equipped.stream()
                     .filter(i -> i.getItem().getSlot() == Item.ItemSlot.WEAPON
                             && !i.getId().equals(inventoryId))

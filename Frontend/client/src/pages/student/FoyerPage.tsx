@@ -22,7 +22,6 @@ export const FoyerPage = () => {
     const [tasks, setTasks] = useState<TaskDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Стан для модального вікна
     const [selectedTask, setSelectedTask] = useState<TaskDto | null>(null);
     const hasEnergy = energy > 0;
 
@@ -45,7 +44,6 @@ export const FoyerPage = () => {
 
     const { nodes, edges } = useMemo(() => buildTreeLayout(tasks), [tasks]);
 
-    // Обробник кліку по вузлу
     const onNodeClick = useCallback((event: React.MouseEvent, node: any) => {
         if (!node.data.isLocked) {
             setSelectedTask(node.data);
@@ -65,18 +63,18 @@ export const FoyerPage = () => {
 
     return (
         <div className="w-full h-screen bg-zinc-950 relative overflow-hidden">
-            {/* ГЛОБАЛЬНІ СТИЛІ ДЛЯ ПЕРЕБИВАННЯ REACT FLOW */}
+            {/* ReactFlow CSS overrides — required to suppress default cursor/pointer styles */}
             <style>{`
-                /* Прибираємо курсор-руку на фоні */
+                /* Remove grab cursor on the background pane */
                 .react-flow__pane {
                     cursor: default !important;
                 }
-                /* Вимикаємо будь-яку взаємодію з лініями-зв'язками */
+                /* Disable pointer events on edges so they don't intercept clicks */
                 .react-flow__edge, .react-flow__edge-path, .react-flow__edge-interaction {
                     pointer-events: none !important;
                     cursor: default !important;
                 }
-                /* Приховуємо білі крапки (handles) на вузлах */
+                /* Hide connection handles on nodes */
                 .react-flow__handle {
                     opacity: 0 !important;
                     pointer-events: none !important;
@@ -118,7 +116,6 @@ export const FoyerPage = () => {
                 <Background color="#27272a" gap={24} />
             </ReactFlow>
 
-            {/* 🛡️ МОДАЛЬНЕ ВІКНО ПІДТВЕРДЖЕННЯ */}
             {selectedTask && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                     <div className="bg-zinc-900 border border-zinc-700 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">

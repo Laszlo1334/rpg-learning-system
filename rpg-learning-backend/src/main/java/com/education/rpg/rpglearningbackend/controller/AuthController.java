@@ -12,7 +12,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // Явний конструктор
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
@@ -21,7 +20,6 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             User newUser = authService.register(request);
-            // Тепер метод getId() точно знайдеться, бо ми його прописали вручну
             return ResponseEntity.ok("User registered successfully! ID: " + newUser.getId());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

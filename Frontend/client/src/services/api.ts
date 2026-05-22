@@ -1,31 +1,26 @@
-// src/services/api.ts
 import axios from 'axios';
 
-// Створюємо базовий екземпляр axios
+// Shared axios instance; withCredentials is required to send JSESSIONID cookies
 export const api = axios.create({
   baseURL: 'http://localhost:8080/api',
-  // КРИТИЧНО ВАЖЛИВО: дозволяє браузеру відправляти cookie (JSESSIONID)
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Глобальний перехоплювач відповідей
+// Global response interceptor: handles session expiry
 api.interceptors.response.use(
   (response) => {
-    // Якщо запит успішний, просто повертаємо дані
     return response;
   },
   (error) => {
-    // Якщо отримуємо 401 (Неавторизовано), сесія закінчилась
+    // 401 = session expired; force a full page reload to /login to clear React state
     if (error.response?.status === 401) {
-      // Перенаправляємо на сторінку логіну
-      // Використовуємо window.location для повного перезавантаження сторінки
       window.location.href = '/login';
     }
 
-    // Повертаємо помилку далі, щоб її можна було обробити в компоненті (наприклад, показати тост)
+    // Propagate so callers can still show error toasts or handle locally
     return Promise.reject(error);
   }
 );

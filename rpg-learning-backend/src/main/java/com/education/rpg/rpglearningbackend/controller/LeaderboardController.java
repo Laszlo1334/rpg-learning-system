@@ -34,7 +34,6 @@ public class LeaderboardController {
     @GetMapping("/course/{courseId}")
     @Operation(summary = "Course Leaderboard", description = "Top players within a specific course (respects privacy settings)")
     public ResponseEntity<List<CourseLeaderboardDto>> getCourseLeaderboard(@PathVariable Long courseId) {
-        // Delegate to the service so that avatar URLs are resolved from the inventory
         return ResponseEntity.ok(leaderboardService.getCourseLeaderboard(courseId));
     }
 }

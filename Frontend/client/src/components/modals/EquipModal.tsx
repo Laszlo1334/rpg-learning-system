@@ -1,4 +1,4 @@
-// src/components/modals/EquipModal.tsx
+
 import { useState } from 'react';
 import { X, CheckCircle2, Loader2 } from 'lucide-react';
 import type { InventoryEntry, ItemSlot } from '@/types';
@@ -63,7 +63,6 @@ export const EquipModal = ({ selectedSlot, inventory, onClose, onEquipped, repla
         className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 max-w-md w-full shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-black text-white">
             Equip — {SLOT_LABEL[selectedSlot]} Slot
@@ -76,14 +75,12 @@ export const EquipModal = ({ selectedSlot, inventory, onClose, onEquipped, repla
           </button>
         </div>
 
-        {/* Error */}
         {error && (
           <p className="text-red-400 text-sm font-bold mb-4 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
             {error}
           </p>
         )}
 
-        {/* Item list */}
         {slotItems.length === 0 ? (
           <div className="text-center py-10 text-zinc-500">
             <span className="text-4xl opacity-30 block mb-3">🎒</span>
@@ -107,7 +104,6 @@ export const EquipModal = ({ selectedSlot, inventory, onClose, onEquipped, repla
                   }`}
                   onClick={() => handleEquip(entry)}
                 >
-                  {/* Sprite */}
                   <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {entry.item.assetUrl ? (
                       <img
@@ -122,7 +118,6 @@ export const EquipModal = ({ selectedSlot, inventory, onClose, onEquipped, repla
                     )}
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-black text-white truncate">{entry.item.name}</p>
                     <p className="text-[11px] text-zinc-500 truncate">{entry.item.description}</p>
@@ -131,7 +126,6 @@ export const EquipModal = ({ selectedSlot, inventory, onClose, onEquipped, repla
                     </span>
                   </div>
 
-                  {/* Status */}
                   {isLoading ? (
                     <Loader2 size={18} className="animate-spin text-zinc-400 flex-shrink-0" />
                   ) : isEquipped ? (

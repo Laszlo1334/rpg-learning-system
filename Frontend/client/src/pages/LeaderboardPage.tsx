@@ -1,4 +1,4 @@
-// src/pages/LeaderboardPage.tsx
+
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { leaderboardService } from '@/services/leaderboardService';
@@ -11,22 +11,19 @@ type Tab = 'global' | 'course';
 export const LeaderboardPage = () => {
     const { user, refreshUser } = useAuthStore();
 
-    // Privacy toggle — initialise from the store (default: public)
+    // Initialise from store; defaults to public if not set
     const [isPublic, setIsPublic] = useState<boolean>(user?.isPublicProfile ?? true);
     const [isPrivacyUpdating, setIsPrivacyUpdating] = useState(false);
 
-    // Tabs and data
     const [activeTab, setActiveTab] = useState<Tab>('global');
     const [sortBy, setSortBy] = useState<'xp' | 'gold'>('xp');
     const [globalData, setGlobalData] = useState<LeaderboardDto[]>([]);
     const [courseData, setCourseData] = useState<CourseLeaderboardDto[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Dynamic course list
     const [courses, setCourses] = useState<CourseProgressDto[]>([]);
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
 
-    // Load global leaderboard and course list on mount
     useEffect(() => {
         if (!isPublic) return;
 
@@ -53,7 +50,7 @@ export const LeaderboardPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isPublic, sortBy]);
 
-    // Load course leaderboard when tab or selected course changes
+    // Re-fetch when the active tab or selected course changes
     useEffect(() => {
         if (!isPublic || activeTab !== 'course' || selectedCourseId === null) return;
 
@@ -72,14 +69,13 @@ export const LeaderboardPage = () => {
         loadCourse();
     }, [activeTab, selectedCourseId, isPublic]);
 
-    // Privacy toggle handler
     const handlePrivacyToggle = async () => {
         const newValue = !isPublic;
         setIsPrivacyUpdating(true);
         try {
             await leaderboardService.updatePrivacy(newValue);
             setIsPublic(newValue);
-            await refreshUser(); // Sync global auth store
+            await refreshUser(); // Keep global auth store in sync
         } catch (err) {
             console.error('[LeaderboardPage] Failed to update privacy setting:', err);
         } finally {
@@ -87,7 +83,7 @@ export const LeaderboardPage = () => {
         }
     };
 
-    // Returns a medal icon for positions 1–3, or a plain rank number for the rest
+    // Returns a crown/medal for the top 3 and a plain rank number for the rest
     const getMedalIcon = (index: number) => {
         if (index === 0) return <Crown size={20} className="text-yellow-400" />;
         if (index === 1) return <Medal size={20} className="text-zinc-400" />;
@@ -98,7 +94,6 @@ export const LeaderboardPage = () => {
     return (
         <div className="p-6 max-w-3xl mx-auto space-y-6">
 
-            {/* --- Page header --- */}
             <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center">
                     <Trophy size={28} className="text-yellow-400" />
@@ -109,7 +104,6 @@ export const LeaderboardPage = () => {
                 </div>
             </div>
 
-            {/* --- Privacy toggle --- */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isPublic ? 'bg-purple-500/10' : 'bg-zinc-800'}`}>
@@ -123,7 +117,6 @@ export const LeaderboardPage = () => {
                     </div>
                 </div>
 
-                {/* Custom toggle */}
                 <button
                     onClick={handlePrivacyToggle}
                     disabled={isPrivacyUpdating}
@@ -139,7 +132,6 @@ export const LeaderboardPage = () => {
                 </button>
             </div>
 
-            {/* --- Hidden profile mode --- */}
             {!isPublic ? (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-12 flex flex-col items-center justify-center text-center gap-4">
                     <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center">
@@ -152,7 +144,6 @@ export const LeaderboardPage = () => {
                 </div>
             ) : (
                 <>
-                    {/* --- Tabs --- */}
                     <div className="flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1 gap-1">
                         <button
                             onClick={() => setActiveTab('global')}
@@ -176,7 +167,6 @@ export const LeaderboardPage = () => {
                         </button>
                     </div>
 
-                    {/* --- Sort by toggle (only for global) --- */}
                     {activeTab === 'global' && (
                         <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl p-1 gap-1 w-full max-w-xs ml-auto mb-2">
                             <button
@@ -196,7 +186,6 @@ export const LeaderboardPage = () => {
                         </div>
                     )}
 
-                    {/* --- Course selector --- */}
                     {activeTab === 'course' && courses.length > 0 && (
                         <div className="mb-6 flex justify-end">
                             <select
@@ -211,7 +200,6 @@ export const LeaderboardPage = () => {
                         </div>
                     )}
 
-                    {/* --- Leaderboard table --- */}
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center py-16 gap-3 text-zinc-500">
@@ -229,7 +217,6 @@ export const LeaderboardPage = () => {
                                             className={`flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-800/50 ${player.username === user?.username ? 'bg-purple-500/5 border-l-2 border-purple-500' : ''
                                                 }`}
                                         >
-                                            {/* Medal / rank number */}
                                             <div className="w-7 flex justify-center flex-shrink-0">
                                                 {getMedalIcon(index)}
                                             </div>
@@ -241,7 +228,6 @@ export const LeaderboardPage = () => {
                                                 onError={(e) => { e.currentTarget.src = '/assets/default_avatar.png'; }}
                                             />
 
-                                            {/* Name + level */}
                                             <div className="flex-1 min-w-0">
                                                 <p className={`font-bold truncate ${player.username === user?.username ? 'text-purple-400' : 'text-white'}`}>
                                                     {player.username}
@@ -254,7 +240,6 @@ export const LeaderboardPage = () => {
                                                 </p>
                                             </div>
 
-                                            {/* Score */}
                                             {sortBy === 'xp' ? (
                                                 <div className="flex items-center gap-1.5 text-blue-400 font-black text-sm bg-blue-500/10 px-3 py-1.5 rounded-lg whitespace-nowrap">
                                                     <Gem size={14} />

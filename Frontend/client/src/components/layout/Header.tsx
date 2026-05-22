@@ -19,7 +19,6 @@ export const Header = () => {
     try {
       await authService.logout();
     } catch {
-      // Сервер може відхилити logout, але ми все одно чистимо стейт локально
     } finally {
       setUser(null);
       setIsLogoutModalOpen(false);
@@ -32,12 +31,10 @@ export const Header = () => {
       <header className="sticky top-0 z-50 w-full bg-zinc-950 border-b border-zinc-800 px-6 py-3">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
 
-          {/* 1. Логотип */}
-          <Link to="/dashboard" className="flex items-center gap-2 text-2xl font-black text-white shrink-0">
+        <Link to="/dashboard" className="flex items-center gap-2 text-2xl font-black text-white shrink-0">
             <span className="text-purple-500">Edu</span>RPG
           </Link>
 
-          {/* 2. Навігація по сторінках */}
           <nav className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full pb-1 md:pb-0">
             <NavLink to="/dashboard" className={navLinkClass}>
               <Tent size={20} />
@@ -57,7 +54,6 @@ export const Header = () => {
             </NavLink>
           </nav>
 
-          {/* 3. Статистика гравця та кнопка виходу */}
           <div className="flex items-center gap-4 shrink-0">
             <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 px-4 py-1.5 rounded-full shadow-inner">
               <div className="flex items-center gap-1.5 text-yellow-400 font-bold" title="Монети">
@@ -83,7 +79,6 @@ export const Header = () => {
         </div>
       </header>
 
-      {/* Модальне вікно підтвердження виходу */}
       {isLogoutModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">

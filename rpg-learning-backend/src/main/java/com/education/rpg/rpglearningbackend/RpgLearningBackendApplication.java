@@ -6,16 +6,15 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.TimeZone;
 
-// exclude вимикає екран логіну, щоб нам було зручніше розробляти
+
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 @EnableScheduling
 public class RpgLearningBackendApplication {
 
     public static void main(String[] args) {
-        // 1. Встановлюємо UTC НАЙПЕРШИМ рядком, до запуску Spring
+        // Must be set before Spring starts so all JPA/timestamp handling uses UTC
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
-        // 2. Тепер запускаємо сервер
         SpringApplication.run(RpgLearningBackendApplication.class, args);
     }
 }

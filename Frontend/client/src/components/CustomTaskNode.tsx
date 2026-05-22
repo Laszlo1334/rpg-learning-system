@@ -4,7 +4,6 @@ import { Lock, Sparkles, Skull, Flame } from 'lucide-react';
 export const CustomTaskNode = ({ data }: any) => {
     const isBoss = data.type === 'BOSS';
 
-    // Styles for the node icon
     let nodeBg = "bg-zinc-800 border-zinc-700 text-zinc-400";
     let fogOfWarClass = "";
 
@@ -22,18 +21,16 @@ export const CustomTaskNode = ({ data }: any) => {
 
     return (
         <div className="relative group flex items-center justify-center">
-            {/* Connection handles */}
             <Handle type="target" position={Position.Bottom} className="w-1 h-1 bg-transparent border-0" />
             <Handle type="source" position={Position.Top} className="w-1 h-1 bg-transparent border-0" />
 
-            {/* Map node icon */}
             <div
                 className={`w-14 h-14 rounded-full border-2 flex items-center justify-center transition-transform hover:scale-110 z-10 ${nodeBg} ${fogOfWarClass} ${!data.isLocked ? 'cursor-pointer' : ''}`}
             >
                 {data.isLocked ? <Lock size={20} /> : data.isCompleted ? <Sparkles size={20} /> : isBoss ? <Skull size={20} /> : <Flame size={20} />}
             </div>
 
-            {/* Hover tooltip — shows task title only */}
+            {/* Tooltip: appears on hover, shows task title and status */}
             <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 p-4 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-500 z-50 pointer-events-none">
                 <div className="flex flex-col gap-2">
                     <h3 className="font-bold text-white text-sm">{data.title}</h3>

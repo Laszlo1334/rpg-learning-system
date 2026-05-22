@@ -13,11 +13,11 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Дозволяємо всі ендпоінти (/api/users, /api/items тощо)
-                        .allowedOrigins("http://localhost:5173") // Адреса твого React-додатку
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true); // Дуже важливо для передачі кукі/сесій авторизації Google!
+                        .allowCredentials(true); // Required for Google OAuth2 session cookies
             }
         };
     }

@@ -13,8 +13,6 @@ import { BackpackWidget } from '@/components/widgets/BackpackWidget';
 import { PlayerChronicleModal } from '@/components/modals/PlayerChronicleModal';
 import { EquipModal } from '@/components/modals/EquipModal';
 
-// ─── RPG Equipment Layout ──────────────────────────────────────────────────
-
 type SlotConfig = {
   slot: ItemSlot;
   label: string;
@@ -31,7 +29,6 @@ const SLOT_CONFIGS: SlotConfig[] = [
   { slot: 'WEAPON', label: 'Зброя (доп.)', icon: '🛡️', gridArea: 'off' },
 ];
 
-// Helper: rarity → solid border class (replaces default dashed border when item is equipped)
 const getRarityBorder = (rarity?: string): string => {
   switch (rarity) {
     case 'COMMON': return 'border-solid border-zinc-400';
@@ -68,7 +65,6 @@ const EquipSlot = ({ config, equippedEntry, onClick }: EquipSlotProps) => {
       ) : (
         <span className="text-xl opacity-30 select-none">{config.icon}</span>
       )}
-      {/* Tooltip */}
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded-lg text-[10px] text-zinc-300 font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
         {item ? item.name : config.label}
       </div>
@@ -76,14 +72,11 @@ const EquipSlot = ({ config, equippedEntry, onClick }: EquipSlotProps) => {
   );
 };
 
-// Helper: find first equipped item for a given slot
 const findEquipped = (inventory: InventoryEntry[], slot: ItemSlot, skipFirst?: boolean): InventoryEntry | null => {
   const matches = inventory.filter(e => e.isEquipped && e.item.slot === slot);
   if (skipFirst) return matches[1] ?? null;
   return matches[0] ?? null;
 };
-
-// ─── Main Component ─────────────────────────────────────────────────────────
 
 export const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -107,13 +100,10 @@ export const StudentDashboard = () => {
     }
   }, []);
 
-
-  // Load inventory on mount
   useEffect(() => {
     loadInventory();
   }, [loadInventory]);
 
-  // Auto-dismiss toast after 3 s
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(null), 3000);
@@ -151,13 +141,11 @@ export const StudentDashboard = () => {
   const targetUrl = isNewbie ? '/courses' : (lastCourseId ? `/courses/${lastCourseId}/foyer` : '/courses');
   const buttonText = isNewbie ? "Розпочати пригоду" : "Продовжити пригоду";
 
-  // Equipped items
   const equippedAvatar = findEquipped(inventory, 'AVATAR');
   const equippedHead = findEquipped(inventory, 'HEAD');
   const equippedBody = findEquipped(inventory, 'BODY');
   const equippedHands = findEquipped(inventory, 'HANDS');
   const equippedLegs = findEquipped(inventory, 'LEGS');
-  // Dual-wield: collect up to 2 equipped weapons as an ordered array
   const equippedWeapons = inventory.filter(e => e.isEquipped && e.item.slot === 'WEAPON');
   const equippedMainWpn = equippedWeapons[0] ?? null;
   const equippedOffWpn = equippedWeapons[1] ?? null;
@@ -165,26 +153,21 @@ export const StudentDashboard = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 relative">
 
-      {/* ── Toast notification ─────────────────────────────── */}
       {toast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 border border-zinc-700 text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-2xl">
           {toast}
         </div>
       )}
 
-      {/* --- БЛОК 1: Профіль Гравця --- */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row flex-wrap items-center gap-6">
 
-        {/* ── RPG Equipment Grid ────────────────────────────── */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Left column: HEAD / BODY / HANDS */}
           <div className="flex flex-col gap-2">
             <EquipSlot config={{ slot: 'HEAD', label: 'Head', icon: '⛑️', gridArea: 'head' }} equippedEntry={equippedHead} onClick={() => { setSelectedSlot('HEAD'); setReplaceItemId(equippedHead?.id ?? null); }} />
             <EquipSlot config={{ slot: 'BODY', label: 'Body', icon: '🥋', gridArea: 'body' }} equippedEntry={equippedBody} onClick={() => { setSelectedSlot('BODY'); setReplaceItemId(equippedBody?.id ?? null); }} />
             <EquipSlot config={{ slot: 'HANDS', label: 'Hands', icon: '🧤', gridArea: 'hands' }} equippedEntry={equippedHands} onClick={() => { setSelectedSlot('HANDS'); setReplaceItemId(equippedHands?.id ?? null); }} />
           </div>
 
-          {/* Center: AVATAR */}
           <div
             className={`w-24 h-24 rounded-2xl border-2 ${equippedAvatar ? getRarityBorder(equippedAvatar.item.rarity) : 'border-zinc-600'
               } bg-zinc-800 shadow-lg overflow-hidden flex items-center justify-center relative cursor-pointer hover:border-blue-500/60 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-all group`}
@@ -204,7 +187,6 @@ export const StudentDashboard = () => {
             <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
           </div>
 
-          {/* Right column: LEGS / WEAPON (main) / WEAPON (off) */}
           <div className="flex flex-col gap-2">
             <EquipSlot config={{ slot: 'LEGS', label: 'Legs', icon: '👢', gridArea: 'legs' }} equippedEntry={equippedLegs} onClick={() => { setSelectedSlot('LEGS'); setReplaceItemId(equippedLegs?.id ?? null); }} />
             <EquipSlot config={{ slot: 'WEAPON', label: 'Weapon (main)', icon: '⚔️', gridArea: 'main' }} equippedEntry={equippedMainWpn} onClick={() => { setSelectedSlot('WEAPON'); setReplaceItemId(equippedMainWpn?.id ?? null); }} />
@@ -212,7 +194,6 @@ export const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* ── Name + XP bar ─────────────────────────────────── */}
         <div className="flex-1 w-full text-center md:text-left">
           <h2 className="text-2xl font-black text-white mb-1">
             {user.username} <span className="text-zinc-500 text-lg font-bold ml-2">Рівень {user.level}</span>
@@ -229,7 +210,6 @@ export const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* ── Gold / Crystals ───────────────────────────────── */}
         <div className="flex gap-3 w-full md:w-auto justify-center">
           <div className="flex flex-col items-center justify-center bg-zinc-950 px-5 py-3 rounded-xl border border-zinc-800 min-w-[90px]">
             <Coins size={28} className="text-yellow-400 mb-1" />
@@ -241,7 +221,6 @@ export const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* Active Buffs */}
         {(isXpActive || isGoldActive || isShieldActive) && (
           <div className="flex flex-wrap gap-2 w-full mt-4">
             {isXpActive && (
@@ -265,7 +244,6 @@ export const StudentDashboard = () => {
         )}
       </div>
 
-      {/* --- БЛОК 2: Головна навігація --- */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
           onClick={() => navigate(targetUrl)}
@@ -281,12 +259,10 @@ export const StudentDashboard = () => {
         </button>
       </div>
 
-      {/* --- БЛОК 3: Сітка віджетів --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 auto-rows-fr">
         <CampfireWidget level={user.campfireLevel} />
         <EnergyWidget energy={user.energy} />
 
-        {/* Мікро-віджет: Літопис Героя */}
         <div
           onClick={() => setIsChronicleOpen(true)}
           className="h-full bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[160px] text-center transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] cursor-pointer group"
@@ -302,7 +278,7 @@ export const StudentDashboard = () => {
           </span>
         </div>
 
-        {/* Рюкзак — займає повну ширину другого ряду на xl */}
+        {/* BackpackWidget spans full width of the xl row */}
         <div className="xl:col-span-3">
           <BackpackWidget
             inventory={inventory}
@@ -315,7 +291,7 @@ export const StudentDashboard = () => {
 
       <PlayerChronicleModal isOpen={isChronicleOpen} onClose={() => { setIsChronicleOpen(false); refreshUser(); }} />
 
-      {/* Equip Modal — opens when a slot box is clicked */}
+      {/* Equip Modal — opens when a slot is clicked */}
       {selectedSlot && (
         <EquipModal
           selectedSlot={selectedSlot}
@@ -326,7 +302,7 @@ export const StudentDashboard = () => {
         />
       )}
 
-      {/* Custom confirmation modal for consumables */}
+      {/* Confirmation modal for consumable use */}
       {itemToUse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-zinc-700 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">

@@ -21,7 +21,7 @@ public class Item {
     @Column(nullable = false)
     private Integer price;
 
-    // ── Currency ──────────────────────────────────────────────────
+    // Currency used to purchase this item
     public enum CurrencyType {
         GOLD, CRYSTAL
     }
@@ -30,7 +30,7 @@ public class Item {
     @Column(nullable = false)
     private CurrencyType currencyType;
 
-    // ── Category ──────────────────────────────────────────────────
+    // Item category: cosmetic (equip-only) or consumable (activatable)
     public enum ItemCategory {
         COSMETIC, CONSUMABLE
     }
@@ -39,7 +39,7 @@ public class Item {
     @Column(nullable = false)
     private ItemCategory category;
 
-    // ── Effect (consumable mechanics) ─────────────────────────────
+    // Effect applied when a consumable is used
     public enum EffectType {
         XP_BOOST, // +50% XP for 30 min
         GOLD_BOOST, // ×2 Gold for 60 min
@@ -52,7 +52,7 @@ public class Item {
     @Column(nullable = false)
     private EffectType effect = EffectType.NONE;
 
-    // ── Cosmetic slot (for equip system) ─────────────────────────
+    // Equipment slot this item occupies (NONE for consumables)
     public enum ItemSlot {
         HEAD, BODY, HANDS, LEGS, WEAPON, AVATAR,
         NONE // consumables / items without a slot
@@ -62,7 +62,7 @@ public class Item {
     @Column(nullable = false)
     private ItemSlot slot = ItemSlot.NONE;
 
-    // ── Rarity ────────────────────────────────────────────────────
+    // Rarity tier used for visual distinction and drop rates
     public enum ItemRarity {
         COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
     }
@@ -73,7 +73,7 @@ public class Item {
 
     private String assetUrl;
 
-    // ── Weapon power (ATK bonus) — 0 for all non-weapon items ────────
+    // ATK bonus granted by weapons; 0 for all non-weapon items
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer attributeBonus = 0;
 }

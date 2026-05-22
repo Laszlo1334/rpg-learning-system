@@ -21,22 +21,22 @@ public class ItemService {
     private final TransactionHistoryRepository transactionHistoryRepository;
     private final ActivityLogService activityLogService;
 
-    // Отримати список усіх товарів у магазині
+
     public List<Item> getAllItems() {
         return itemRepository.findAll();
     }
 
     @Transactional
     public Inventory buyItem(String email, Long itemId) {
-        // 1. Знаходимо гравця
+
         User player = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Гравця не знайдено"));
 
-        // 2. Знаходимо предмет
+
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Предмет не знайдено в магазині"));
 
-        // 3. ПЕРЕВІРКА ВАЛЮТИ ТА СПИСАННЯ
+
         if (item.getCurrencyType() == Item.CurrencyType.GOLD) {
             if (player.getGold() < item.getPrice()) {
                 throw new RuntimeException(
@@ -52,11 +52,11 @@ public class ItemService {
             player.setCrystals(player.getCrystals() - item.getPrice());
         }
 
-        // 4. ЛОГІКА ІНВЕНТАРЮ (Косметика vs Розхідники)
+
         Inventory inventoryEntry;
 
         if (item.getCategory() == Item.ItemCategory.COSMETIC) {
-            // Косметику купуємо лише один раз
+            // Cosmetics are unique — block duplicate purchases
             boolean alreadyOwns = inventoryRepository.existsByUserAndItem(player, item);
             if (alreadyOwns) {
                 throw new RuntimeException("У вас вже є цей предмет гардеробу!");
@@ -65,26 +65,26 @@ public class ItemService {
             inventoryEntry.setUser(player);
             inventoryEntry.setItem(item);
             inventoryEntry.setIsEquipped(false);
-            inventoryEntry.setQuantity(1); // Навіть для косметики ставимо 1
+            inventoryEntry.setQuantity(1);
 
         } else {
-            // Розхідники (Consumables) - їх можна купувати багато разів (стакаються)
+            // Consumables stack: increment quantity if already owned
             Optional<Inventory> existingItemOpt = inventoryRepository.findByUserAndItem(player, item);
             if (existingItemOpt.isPresent()) {
                 inventoryEntry = existingItemOpt.get();
-                inventoryEntry.setQuantity(inventoryEntry.getQuantity() + 1); // Збільшуємо кількість на 1
+                inventoryEntry.setQuantity(inventoryEntry.getQuantity() + 1);
             } else {
                 inventoryEntry = new Inventory();
                 inventoryEntry.setUser(player);
                 inventoryEntry.setItem(item);
                 inventoryEntry.setIsEquipped(false);
-                inventoryEntry.setQuantity(1); // Перший такий предмет у рюкзаку
+                inventoryEntry.setQuantity(1);
             }
         }
 
         userRepository.save(player);
 
-        // 5. ЗБЕРЕЖЕННЯ ТРАНЗАКЦІЇ
+
         TransactionHistory transaction = TransactionHistory.builder()
                 .user(player)
                 .item(item)

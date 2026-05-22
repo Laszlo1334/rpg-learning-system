@@ -21,13 +21,13 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-    private User author; // Викладач
+    private User author; // Course instructor
 
-    private String accessCode; // Код для входу студентів
+    private String accessCode; // Invite code students use to enrol
 
     @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<Task> tasks; // Список квестів
+    private List<Task> tasks;
 
     private LocalDateTime createdAt;
 

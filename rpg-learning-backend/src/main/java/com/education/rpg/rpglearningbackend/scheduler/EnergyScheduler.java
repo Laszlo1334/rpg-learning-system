@@ -7,9 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Планувальник для автоматичного відновлення енергії всіх гравців о 00:00 UTC.
- */
+/** Resets all players' energy to 100 every day at 00:00 UTC. */
 @Component
 public class EnergyScheduler {
 
@@ -21,10 +19,7 @@ public class EnergyScheduler {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Виконується щодня о 00:00:00 UTC.
-     * Скидає енергію всіх гравців до максимального значення (100).
-     */
+    /** Triggered daily at midnight UTC; performs a bulk energy reset via a single UPDATE. */
     @Transactional
     @Scheduled(cron = "0 0 0 * * *")
     public void resetEnergyAtMidnight() {

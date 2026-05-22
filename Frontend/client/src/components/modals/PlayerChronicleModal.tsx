@@ -1,4 +1,3 @@
-// src/components/modals/PlayerChronicleModal.tsx
 import { useAuthStore } from '@/store/authStore';
 import {
     X, Target, Skull, Coins, Gem, Crosshair,
@@ -11,14 +10,13 @@ interface PlayerChronicleModalProps {
     onClose: () => void;
 }
 
-// --- Допоміжні функції ---
 
 const parseBuffDate = (dateStr?: string) => {
     if (!dateStr) return new Date(0);
     return new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
 };
 
-/** Повертає true, якщо баф активний (дата у майбутньому) */
+/** Returns true if the buff expiry date is still in the future */
 const isBuffActive = (dateString: string | null): boolean => {
     if (!dateString) return false;
     return parseBuffDate(dateString) > new Date();
@@ -34,7 +32,7 @@ const formatPlayTime = (totalSeconds: number): string => {
     return `${totalSeconds}s`;
 };
 
-/** Форматує ISO-дату в читабельний вигляд або "Немає даних" */
+/** Formats an ISO date string into a localised display string, or 'Немає даних' if absent */
 const formatDate = (dateString: string | null): string => {
     if (!dateString) return 'Немає даних';
     return new Date(dateString).toLocaleString('uk-UA', {
@@ -46,14 +44,13 @@ const formatDate = (dateString: string | null): string => {
     });
 };
 
-// --- Компонент ---
 
 export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalProps) => {
     const user = useAuthStore(state => state.user);
 
     if (!isOpen || !user) return null;
 
-    // Обчислення "Точність маг-касту"
+    // task completion accuracy (0–100 %)
     const totalAttempts = user.totalTasksCompleted + user.totalFailures;
     const accuracy = totalAttempts > 0
         ? Math.round((user.totalTasksCompleted / totalAttempts) * 100)
@@ -64,7 +61,7 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
             accuracy >= 50 ? 'from-yellow-500 to-amber-400' :
                 'from-red-500 to-orange-400';
 
-    // Активні бафи
+    // Active buffs
     const buffs = [
         {
             active: user.hasActiveShield === true,
@@ -130,8 +127,7 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
         >
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
 
-                {/* --- Шапка --- */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800 bg-zinc-950/60 flex-shrink-0">
+<div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800 bg-zinc-950/60 flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
                             <BookOpen size={22} className="text-blue-400" />
@@ -149,13 +145,9 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                     </button>
                 </div>
 
-                {/* --- Прокручуване тіло --- */}
+                {/* Scrollable body */}
                 <div className="overflow-y-auto flex-1 p-5 space-y-4">
 
-                    {/* ══════════════════════════════════
-                        СЕКЦІЯ 1: Бойова статистика
-                    ══════════════════════════════════ */}
-                    <div>
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <Target size={11} /> Бойова статистика
                         </p>
@@ -196,10 +188,8 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                         </div>
                     </div>
 
-                    {/* ══════════════════════════════════
-                        СЕКЦІЯ 2: Активні чари
-                    ══════════════════════════════════ */}
-                    <div>
+                {/* Section: active buffs */}
+                <div>
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <Sparkles size={11} /> Активні чари
                         </p>
@@ -258,10 +248,8 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                         )}
                     </div>
 
-                    {/* ══════════════════════════════════
-                        SECTION: Engagement & Streaks
-                    ══════════════════════════════════ */}
-                    <div>
+                {/* Section: engagement & streaks */}
+                <div>
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <Trophy size={11} /> Залученість та Серії
                         </p>
@@ -305,10 +293,8 @@ export const PlayerChronicleModal = ({ isOpen, onClose }: PlayerChronicleModalPr
                         </div>
                     </div>
 
-                    {/* ══════════════════════════════════
-                        СЕКЦІЯ 3: Журнал активності
-                    ══════════════════════════════════ */}
-                    <div>
+                {/* Section: activity log */}
+                <div>
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <CalendarDays size={11} /> Журнал активності
                         </p>

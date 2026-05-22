@@ -14,7 +14,6 @@ export const InventoryPage = () => {
     const fetchInventory = async () => {
         try {
             const data = await inventoryService.getInventory();
-            // Відфільтровуємо лише косметику
             setInventory(data.filter((entry: InventoryEntry) => entry.item.category === 'COSMETIC'));
         } catch (error) {
             console.error('Помилка завантаження інвентарю', error);
@@ -48,7 +47,6 @@ export const InventoryPage = () => {
         <div className="min-h-screen bg-zinc-950 text-white p-6">
             <div className="max-w-6xl mx-auto">
 
-                {/* Header */}
                 <header className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-800">
                     <div className="flex items-center gap-4">
                         <button
@@ -63,7 +61,6 @@ export const InventoryPage = () => {
                     </div>
                 </header>
 
-                {/* Empty state */}
                 {inventory.length === 0 ? (
                     <div className="text-center py-20 bg-zinc-900/50 rounded-3xl border border-zinc-800">
                         <Crown size={48} className="mx-auto text-zinc-600 mb-4" />
@@ -89,14 +86,12 @@ export const InventoryPage = () => {
                                         : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600'
                                 }`}
                             >
-                                {/* "Надіто" badge */}
                                 {entry.isEquipped && (
                                     <div className="absolute top-0 right-0 bg-purple-500 text-white text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-widest z-10">
                                         Надіто
                                     </div>
                                 )}
 
-                                {/* Item image */}
                                 <div className="w-full h-40 bg-zinc-950 rounded-xl mb-4 flex items-center justify-center border border-zinc-800">
                                     {entry.item.assetUrl ? (
                                         <img

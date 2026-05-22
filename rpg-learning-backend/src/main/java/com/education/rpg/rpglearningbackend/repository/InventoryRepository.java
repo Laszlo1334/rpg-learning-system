@@ -11,21 +11,18 @@ import java.util.Optional;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
-    // Fetch all inventory entries by user id
     List<Inventory> findByUserId(Long userId);
 
-    // Fetch all inventory entries by User object
     List<Inventory> findAllByUser(User user);
 
-    // Fetch all currently equipped items for a user
     List<Inventory> findByUserIdAndIsEquippedTrue(Long userId);
 
-    // Find a specific inventory entry belonging to a user (used for equip/unequip security check)
+    // Ownership-safe lookup — used to prevent equip/unequip of another user's item
     Optional<Inventory> findByIdAndUserId(Long id, Long userId);
 
-    // Check ownership for cosmetics (prevents duplicate purchases)
+    // Used to block duplicate cosmetic purchases
     boolean existsByUserAndItem(User user, Item item);
 
-    // Find a specific item entry for stacking (consumable quantity management)
+    // Used to increment quantity when a consumable is purchased again
     Optional<Inventory> findByUserAndItem(User user, Item item);
 }

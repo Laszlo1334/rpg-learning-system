@@ -28,11 +28,11 @@ public class Task {
     @Column(columnDefinition = "TEXT")
     private String theoryContent;
 
-    // --- НОВЕ: Список запитань для цього забігу (Roguelite цикл) ---
+    // Questions drawn for each roguelite run of this task
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Question> questions = new ArrayList<>();
 
-    // --- МЕХАНІКА ГІЛОК ТА "ТУМАНУ ВІЙНИ" ---
+    // Branch name used for the fog-of-war task map
     private String branchName;
 
     @Column(nullable = false)
@@ -43,11 +43,11 @@ public class Task {
     @Column(name = "prerequisite_task_id")
     private List<Long> prerequisiteTaskIds = new ArrayList<>();
 
-    // --- РЕЖИМИ НАВЧАННЯ (Управління когнітивним навантаженням) ---
+    // When true, theory is hidden (Mode B: discovery-first learning)
     @Column(nullable = false)
-    private Boolean isTheoryHidden = false; // true = Режим Б (теорії немає)
+    private Boolean isTheoryHidden = false;
 
-    // Нагороди за весь забіг (видаються після успішного проходження всіх запитань)
+    // Rewards granted after all questions in the run are answered correctly
     private Integer rewardXp;
     private Integer rewardGold;
 
@@ -56,13 +56,13 @@ public class Task {
     }
 
     @Column(nullable = false)
-    private Integer dynamicQuestionCount = 5; // Задаємо 5 як дефолтне значення
+    private Integer dynamicQuestionCount = 5;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskType type = TaskType.REGULAR;
 
-    // Метадані для Боса (можуть бути null для REGULAR)
+    // Boss-only fields; null for REGULAR tasks
     private String bossName;
     private String bossAvatarUrl;
     private Integer timeLimitSeconds;

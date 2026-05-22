@@ -44,7 +44,7 @@ public class AuthService {
             role = Role.ADMIN;
         }
 
-        // Створюємо юзера без Builder, через звичайні сеттери
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -60,13 +60,13 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Автоматично додаємо Базовий Аватар до інвентарю
+        // Grant the default avatar item to every new user on registration
         Optional<Item> defaultAvatarOpt = itemRepository.findByName("Базовий Аватар");
         if (defaultAvatarOpt.isPresent()) {
             Inventory inventory = new Inventory();
             inventory.setUser(savedUser);
             inventory.setItem(defaultAvatarOpt.get());
-            inventory.setIsEquipped(true); // Автоматично одягаємо
+            inventory.setIsEquipped(true);
             inventory.setQuantity(1);
             inventoryRepository.save(inventory);
         }

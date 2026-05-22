@@ -33,7 +33,6 @@ public class ArenaController {
     @PostMapping("/finish-run")
     public ResponseEntity<RunCompletionResponse> finishRun(@RequestBody RunCompletionRequest request,
                                             @AuthenticationPrincipal OAuth2User principal) {
-        // Беремо email гравця з його Google-сесії
         String email = principal.getAttribute("email");
         RunCompletionResponse response = submissionService.processRunCompletion(email, request);
         return ResponseEntity.ok(response);

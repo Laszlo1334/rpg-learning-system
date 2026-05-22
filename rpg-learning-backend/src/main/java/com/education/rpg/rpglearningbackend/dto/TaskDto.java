@@ -29,11 +29,11 @@ public class TaskDto {
 
     private List<QuestionDto> questions;
 
-    private String type; // Serialized as a String to the frontend (REGULAR, BOSS, MEMORY)
+    private String type; // TaskType enum serialized as a string for the frontend
     private BossMetadata bossMetadata;
     private Integer dynamicQuestionCount;
 
-    // Nested class for boss-specific metadata
+    // Boss-specific metadata; null for non-boss tasks
     @Data
     public static class BossMetadata {
         private String bossName;

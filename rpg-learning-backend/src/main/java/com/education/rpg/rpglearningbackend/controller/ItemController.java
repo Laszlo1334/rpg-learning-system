@@ -42,7 +42,6 @@ public class ItemController {
             Inventory result = itemService.buyItem(email, id);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
-            // Якщо сталася помилка (немає грошей, низький рівень), повертаємо її як текст
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

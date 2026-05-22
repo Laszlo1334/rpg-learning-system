@@ -1,4 +1,3 @@
-// src/services/authService.ts
 import { api } from './api';
 import type { User, UserStatsDto } from '../types';
 
@@ -20,12 +19,10 @@ export const authService = {
     await api.post('/users/me/consume-shield');
   },
 
-  // Login via Google OAuth2
   loginWithGoogle: () => {
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   },
 
-  // Logout
   logout: async () => {
     await api.post('/logout');
   }

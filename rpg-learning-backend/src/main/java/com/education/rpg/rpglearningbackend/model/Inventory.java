@@ -13,23 +13,23 @@ public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID remains public — frontend needs it for use/equip calls
+    private Long id; // Exposed to frontend for use/equip API calls
 
-    @JsonIgnore // Prevent circular reference / LazyInitializationException
+    @JsonIgnore // Prevents circular serialization and lazy-load exceptions
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // EAGER so the frontend immediately gets item name, price, assetUrl
+    // EAGER so item details (name, price, assetUrl) are always available in the response
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @JsonProperty("isEquipped") // Fix Lombok is-prefix → Jackson strips "is" → "equipped"
+    @JsonProperty("isEquipped") // Lombok strips the "is" prefix; this forces the correct JSON key
     @Column(nullable = false)
     private Boolean isEquipped = false;
 
-    // Stack count for consumables (cosmetics always = 1)
+    // Stack count: consumables may stack; cosmetics are always 1
     @Column(nullable = false)
     private Integer quantity = 1;
 

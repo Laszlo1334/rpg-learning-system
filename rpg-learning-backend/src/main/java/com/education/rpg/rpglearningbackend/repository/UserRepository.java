@@ -19,24 +19,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
-    // Метод для входу через Google (залишив один, без дублікатів)
     Optional<User> findByEmail(String email);
 
-    // 1. Для таблиці лідерів (Топ гравців) - ЗМІНЕНО НА currentXp
     List<User> findAllByOrderByCurrentXpDesc();
 
-    // 2. Для адмінки (Знайти всіх вчителів або всіх студентів)
     List<User> findByRole(Role role);
 
-    // ЗМІНЕНО: Тепер беремо лише тих студентів, у яких isPublicProfile == true,
-    // і сортуємо за currentXp.
     List<User> findTop10ByRoleAndIsPublicProfileTrueOrderByCurrentXpDesc(Role role);
 
-    // Для Глобального Лідерборду
     List<User> findTop10ByIsPublicProfileTrueOrderByCurrentXpDesc();
     List<User> findTop10ByIsPublicProfileTrueOrderByLifetimeGoldDesc();
 
-    // --- НОВЕ: МІКРО-ЛІДЕРБОРД ДЛЯ КОНКРЕТНОГО КУРСУ ---
+
     @Query("SELECT new com.education.rpg.rpglearningbackend.dto.CourseLeaderboardDto(u.id, u.username, SUM(t.rewardXp)) " +
             "FROM CompletedTask ct " +
             "JOIN ct.user u " +
@@ -46,7 +40,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "ORDER BY SUM(t.rewardXp) DESC")
     List<CourseLeaderboardDto> getLeaderboardByCourseId(@Param("courseId") Long courseId);
 
-    // --- SCHEDULER: Масове скидання енергії всіх гравців ---
+    // Called by EnergyScheduler to reset all players' energy to 100 at midnight
     @Modifying
     @Query("UPDATE User u SET u.energy = 100")
     void resetAllUsersEnergy();

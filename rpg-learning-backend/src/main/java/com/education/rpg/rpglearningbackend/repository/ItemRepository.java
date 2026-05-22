@@ -8,12 +8,10 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    // Знайти предмети за категорією (наприклад, тільки CONSUMABLE)
     List<Item> findByCategory(Item.ItemCategory category);
 
-    // Перевірка існування предмета за назвою (захист від дублікатів у сідері)
+    // Used by the database seeder to prevent duplicate item entries
     boolean existsByName(String name);
 
-    // Знайти предмет за назвою
     java.util.Optional<Item> findByName(String name);
 }

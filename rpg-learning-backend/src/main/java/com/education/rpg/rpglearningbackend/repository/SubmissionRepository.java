@@ -9,15 +9,13 @@ import java.util.List;
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
-    // Знайти всі відповіді конкретного студента
     List<Submission> findByStudentId(Long studentId);
 
-    // Знайти всі роботи, які чекають перевірки (для викладача)
     List<Submission> findByTaskIdAndStatus(Long taskId, SubmissionStatus status);
 
-    // 1. Перевіряє, чи взагалі пробував студент це завдання (для видачі Кристалів тільки за ПЕРШУ помилку)
+    // True if the student has any prior attempt — used to award crystals only on the first failure
     boolean existsByTaskIdAndStudentId(Long taskId, Long studentId);
 
-    // 2. Перевіряє, чи студент вже УСПІШНО пройшов це завдання (щоб не давати XP та Золото вдруге)
+    // True if the student already passed this task — prevents awarding XP/Gold a second time
     boolean existsByTaskIdAndStudentIdAndStatus(Long taskId, Long studentId, SubmissionStatus status);
 }

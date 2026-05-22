@@ -24,12 +24,12 @@ public class Submission {
     private String studentAnswer;
 
     @Enumerated(EnumType.STRING)
-    private SubmissionStatus status; // PENDING, APPROVED, REJECTED
+    private SubmissionStatus status;
 
     @Column(columnDefinition = "TEXT")
     private String teacherComment;
 
-    // Номер спроби (для аналітики)
+    // Tracks how many times this student has submitted this task (used in analytics)
     private Integer attemptNumber = 1;
 
     private LocalDateTime submittedAt;

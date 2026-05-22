@@ -23,16 +23,16 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    // --- ТВОРЇ СТАРІ БАЗОВІ ПОЛЯ (Повернули на місце) ---
+
     @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String avatarUrl; // Повернув, бо ти використовував це в DTO
+    private String avatarUrl;
 
-    // --- БАЗОВА ЕКОНОМІКА ТА ПРОГРЕС ---
+
     @Column(nullable = false)
     private Integer level = 1;
 
@@ -46,48 +46,49 @@ public class User {
 
 
     @Column(nullable = false)
-    private Integer gold = 0; // Поточний баланс монет (для Ачіверів)
+    private Integer gold = 0;
+
+    // Crystals are earned through productive failure (wrong answers)
+    @Column(nullable = false)
+    private Integer crystals = 0;
+
 
     @Column(nullable = false)
-    private Integer crystals = 0; // Валюта "Продуктивної невдачі"
+    private Integer campfireLevel = 1; // Login streak bonus level (1–5)
 
-    // --- МЕХАНІКА "БАГАТТЯ ТАБОРУ" (Streak) ---
+    private LocalDateTime lastLoginDate; // Used to detect 48-hour inactivity and reset the streak
+
+
     @Column(nullable = false)
-    private Integer campfireLevel = 1; // Від 1 до 5
+    private Integer energy = 100; // Cognitive-load throttle; max 100, restores over time
 
-    private LocalDateTime lastLoginDate; // Для перевірки 48 годин бездіяльності
+    private LocalDateTime lastTaskCompletionDate; // Used to calculate energy recovery (+1 per 6 min)
 
-    // --- МЕХАНІКА "ЕНЕРГІЯ ВІДПОЧИНКУ" (Когнітивне навантаження) ---
-    @Column(nullable = false)
-    private Integer energy = 100; // Максимум 100
 
-    private LocalDateTime lastTaskCompletionDate; // Для розрахунку відновлення (+1 за 6 хв)
-
-    // --- ПРИВАТНІСТЬ (SDT: Автономія та Безпека) ---
     @Column(nullable = false)
     @JsonProperty("isPublicProfile")
-    private Boolean isPublicProfile = true; // Opt-out система для Лідерборду
+    private Boolean isPublicProfile = true; // Opt-out: false hides the user from the leaderboard
 
-    // --- АКТИВНІ БАФИ ВІД ПРЕДМЕТІВ ---
-    private LocalDateTime xpBuffEndsAt; // Еліксир Мудрості
-    private LocalDateTime goldBuffEndsAt; // Магніт Гобліна
-    private LocalDateTime energyStasisEndsAt; // Кава Магістра
-    private Boolean hasActiveShield = false; // Аура Безстрашності (діє на 1 рівень)
+    // Active consumable buff expiry timestamps
+    private LocalDateTime xpBuffEndsAt;
+    private LocalDateTime goldBuffEndsAt;
+    private LocalDateTime energyStasisEndsAt;
+    private Boolean hasActiveShield = false; // Shield absorbs one defeat
 
-    // --- ЛІТОПИС ГРАВЦЯ (Дані для дипломного дослідження) ---
+    // Lifetime totals for research analytics
     @Column(nullable = false)
-    private Integer lifetimeGold = 0; // Все зароблене золото за весь час
+    private Integer lifetimeGold = 0; // Total gold ever earned (never decremented)
 
     @Column(nullable = false)
-    private Integer lifetimeCrystals = 0; // Всі отримані кристали
+    private Integer lifetimeCrystals = 0; // Total crystals ever earned (never decremented)
 
     @Column(nullable = false)
     private Integer totalTasksCompleted = 0;
 
     @Column(nullable = false)
-    private Integer totalFailures = 0; // Ключова метрика для аналізу "Продуктивної невдачі"
+    private Integer totalFailures = 0; // Key metric for productive-failure research analysis
 
-    // --- Analytics: login & engagement ---
+    // Login and engagement analytics
     @Column(nullable = false)
     private Integer totalLoginDays = 0;
 
@@ -97,7 +98,7 @@ public class User {
     @Column(nullable = false)
     private Long totalPlayTimeSeconds = 0L;
 
-    // --- Analytics: flawless task streaks ---
+    // Flawless-run streak analytics
     @Column(nullable = false)
     private Integer currentFlawlessStreak = 0;
 

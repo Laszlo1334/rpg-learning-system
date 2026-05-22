@@ -229,10 +229,10 @@ public class SubmissionService {
             student.setCurrentFlawlessStreak(0);
         }
 
-        // 1. Calculate Flawless Multiplier (e.g., +10% per flawless run, max +100%)
+        // +10% per consecutive flawless run, capped at +100%
         double flawlessMultiplier = flawless ? (1.0 + Math.min(student.getCurrentFlawlessStreak() * 0.1, 1.0)) : 1.0;
 
-        // 2. Calculate Campfire Multiplier
+        // Campfire level increases the multiplier: level 5 doubles all rewards
         int campfireLevel = student.getCampfireLevel() != null ? student.getCampfireLevel() : 1;
         double campfireMultiplier = switch (campfireLevel) {
             case 2 -> 1.05;
@@ -242,15 +242,15 @@ public class SubmissionService {
             default -> 1.0;
         };
 
-        // 3. Check Active Item Buffs (x2 multiplier)
+        // Active XP/Gold buff items each double their respective reward
         double xpBuffMultiplier = (student.getXpBuffEndsAt() != null && now.isBefore(student.getXpBuffEndsAt())) ? 2.0 : 1.0;
         double goldBuffMultiplier = (student.getGoldBuffEndsAt() != null && now.isBefore(student.getGoldBuffEndsAt())) ? 2.0 : 1.0;
 
-        // Check Rest Energy Multiplier (x1.5 if user has energy)
+        // Having any energy remaining grants a 1.5× reward bonus
         int currentEnergy = student.getEnergy() != null ? student.getEnergy() : 0;
         double energyMultiplier = currentEnergy > 0 ? 1.5 : 1.0;
 
-        // 4. Apply Final Multipliers
+
         int finalXp = (int) Math.round(baseXp * flawlessMultiplier * campfireMultiplier * xpBuffMultiplier * energyMultiplier);
         int finalGold = (int) Math.round(baseGold * flawlessMultiplier * campfireMultiplier * goldBuffMultiplier * energyMultiplier);
 

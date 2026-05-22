@@ -1,4 +1,4 @@
-// src/services/courseService.ts
+
 import { api } from './api';
 import type { CourseProgressDto } from '@/types';
 

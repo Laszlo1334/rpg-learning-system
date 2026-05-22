@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class SubmissionReviewRequest {
-    private SubmissionStatus status; // Очікуємо APPROVED або REJECTED
-    private String teacherComment;   // Текст коментаря (наприклад, "Молодець!")
+    private SubmissionStatus status;
+    private String teacherComment;
 }

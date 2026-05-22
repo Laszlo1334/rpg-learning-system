@@ -5,7 +5,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
-    // Крок 1: Топологічне сортування та визначення рівнів
+    // Step 1: Topological sort — assign a depth level to each task
     const taskLevels = new Map<number, number>();
     let remainingTasks = [...tasks];
 
@@ -36,7 +36,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
         }
     }
 
-    // Крок 2: Групуємо завдання по рівнях
+    // Step 2: Group tasks by depth level
     const tasksByLevel: TaskDto[][] = [];
     tasks.forEach(task => {
         const level = taskLevels.get(task.id);
@@ -48,7 +48,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
         tasksByLevel[level].push(task);
     });
 
-    // Крок 3: Формуємо Вузли (Nodes) із "шумом"
+    // Step 3: Build ReactFlow nodes with deterministic position jitter
     const CELL_WIDTH = 280;
     const LEVEL_HEIGHT = 160;
 
@@ -59,7 +59,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
             const idealX = (index - (count - 1) / 2) * CELL_WIDTH;
             const idealY = levelIndex * -LEVEL_HEIGHT;
 
-            // Детермінований шум: від -20 до +20 px
+            // Deterministic per-task jitter: spreads overlapping nodes without randomness
             const jitterX = ((task.id * 137) % 40) - 20;
             const jitterY = ((task.id * 93) % 40) - 20;
 
@@ -69,7 +69,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
                     x: idealX + jitterX,
                     y: idealY + jitterY
                 },
-                type: 'customTaskNode', // Назва нашого кастомного UI-компонента
+                type: 'customTaskNode',
                 data: {
                     id: task.id,
                     title: task.title,
@@ -82,7 +82,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
         });
     });
 
-    // Крок 4: Формуємо Ребра (Edges)
+    // Step 4: Build edges from prerequisite relationships
     tasks.forEach(task => {
         const prereqs = task.prerequisiteTaskIds || [];
         prereqs.forEach(reqId => {
@@ -92,10 +92,10 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
                 id: `e${reqId}-${task.id}`,
                 source: reqId.toString(),
                 target: task.id.toString(),
-                type: 'default', // Звичайна плавна лінія
-                animated: isTaskActive, // Анімуємо лінію, якщо завдання зараз актуальне
+                type: 'default',
+                animated: isTaskActive, // Animate edge when the dependent task is currently actionable
                 style: {
-                    stroke: isTaskActive ? '#a855f7' : '#3f3f46', // Фіолетова для активних, сіра для інших
+                    stroke: isTaskActive ? '#a855f7' : '#3f3f46', // Purple for active, grey for locked/done
                     strokeWidth: 3
                 },
             });

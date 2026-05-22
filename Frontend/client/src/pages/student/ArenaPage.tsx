@@ -15,7 +15,6 @@ export const ArenaPage = () => {
 
     const [task, setTask] = useState<TaskDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    // Controls whether the theory panel is visible; synced after the task loads
     const [isTheoryVisible, setIsTheoryVisible] = useState(true);
 
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,7 +36,6 @@ export const ArenaPage = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [runResult, setRunResult] = useState<RunCompletionResponse | null>(null);
 
-    // Inline arena toast (avoids external library dependency)
     const [arenaToast, setArenaToast] = useState<{ message: string; type: 'shield' | 'crystal' | 'error' } | null>(null);
 
     const showArenaToast = useCallback((message: string, type: 'shield' | 'crystal' | 'error') => {
@@ -51,7 +49,6 @@ export const ArenaPage = () => {
                 if (id) {
                     const data = await taskService.getTaskById(Number(id));
                     setTask(data);
-                    // Hide theory by default when the task explicitly hides it
                     setIsTheoryVisible(!data.isTheoryHidden);
 
                     if (data.type === 'BOSS' && data.bossMetadata?.timeLimitSeconds) {
@@ -116,32 +113,26 @@ export const ArenaPage = () => {
             setShowNextButton(true);
 
             if (result.isCorrect) {
-                // ── Correct answer ────────────────────────────────────────
                 setIsSuccess(true);
             } else {
-                // ── Wrong answer ──────────────────────────────────────────
                 setAttemptsTaken(prev => prev + 1);
                 setIsShaking(true);
                 setTimeout(() => setIsShaking(false), 500);
 
-                // STEP 1: Check if Rune of Protection (shield) is active
                 if (user?.hasActiveShield) {
                     showArenaToast('🛡️ Rune of Protection absorbed the blow! No life lost.', 'shield');
-                    // Burn the shield on the backend in background (non-blocking UX)
+                    // Burn the shield on the backend without blocking the UI
                     authService.consumeShield()
                         .then(() => refreshUser())
                         .catch(err => console.error('[Shield] consume failed:', err));
-                    // Hearts stay the same — skip setHearts
                 } else {
-                    // STEP 2: No shield — deduct a heart
                     setHearts(prev => prev - 1);
                 }
 
-                // STEP 3: Productive failure crystal reward (first miss only)
+                // Award crystals on the first miss per question (productive failure mechanic);
+                // the backend already persists this — we just update the local counter.
                 if (!failedQuestionIds.includes(currentQuestion.id)) {
                     setFailedQuestionIds(prev => [...prev, currentQuestion.id]);
-                    // Backend already awards crystals via SubmissionService,
-                    // but we reflect the response amount in the local counter
                     if (result.crystalsAwarded && result.crystalsAwarded > 0) {
                         setEarnedCrystals(prev => prev + result.crystalsAwarded!);
                         showArenaToast(`Wrong answer — but you earned +${result.crystalsAwarded} 💎 (Productive Failure)!`, 'crystal');
@@ -149,7 +140,6 @@ export const ArenaPage = () => {
                         showArenaToast('Wrong answer. Keep trying!', 'error');
                     }
                 } else {
-                    // Repeat mistake — no crystals, no extra toast
                     showArenaToast('Wrong again. Study the theory carefully!', 'error');
                 }
             }
@@ -166,13 +156,11 @@ export const ArenaPage = () => {
         setSelectedOption(null);
         setIsSuccess(false);
 
-        // Якщо втрачено останнє серце, завершуємо гру поразкою
         if (hearts <= 0) {
             handleFinishRun(false, 'defeat');
             return;
         }
 
-        // Інакше йдемо до наступного питання або святкуємо перемогу
         if (task?.questions && currentIndex + 1 < task.questions.length) {
             setCurrentIndex(prev => prev + 1);
         } else {
@@ -183,24 +171,9 @@ export const ArenaPage = () => {
     const handleFinishRun = useCallback(async (isVictory: boolean, reason: 'victory' | 'defeat' | 'timeout' | 'cheated') => {
         setRunStatus(reason);
 
-        // 🎉 Confetti — only on victory, right after showing the screen
         if (isVictory) {
-            // Left burst
-            confetti({
-                particleCount: 80,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0, y: 0.65 },
-                colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'],
-            });
-            // Right burst
-            confetti({
-                particleCount: 80,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1, y: 0.65 },
-                colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'],
-            });
+            confetti({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0, y: 0.65 }, colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'] });
+            confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1, y: 0.65 }, colors: ['#a855f7', '#3b82f6', '#facc15', '#34d399'] });
         }
 
         if (task) {
@@ -225,7 +198,6 @@ export const ArenaPage = () => {
                 console.error('[ArenaPage] finishRun error:', error);
             }
         }
-        // Update player profile (XP, Gold, Crystals) after run completion
         await refreshUser();
     }, [task, failedQuestionIds, attemptsTaken, hintsUsed, refreshUser]);
 
@@ -239,7 +211,6 @@ export const ArenaPage = () => {
     return (
         <>
 
-            {/* ── Arena toast notification ──────────────────────────────── */}
             {arenaToast && (
                 <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all ${arenaToast.type === 'shield'
                     ? 'bg-blue-900 border border-blue-600 text-blue-200'
@@ -268,7 +239,7 @@ export const ArenaPage = () => {
                     </button>
                     <div className="flex items-center gap-6 md:gap-8">
 
-                        {/* Theory toggle button — hidden during boss runs */}
+                        {/* Theory panel toggle is hidden during boss runs to prevent cheating */}
                         {!isBoss && (
                             <button
                                 onClick={() => {
@@ -311,7 +282,6 @@ export const ArenaPage = () => {
 
                 <main className="flex-1 flex flex-col w-full p-4 lg:p-6 relative z-10">
 
-                    {/* 1. Full-width progress bar above the panels */}
                     <div className="w-full max-w-7xl mx-auto mb-6">
                         <div className={`flex items-center gap-4 text-sm font-bold tracking-wider uppercase ${isBoss ? 'text-red-500/70' : 'text-zinc-400'}`}>
                             <span className="whitespace-nowrap">Step {currentIndex + 1} of {task.questions?.length || 1}</span>
@@ -324,10 +294,8 @@ export const ArenaPage = () => {
                         </div>
                     </div>
 
-                    {/* 2. Split panels container — Theory (left) + Questions (right) */}
                     <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto transition-all duration-500">
 
-                        {/* Theory panel — collapses smoothly when hidden */}
                         <div className={`transition-all duration-500 overflow-hidden ${isTheoryVisible && !isBoss ? 'lg:w-1/2 opacity-100' : 'w-0 opacity-0 p-0'}`}>
                             <div className={`border rounded-3xl p-6 overflow-y-auto max-h-[80vh] h-full ${isBoss ? 'bg-zinc-950/60 border-red-900/30' : 'bg-zinc-900 border-zinc-800'}`}>
                                 {isBoss ? (
@@ -347,7 +315,6 @@ export const ArenaPage = () => {
                             </div>
                         </div>
 
-                        {/* Questions panel — expands to full width when theory is hidden */}
                         <div className={`transition-all duration-500 flex flex-col ${isBoss || !isTheoryVisible ? 'w-full max-w-3xl mx-auto' : 'lg:w-1/2'}`}>
 
                             <div className={`border rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center relative backdrop-blur-sm ${isBoss ? 'bg-zinc-950/80 border-red-900/30 shadow-[0_0_30px_rgba(220,38,38,0.05)]' : 'bg-zinc-900 border-zinc-800'}`}>
@@ -398,7 +365,7 @@ export const ArenaPage = () => {
                             </div>
                         </div>
 
-                    </div> {/* end: split panels container */}
+                    </div>
                 </main>
 
                 {runStatus !== 'playing' && (

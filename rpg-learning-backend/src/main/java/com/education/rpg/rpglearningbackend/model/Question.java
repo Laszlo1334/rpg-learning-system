@@ -31,14 +31,14 @@ public class Question {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private QuestionType type; // TEST або TEXT
+    private QuestionType type;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "question_options", joinColumns = @JoinColumn(name = "question_id"))
     @Column(name = "option_text")
     private List<String> options;
 
-    // СЕКРЕТНЕ ПОЛЕ: воно є тут у БД, але ми не передаємо його у QuestionDto!
+    // Stored in DB but intentionally excluded from QuestionDto to prevent cheating
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "question_correct_answers", joinColumns = @JoinColumn(name = "question_id"))
     @Column(name = "correct_answer")

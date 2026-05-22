@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class CourseLeaderboardDto {
     private Long userId;
     private String username;
-    private Long courseXp; // Spring Data JPA returns the SUM as Long
+    private Long courseXp; // JPA SUM aggregation returns Long
     private String avatarUrl;
 
     public CourseLeaderboardDto(Long userId, String username, Long courseXp) {

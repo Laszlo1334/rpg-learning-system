@@ -37,13 +37,13 @@ public class DatabaseSeeder {
         return args -> {
             System.out.println("🌱 Запуск модульної перевірки бази даних...");
 
-            // 1. БЛОК КОРИСТУВАЧІВ
+            // === Users ===
             if (userRepository.count() == 0) {
                 System.out.println("Створення користувачів...");
                 generateUsers(userRepository, passwordEncoder);
             }
 
-            // 2. БЛОК КУРСІВ ТА ЗАВДАНЬ
+            // === Courses & Tasks ===
             if (courseRepository.count() == 0) {
                 System.out.println("Створення курсів...");
                 User teacher = userRepository.findByEmail("teacher@rpg.com").orElseThrow();
@@ -58,7 +58,7 @@ public class DatabaseSeeder {
                 generateBranchedCourse(courses.get(2), 20, taskRepository);
             }
 
-            // 1. Шукаємо старий курс. Якщо він є — використовуємо його, інакше створюємо новий
+            // Reuse the networking course if it already exists, otherwise create and persist it.
             Course networkCourse = courseRepository.findAll().stream()
                     .filter(c -> "NET101".equals(c.getAccessCode()))
                     .findFirst()
@@ -71,8 +71,7 @@ public class DatabaseSeeder {
 
             loadTasksFromJson(networkCourse, taskRepository);
 
-            // 3. БЛОК МАГАЗИНУ (запускається завжди, але хелпери не дадуть створити
-            // дублікати)
+            // === Shop Items === (runs every startup; helpers skip existing items to prevent duplicates)
             System.out.println("Перевірка та оновлення асортименту магазину...");
             generateShopItems(itemRepository);
 
@@ -81,13 +80,13 @@ public class DatabaseSeeder {
     }
 
     // ==========================================
-    // ХЕЛПЕРИ ДЛЯ ПРОЦЕДУРНОЇ ГЕНЕРАЦІЇ
+    // Procedural generation helpers
     // ==========================================
 
     private void generateLinearCourse(Course course, int taskCount, String prefix, TaskRepository taskRepository) {
         Task prevTask = null;
         for (int i = 1; i <= taskCount; i++) {
-            boolean isBoss = (i % 5 == 0); // Кожне 5-те завдання - Бос
+            boolean isBoss = (i % 5 == 0); // Every 5th task is a Boss task
             Task task = new Task();
             task.setTitle(prefix + " " + i);
             task.setTheoryContent(isBoss ? "Приготуйтесь до перевірки знань!" : "Детальна теорія для завдання " + i);
@@ -115,7 +114,7 @@ public class DatabaseSeeder {
     }
 
     private void generateBranchedCourse(Course course, int totalTasks, TaskRepository taskRepository) {
-        // Генерує деревоподібну структуру (схоже на те, що було для Курсу 1)
+
         Task root = new Task();
         root.setTitle("Вступ до " + course.getTitle());
         root.setTheoryContent("Основи основ.");
@@ -172,7 +171,7 @@ public class DatabaseSeeder {
                 remaining--;
             }
 
-            // Бос Злиття
+            // Merge Boss: unlocked only after completing both branches
             if (remaining > 0) {
                 Task boss = new Task();
                 boss.setTitle("Бос Злиття " + order);
@@ -233,27 +232,27 @@ public class DatabaseSeeder {
         student.setLastLoginDate(LocalDateTime.now());
         userRepository.save(student);
 
-        // Фіктивні студенти для лідерборду
+        // Fictional students to populate the leaderboard
         String[] heroNames = {
                 "Сем Гемджі", "Піппін Тук", "Меррі Брендібак",
                 "Арагорн", "Леголас", "Гімлі",
                 "Боромір", "Фарамір", "Еовін",
                 "Галадріель", "Елронд", "Саруман"
         };
-        // Mapping each hero to an existing PNG in /assets/avatars/
+        // Each avatar maps to an existing file under /assets/avatars/
         String[] heroAvatars = {
-                "/assets/avatars/boy.png",          // Сем Гемджі
-                "/assets/avatars/man.png",          // Піппін Тук
-                "/assets/avatars/man_2.png",        // Меррі Брендібак
-                "/assets/avatars/viking.png",       // Арагорн
-                "/assets/avatars/goblin_archer.png",// Леголас
-                "/assets/avatars/ogr_warrior.png",  // Гімлі
-                "/assets/avatars/knight.png",       // Боромір
-                "/assets/avatars/man_3.png",        // Фарамір
-                "/assets/avatars/lady.png",         // Еовін
-                "/assets/avatars/lady_ginger.png",  // Галадріель
-                "/assets/avatars/elder.png",        // Елронд
-                "/assets/avatars/mrmustage.png"     // Саруман
+                "/assets/avatars/boy.png",
+                "/assets/avatars/man.png",
+                "/assets/avatars/man_2.png",
+                "/assets/avatars/viking.png",
+                "/assets/avatars/goblin_archer.png",
+                "/assets/avatars/ogr_warrior.png",
+                "/assets/avatars/knight.png",
+                "/assets/avatars/man_3.png",
+                "/assets/avatars/lady.png",
+                "/assets/avatars/lady_ginger.png",
+                "/assets/avatars/elder.png",
+                "/assets/avatars/mrmustage.png"
         };
         int[] privateIndexes = { 3, 7 };
         Random seedRandom = new Random(42);
@@ -284,7 +283,7 @@ public class DatabaseSeeder {
     }
 
     private void generateShopItems(ItemRepository itemRepository) {
-        // --- Розхідники (Consumables) ---
+        // --- Consumables ---
         createConsumable(itemRepository, "Бустер досвіду", "+50% XP на 30 хвилин.", 200, Item.CurrencyType.CRYSTAL,
                 Item.EffectType.XP_BOOST, "/assets/items/potion_wisdom.png");
         createConsumable(itemRepository, "Магніт гобліна", "Подвійне золото на 60 хвилин.", 150,
@@ -294,7 +293,7 @@ public class DatabaseSeeder {
         createConsumable(itemRepository, "Руна захисту", "Поглинає одну поразку.", 100, Item.CurrencyType.CRYSTAL,
                 Item.EffectType.SHIELD, "/assets/items/rune_protection.png");
 
-        // --- Аватари (AVATAR) — всі шляхи відповідають реальним файлам у /assets/avatars/ ---
+        // --- Avatars — all paths correspond to real files under /assets/avatars/ ---
         createEquipment(itemRepository, "Базовий Аватар",   0,    Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/default_avatar.png");
         createEquipment(itemRepository, "Лицар",         300,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/knight.png");
         createEquipment(itemRepository, "Старець",        500,  Item.ItemSlot.AVATAR, Item.ItemRarity.COMMON, "/assets/avatars/elder.png");
@@ -339,7 +338,7 @@ public class DatabaseSeeder {
         createEquipment(itemRepository, "Чарівник",       550,  Item.ItemSlot.AVATAR, Item.ItemRarity.UNCOMMON, "/assets/avatars/mrmustage.png");
 
 
-        // --- Голова (HEAD) — 21 шоломів, тир: COMMON(+3,200g) UNCOMMON(+6,500g) RARE(+12,900g) EPIC(+20,1600g) LEGENDARY(+30,2500g) ---
+        // --- Head (HEAD) — 21 helmets; tiers: COMMON(+3 DEF,200g) UNCOMMON(+6,500g) RARE(+12,900g) EPIC(+20,1600g) LEGENDARY(+30,2500g) ---
         createArmor(itemRepository, "Шолом Новачка",        200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head1.png",   3);
         createArmor(itemRepository, "Залізний Шолом",       200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head2.png",   3);
         createArmor(itemRepository, "Бойовий Шолом",        200,  Item.ItemSlot.HEAD, Item.ItemRarity.COMMON,    "/assets/cosmetics/Head/head3.png",   3);
@@ -362,7 +361,7 @@ public class DatabaseSeeder {
         createArmor(itemRepository, "Шолом Богатиря",      2500,  Item.ItemSlot.HEAD, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Head/head20.png", 30);
         createArmor(itemRepository, "Корона Воїна",        3000,  Item.ItemSlot.HEAD, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Head/head21.png", 35);
 
-        // --- Тулуб (BODY) — 20 нагрудників, COMMON(+5,300g) UNCOMMON(+10,700g) RARE(+18,1200g) EPIC(+28,2000g) LEGENDARY(+40,3200g) ---
+        // --- Body (BODY) — 20 chest pieces; tiers: COMMON(+5 DEF,300g) UNCOMMON(+10,700g) RARE(+18,1200g) EPIC(+28,2000g) LEGENDARY(+40,3200g) ---
         createArmor(itemRepository, "Мантія Учня",            300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest1.png",   5);
         createArmor(itemRepository, "Шкіряна Броня",          300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest2.png",   5);
         createArmor(itemRepository, "Броня Рекрута",          300,  Item.ItemSlot.BODY, Item.ItemRarity.COMMON,    "/assets/cosmetics/Chest/chest3.png",   5);
@@ -384,7 +383,7 @@ public class DatabaseSeeder {
         createArmor(itemRepository, "Броня Легенди",         3200,  Item.ItemSlot.BODY, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Chest/chest19.png", 40);
         createArmor(itemRepository, "Броня Богатиря",        3200,  Item.ItemSlot.BODY, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Chest/chest20.png", 40);
 
-        // --- Руки (HANDS) — 20 рукавиць, COMMON(+2,150g) UNCOMMON(+5,400g) RARE(+10,800g) EPIC(+16,1400g) LEGENDARY(+25,2200g) ---
+        // --- Hands (HANDS) — 20 gloves; tiers: COMMON(+2 DEF,150g) UNCOMMON(+5,400g) RARE(+10,800g) EPIC(+16,1400g) LEGENDARY(+25,2200g) ---
         createArmor(itemRepository, "Шкіряні Рукавиці",       150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands1.png",   2);
         createArmor(itemRepository, "Рукавиці Учня",          150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands2.png",   2);
         createArmor(itemRepository, "Рукавиці Рекрута",       150,  Item.ItemSlot.HANDS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Hands/hands3.png",   2);
@@ -406,7 +405,7 @@ public class DatabaseSeeder {
         createArmor(itemRepository, "Рукавиці Легенди",      2200,  Item.ItemSlot.HANDS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Hands/hands19.png", 25);
         createArmor(itemRepository, "Рукавиці Богатиря",     2200,  Item.ItemSlot.HANDS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Hands/hands20.png", 25);
 
-        // --- Ноги (LEGS) — 20 чобіт, COMMON(+2,150g) UNCOMMON(+5,400g) RARE(+10,800g) EPIC(+16,1400g) LEGENDARY(+25,2200g) ---
+        // --- Legs (LEGS) — 20 boots; tiers: COMMON(+2 DEF,150g) UNCOMMON(+5,400g) RARE(+10,800g) EPIC(+16,1400g) LEGENDARY(+25,2200g) ---
         createArmor(itemRepository, "Чоботи Мандрівника",     150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs1.png",   2);
         createArmor(itemRepository, "Чоботи Рекрута",         150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs2.png",   2);
         createArmor(itemRepository, "Шкіряні Чоботи",         150,  Item.ItemSlot.LEGS, Item.ItemRarity.COMMON,    "/assets/cosmetics/Legs/legs3.png",   2);
@@ -428,7 +427,7 @@ public class DatabaseSeeder {
         createArmor(itemRepository, "Чоботи Легенди",        2200,  Item.ItemSlot.LEGS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Legs/legs19.png", 25);
         createArmor(itemRepository, "Чоботи Богатиря",       2200,  Item.ItemSlot.LEGS, Item.ItemRarity.LEGENDARY, "/assets/cosmetics/Legs/legs20.png", 25);
 
-        // --- Зброя (WEAPON) — всі 57 файлів із /assets/weapons/ ---
+        // --- Weapons (WEAPON) — all 57 files from /assets/weapons/ ---
         // Suffix _1=COMMON(+5, 500g)  _2=UNCOMMON(+10, 1000g)  _3=RARE(+20, 1800g)
         //        _4=EPIC(+35, 3000g)  _5=LEGENDARY(+50, 4500g)
 
@@ -504,13 +503,13 @@ public class DatabaseSeeder {
     }
 
     // ==========================================
-    // ХЕЛПЕРИ ДЛЯ ПРЕДМЕТІВ МАГАЗИНУ
+    // Shop item creation helpers
     // ==========================================
 
     private void createEquipment(ItemRepository repo, String name, int price, Item.ItemSlot slot,
             Item.ItemRarity rarity, String assetUrl) {
         if (repo.existsByName(name))
-            return; // Захист від дублікатів
+            return; // Skip if already seeded
         Item item = new Item();
         item.setName(name);
         item.setDescription("Елемент екіпірування героя.");
@@ -582,7 +581,7 @@ public class DatabaseSeeder {
     private void createConsumable(ItemRepository repo, String name, String desc, int price, Item.CurrencyType currency,
             Item.EffectType effect, String assetUrl) {
         if (repo.existsByName(name))
-            return; // Захист від дублікатів
+            return; // Skip if already seeded
         Item item = new Item();
         item.setName(name);
         item.setDescription(desc);
@@ -596,8 +595,7 @@ public class DatabaseSeeder {
         repo.save(item);
     }
 
-    // --- Метод читання JSON з двопрохідним збереженням для коректного ID-маппінгу
-    // ---
+    // Loads tasks from JSON using a two-pass save to correctly remap JSON IDs to DB-generated IDs.
     private void loadTasksFromJson(Course course, TaskRepository taskRepository) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -615,17 +613,15 @@ public class DatabaseSeeder {
             Map<String, Task> existingTaskByTitle = existingTasks.stream()
                     .collect(Collectors.toMap(Task::getTitle, t -> t, (t1, t2) -> t1));
 
-            // Крок 1: Зберігаємо маппінг «старий JSON ID → список prerequisiteTaskIds»,
-            // а також впорядкований список oldIds (щоб потім зіставити з savedTasks за
-            // індексом),
-            // і обнуляємо ID, щоб Hibernate генерував нові.
+            // Pass 1: Record the old JSON ID → prerequisiteTaskIds mapping and null out IDs
+            // so Hibernate assigns new DB IDs. Preserve insertion order for later index-based remapping.
             Map<Long, List<Long>> oldPrerequisites = new HashMap<>();
-            List<Long> indexedOldIds = new ArrayList<>(); // Порядок відповідає tasks
+            List<Long> indexedOldIds = new ArrayList<>(); // Parallel list: indexedOldIds[i] matches tasks[i]
             List<Task> tasksToSave = new ArrayList<>();
 
             for (Task jsonTask : tasks) {
-                Long oldId = jsonTask.getId(); // Зберігаємо JSON-шний ID (201, 202, …)
-                indexedOldIds.add(oldId); // Зберігаємо порядок до скидання ID
+                Long oldId = jsonTask.getId(); // Capture JSON-defined ID before it is reset
+                indexedOldIds.add(oldId); // Preserve order before ID is cleared
                 oldPrerequisites.put(oldId, new ArrayList<>(jsonTask.getPrerequisiteTaskIds()));
 
                 Task existingTask = existingTaskByTitle.get(jsonTask.getTitle());
@@ -683,24 +679,22 @@ public class DatabaseSeeder {
                     }
                 }
 
-                // Тимчасово очищаємо prerequisites — заповнимо після першого збереження
+                // Clear prerequisites temporarily; they will be remapped after the first saveAll
                 taskToPersist.setPrerequisiteTaskIds(new ArrayList<>());
                 tasksToSave.add(taskToPersist);
             }
 
-            // Крок 2: Перший saveAll — Hibernate генерує реальні ID.
-            // savedTasks повертається у тому ж порядку, що й tasks (специфікація JPA).
+            // Pass 2: First saveAll — Hibernate assigns real DB IDs.
+            // JPA guarantees savedTasks is returned in the same order as tasksToSave.
             List<Task> savedTasks = taskRepository.saveAll(tasksToSave);
 
-            // Крок 3: Будуємо маппінг «старий JSON ID → новий DB ID».
-            // indexedOldIds[i] відповідає savedTasks[i], бо порядок збережено.
+            // Pass 3: Build oldJsonId → newDbId map using the preserved index order.
             Map<Long, Long> oldIdToNewId = new HashMap<>();
             for (int i = 0; i < indexedOldIds.size(); i++) {
                 oldIdToNewId.put(indexedOldIds.get(i), savedTasks.get(i).getId());
             }
 
-            // Крок 4: Оновлюємо prerequisiteTaskIds кожного завдання,
-            // замінюючи старі JSON ID на нові згенеровані DB ID.
+            // Pass 4: Remap each task's prerequisiteTaskIds from JSON IDs to DB IDs.
             for (int i = 0; i < savedTasks.size(); i++) {
                 Long oldId = indexedOldIds.get(i);
                 List<Long> oldPrereqs = oldPrerequisites.get(oldId);
@@ -716,7 +710,7 @@ public class DatabaseSeeder {
                 }
             }
 
-            // Крок 5: Другий saveAll — зберігаємо оновлені prerequisiteTaskIds.
+            // Pass 5: Second saveAll — persist the remapped prerequisiteTaskIds.
             taskRepository.saveAll(savedTasks);
             System.out.println("✅ Завдання для курсу '" + course.getTitle() + "' успішно завантажено з JSON!");
 

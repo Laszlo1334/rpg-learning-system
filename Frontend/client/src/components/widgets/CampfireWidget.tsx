@@ -1,12 +1,11 @@
 import { Flame } from 'lucide-react';
 
-// Визначаємо, які дані має отримати віджет ззовні
 interface CampfireWidgetProps {
     level: number;
 }
 
 export const CampfireWidget = ({ level }: CampfireWidgetProps) => {
-    // Словник налаштувань для кожного рівня багаття
+    // Config object per campfire level (1–5)
     const campfireConfigs = {
         1: {
             color: 'text-zinc-500',
@@ -40,13 +39,13 @@ export const CampfireWidget = ({ level }: CampfireWidgetProps) => {
         },
     };
 
-    // Захист від помилок: гарантуємо, що рівень завжди в межах 1-5
+    // Clamp level to valid range 1–5 to avoid missing config keys
     const safeLevel = Math.max(1, Math.min(5, level)) as 1 | 2 | 3 | 4 | 5;
     const config = campfireConfigs[safeLevel];
 
     return (
         <div className={`h-full bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[160px] text-center transition-all duration-500 hover:border-zinc-700 ${config.glow}`}>
-            {/* Анімація animate-pulse створює ефект "дихання" вогню */}
+            {/* animate-pulse gives a breathing flame effect */}
             <Flame size={48} className={`mb-3 ${config.color} animate-pulse`} />
             <h3 className="font-bold text-white mb-2">{config.title}</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">{config.desc}</p>

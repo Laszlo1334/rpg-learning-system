@@ -22,7 +22,7 @@ public class UserController {
 
     @JsonIgnore
     private final UserService userService;
-    private final UserRepository userRepository; // Додали для прямого читання статистики
+    private final UserRepository userRepository;
 
     @GetMapping("/me")
     @Operation(summary = "Отримати мій профіль", description = "Повертає ігрові характеристики поточного гравця з перерахунком Енергії та Багаття.")

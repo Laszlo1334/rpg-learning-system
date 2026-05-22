@@ -41,7 +41,7 @@ public class TaskService {
 
         boolean isCompleted = completedTaskRepository.existsByTaskIdAndUserId(taskId, user.getId());
 
-        // If the task is not yet completed, verify that all prerequisites are met
+        // Enforce prerequisite lock: incomplete tasks require all prereqs to be done
         if (!isCompleted) {
             List<Long> prereqs = task.getPrerequisiteTaskIds();
             if (prereqs != null && !prereqs.isEmpty()) {
@@ -120,17 +120,16 @@ public class TaskService {
         }
 
         if (task.getQuestions() != null && !task.getQuestions().isEmpty()) {
-            // 1. Copy the list to avoid mutating the original data held in Hibernate's
-            // cache
+            // Copy to avoid mutating Hibernate's cached entity collection
             List<Question> allQuestions = new ArrayList<>(task.getQuestions());
 
-            // 2. Determine how many questions to include
+
             int limit = task.getDynamicQuestionCount() != null ? task.getDynamicQuestionCount() : allQuestions.size();
 
-            // 3. Shuffle the questions randomly
+
             java.util.Collections.shuffle(allQuestions);
 
-            // 4. Slice to the required count and map to a safe DTO
+            // Shuffle, slice to dynamicQuestionCount, and map to a DTO that omits correct answers
             List<QuestionDto> safeQuestions = allQuestions.stream()
                     .limit(limit)
                     .map(q -> {

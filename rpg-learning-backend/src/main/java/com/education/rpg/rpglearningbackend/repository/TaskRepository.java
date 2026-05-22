@@ -8,10 +8,8 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    // Отримати всі завдання для конкретного курсу
     List<Task> findByCourseId(Long courseId);
 
-    // НОВИЙ МЕТОД: Отримати завдання курсу, ВІДСОРТОВАНІ за порядком (для Туману війни)
     List<Task> findByCourseIdOrderByOrderIndexAsc(Long courseId);
 
     int countByCourseId(Long courseId);

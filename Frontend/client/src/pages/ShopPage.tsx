@@ -1,4 +1,4 @@
-// src/pages/ShopPage.tsx
+
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
@@ -52,7 +52,7 @@ function sortShopItems(items: Item[], sortBy: SortOption): Item[] {
     }
 }
 
-// Backend effect → readable label
+// Maps backend effect keys to human-readable display labels
 const EFFECT_LABELS: Record<string, string> = {
     XP_BOOST: '🧪 Досвід ×1.5 на 30 хв',
     GOLD_BOOST: '🧲 Золото ×2 на 60 хв',
@@ -61,7 +61,6 @@ const EFFECT_LABELS: Record<string, string> = {
     NONE: '',
 };
 
-// Rarity color map
 const RARITY_BORDER: Record<string, string> = {
     COMMON: 'border-zinc-600',
     UNCOMMON: 'border-green-500',
@@ -105,12 +104,10 @@ export const ShopPage = () => {
     const navigate = useNavigate();
     const { user, refreshUser } = useAuthStore();
 
-    // ─── Data state ────────────────────────────────────────────────
     const [items, setItems] = useState<Item[]>([]);
     const [inventory, setInventory] = useState<InventoryEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // ─── UI state ──────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<ActiveTab>('CONSUMABLE');
     const [activeFilter, setActiveFilter] = useState<SlotFilter>('ALL');
     const [sortBy, setSortBy] = useState<SortOption>('RARITY');
@@ -118,7 +115,6 @@ export const ShopPage = () => {
     const [itemToBuy, setItemToBuy] = useState<Item | null>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-    // ─── Load items + inventory on mount ───────────────────────────
     useEffect(() => {
         const load = async () => {
             try {
@@ -137,14 +133,13 @@ export const ShopPage = () => {
         load();
     }, []);
 
-    // ─── Auto-dismiss notification after 3 s ───────────────────────
+    // Auto-dismiss toast after 3 s
     useEffect(() => {
         if (!notification) return;
         const timer = setTimeout(() => setNotification(null), 3000);
         return () => clearTimeout(timer);
     }, [notification]);
 
-    // ─── Purchase (called from confirm modal) ──────────────────────
     const handleConfirmBuy = useCallback(async () => {
         if (!itemToBuy) return;
         setBuyingId(itemToBuy.id);
@@ -167,7 +162,6 @@ export const ShopPage = () => {
         }
     }, [itemToBuy, refreshUser]);
 
-    // ─── Helpers ───────────────────────────────────────────────────
     const canAfford = (item: Item): boolean => {
         if (!user) return false;
         return item.currencyType === 'GOLD' ? user.gold >= item.price : user.crystals >= item.price;
@@ -178,7 +172,6 @@ export const ShopPage = () => {
         return entry ? entry.quantity : 0;
     };
 
-    // Filter by tab first, then by slot
     const tabFiltered = items.filter(i => i.category === activeTab);
     const filteredItems = activeTab === 'COSMETIC' && activeFilter !== 'ALL'
         ? tabFiltered.filter(i => i.slot === activeFilter)
@@ -199,7 +192,6 @@ export const ShopPage = () => {
             : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
         }`;
 
-    // ─── Item Card ─────────────────────────────────────────────────
     const ItemCard = ({ item }: { item: Item }) => {
         const affordable = canAfford(item);
         const isBuying = buyingId === item.id;
@@ -207,7 +199,7 @@ export const ShopPage = () => {
         const isOwned = inventory.some(inv => inv.item.id === item.id);
         const rarity = item.rarity ?? 'COMMON';
 
-        // Cosmetics that are already owned cannot be repurchased
+        // Owned cosmetics cannot be repurchased
         const isCosmeticOwned = item.category === 'COSMETIC' && isOwned;
         const cardAffordable = !isCosmeticOwned && affordable;
 
@@ -223,7 +215,6 @@ export const ShopPage = () => {
                             : 'border-zinc-800/50 opacity-60'
                     }`}
             >
-                {/* Icon with rarity border */}
                 <div className={`w-14 h-14 rounded-xl bg-zinc-800 border-2 ${RARITY_BORDER[rarity]} ${RARITY_GLOW[rarity]} flex items-center justify-center overflow-hidden`}>
                     {item.assetUrl ? (
                         <img
@@ -237,12 +228,10 @@ export const ShopPage = () => {
                     )}
                 </div>
 
-                {/* Rarity label */}
                 <span className={`text-[10px] font-black uppercase tracking-wider ${RARITY_TEXT[rarity]}`}>
                     {RARITY_LABEL[rarity]}
                 </span>
 
-                {/* Info */}
                 <div className="flex-1">
                     <h3 className="font-black text-white text-base leading-tight">{item.name}</h3>
                     <p className="text-zinc-500 text-xs mt-1 leading-relaxed">{item.description}</p>
@@ -252,14 +241,12 @@ export const ShopPage = () => {
 
                 </div>
 
-                {/* Owned quantity (consumables only) */}
                 {item.category === 'CONSUMABLE' && (
                     <p className="text-xs text-zinc-500">
                         В інвентарі: <span className={ownedQty > 0 ? 'text-green-400 font-bold' : ''}>{ownedQty} шт.</span>
                     </p>
                 )}
 
-                {/* Price + Buy */}
                 <div className="flex items-center justify-between gap-2 mt-auto pt-3 border-t border-zinc-800">
                     <div className="flex items-center gap-1.5 font-black text-base">
                         {item.currencyType === 'GOLD'
@@ -271,7 +258,6 @@ export const ShopPage = () => {
                         </span>
                     </div>
 
-                    {/* Owned badge for cosmetics already in inventory */}
                     {isCosmeticOwned ? (
                         <span className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm bg-emerald-900/50 border border-emerald-700/50 text-emerald-400 cursor-not-allowed">
                             <CheckCircle size={14} />
@@ -300,11 +286,9 @@ export const ShopPage = () => {
         );
     };
 
-    // ──────────────────────────────────────────────────────────────────
     return (
         <div className="p-6 max-w-5xl mx-auto space-y-6">
 
-            {/* ── Toast ─────────────────────────────────────────────── */}
             {notification && (
                 <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm ${notification.type === 'success'
                     ? 'bg-emerald-900 border border-emerald-700 text-emerald-200'
@@ -315,7 +299,7 @@ export const ShopPage = () => {
                 </div>
             )}
 
-            {/* ── Confirmation Modal (portal → document.body) ─────── */}
+            {/* Render confirmation modal into document.body to avoid z-index issues */}
             {itemToBuy && createPortal(
                 <div
                     className="fixed top-0 left-0 w-screen h-[100dvh] z-[100] bg-black/80 flex items-center justify-center p-4 overscroll-none"
@@ -388,7 +372,6 @@ export const ShopPage = () => {
                 document.body,
             )}
 
-            {/* ── Page Header ───────────────────────────────────────── */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-3">
                     <button
@@ -416,7 +399,6 @@ export const ShopPage = () => {
                 </div>
             </div>
 
-            {/* ── Tabs ──────────────────────────────────────────────── */}
             <div className="flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1 gap-1">
                 <button
                     onClick={() => { setActiveTab('CONSUMABLE'); setActiveFilter('ALL'); }}
@@ -432,7 +414,6 @@ export const ShopPage = () => {
                 </button>
             </div>
 
-            {/* ── Slot filter + sort ─────────────────────────────────── */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 {activeTab === 'COSMETIC' ? (
                     <div className="flex flex-wrap gap-2">
@@ -469,7 +450,6 @@ export const ShopPage = () => {
                 </label>
             </div>
 
-            {/* ── Content ───────────────────────────────────────────── */}
             {isLoading ? (
                 <div className="flex items-center justify-center py-20 gap-3 text-zinc-500">
                     <Loader2 size={24} className="animate-spin" />
