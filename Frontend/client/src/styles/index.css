@@ -1,31 +1,216 @@
 @import "tailwindcss";
 
-/* Кастомний скролбар для RPG-теми */
-::-webkit-scrollbar {
-    width: 10px;
+/* Enable class-based dark mode for theme toggle */
+@variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   ANCIENT PARCHMENT ACADEMY — Light Theme CSS Variables
+   Active when <html> does NOT have the `.dark` class.
+   ============================================================ */
+
+/* --- Parchment Palette ---
+   --parchment-canvas:  #FBF7F0  (main page background)
+   --parchment-card:    #F6F1E6  (cards, panels, containers)
+   --parchment-inset:   #EDE6D6  (inset/nested elements, XP bars)
+   --parchment-border:  #D6CAB4  (all borders)
+   --parchment-ink:     #4A3B2F  (primary text, like deep bronze ink)
+   --parchment-muted:   #8C7A65  (secondary / muted text)
+   --parchment-gold:    #C5A059  (warm gold accent)
+   --parchment-blue:    #3B7FB9  (ink blue accent for XP)
+   ============================================================ */
+
+/* ---- Light mode: Global structural overrides ---- */
+/* Applied when html does NOT have .dark (light is the default base) */
+
+html:not(.dark) {
+  /* Page canvas */
+  background-color: #FBF7F0;
+  color: #4A3B2F;
 }
 
-::-webkit-scrollbar-track {
-    background: #09090b;
-    /* zinc-950, колір фону */
-    border-left: 1px solid #27272a;
-    /* zinc-800 */
+/* Scrollbar — parchment style in light mode */
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: #EDE6D6;
+  border-left: 1px solid #D6CAB4;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #C4B49A;
+  border: 2px solid #EDE6D6;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #8C7A65;
 }
 
-::-webkit-scrollbar-thumb {
-    background: #3f3f46;
-    /* zinc-700 */
-    border-radius: 8px;
-    border: 2px solid #09090b;
-    /* створює ефект відступу від країв */
+/* ---- Background overrides ---- */
+html:not(.dark) .bg-zinc-950 { background-color: #FBF7F0 !important; }
+html:not(.dark) .bg-zinc-900 { background-color: #F6F1E6 !important; }
+html:not(.dark) .bg-zinc-800 { background-color: #EDE6D6 !important; }
+
+/* Inset stat blocks and XP bars */
+html:not(.dark) .bg-zinc-950\/50 { background-color: rgba(237, 230, 214, 0.6) !important; }
+html:not(.dark) .bg-zinc-900\/50 { background-color: rgba(246, 241, 230, 0.6) !important; }
+html:not(.dark) .bg-zinc-900\/80 { background-color: rgba(246, 241, 230, 0.9) !important; }
+html:not(.dark) .bg-zinc-900\/90 { background-color: rgba(246, 241, 230, 0.95) !important; }
+html:not(.dark) .bg-zinc-800\/50 { background-color: rgba(237, 230, 214, 0.6) !important; }
+html:not(.dark) .bg-zinc-950\/40 { background-color: rgba(237, 230, 214, 0.5) !important; }
+html:not(.dark) .bg-zinc-950\/80 { background-color: rgba(251, 247, 240, 0.9) !important; }
+html:not(.dark) .bg-zinc-950\/60 { background-color: rgba(251, 247, 240, 0.8) !important; }
+
+/* ---- Border overrides ---- */
+html:not(.dark) .border-zinc-800 { border-color: #D6CAB4 !important; }
+html:not(.dark) .border-zinc-700 { border-color: #C4B49A !important; }
+html:not(.dark) .border-zinc-800\/50 { border-color: rgba(214, 202, 180, 0.5) !important; }
+html:not(.dark) .border-zinc-800\/30 { border-color: rgba(214, 202, 180, 0.3) !important; }
+html:not(.dark) .border-zinc-800\/0 { border-color: transparent !important; }
+html:not(.dark) .divide-zinc-800 > * + * { border-color: #D6CAB4 !important; }
+
+/* ---- Text overrides ---- */
+html:not(.dark) .text-white   { color: #4A3B2F !important; }
+html:not(.dark) .text-zinc-100 { color: #4A3B2F !important; }
+html:not(.dark) .text-zinc-200 { color: #5C4A3A !important; }
+html:not(.dark) .text-zinc-300 { color: #6B5744 !important; }
+html:not(.dark) .text-zinc-400 { color: #8C7A65 !important; }
+html:not(.dark) .text-zinc-500 { color: #8C7A65 !important; }
+html:not(.dark) .text-zinc-600 { color: #A89880 !important; }
+html:not(.dark) .text-zinc-700 { color: #B8A898 !important; }
+
+/* ---- Accent softening — keep vibrant but warm for parchment background ---- */
+html:not(.dark) .text-yellow-400 { color: #C5A059 !important; }
+html:not(.dark) .text-blue-400   { color: #3B7FB9 !important; }
+html:not(.dark) .text-blue-500   { color: #2F6FA8 !important; }
+html:not(.dark) .text-green-400  { color: #4A8C6A !important; }
+html:not(.dark) .text-purple-400 { color: #7B52A8 !important; }
+html:not(.dark) .text-purple-500 { color: #6B40A0 !important; }
+html:not(.dark) .text-orange-400 { color: #B86C30 !important; }
+html:not(.dark) .text-orange-500 { color: #A85C22 !important; }
+html:not(.dark) .text-red-400    { color: #C04040 !important; }
+html:not(.dark) .text-red-500    { color: #B03030 !important; }
+
+/* ---- Hover text overrides ---- */
+html:not(.dark) .hover\:text-white:hover { color: #2A2018 !important; }
+
+/* ---- Accent bg softening ---- */
+html:not(.dark) .bg-blue-500\/20  { background-color: rgba(59, 127, 185, 0.12) !important; }
+html:not(.dark) .bg-yellow-500\/20 { background-color: rgba(197, 160, 89, 0.15) !important; }
+html:not(.dark) .bg-purple-500\/20 { background-color: rgba(123, 82, 168, 0.12) !important; }
+html:not(.dark) .bg-green-500\/20  { background-color: rgba(74, 140, 106, 0.12) !important; }
+html:not(.dark) .bg-red-500\/10    { background-color: rgba(192, 64, 64, 0.08) !important; }
+html:not(.dark) .bg-red-500\/20    { background-color: rgba(192, 64, 64, 0.12) !important; }
+html:not(.dark) .bg-blue-500\/10   { background-color: rgba(59, 127, 185, 0.08) !important; }
+html:not(.dark) .bg-purple-500\/10 { background-color: rgba(123, 82, 168, 0.08) !important; }
+/* bg-blue-600 and hover:bg-blue-500 are NOT overridden globally in light mode.
+   All CTA buttons explicitly declare dark:bg-blue-600 for dark mode
+   and bg-[#7A634B] (dark beige) for light mode directly in their className. */
+
+/* ---- Hover bg overrides ---- */
+html:not(.dark) .hover\:bg-zinc-800:hover  { background-color: #EDE6D6 !important; }
+html:not(.dark) .hover\:bg-zinc-700:hover  { background-color: #E0D8C8 !important; }
+html:not(.dark) .hover\:bg-zinc-800\/50:hover { background-color: rgba(237, 230, 214, 0.7) !important; }
+
+/* ---- Gradient overrides ---- */
+html:not(.dark) .bg-gradient-to-b.from-red-950\/40 {
+  background: linear-gradient(to bottom, rgba(180, 80, 60, 0.10), #FBF7F0, #FBF7F0) !important;
+}
+html:not(.dark) .from-blue-500.to-purple-500 {
+  /* Keep XP bar gradient but softer */
+  background: linear-gradient(to right, #3B7FB9, #7B52A8) !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #a855f7;
-    /* purple-500, магічне світіння при наведенні */
+/* ---- Prose / theory text inside arena ---- */
+html:not(.dark) .prose-invert { color: #4A3B2F !important; }
+html:not(.dark) .prose-invert * { color: #4A3B2F !important; }
+
+/* ---- ReactFlow map: parchment map background ---- */
+html:not(.dark) .react-flow__background { background-color: #F6F1E6 !important; }
+html:not(.dark) .react-flow__background pattern circle { fill: #D6CAB4 !important; }
+/* Parchment canvas for ReactFlow wrapper */
+html:not(.dark) .w-full.h-screen.bg-zinc-950 { background-color: #F6F1E6 !important; }
+
+/* ---- CustomTaskNode: map nodes parchment style ---- */
+html:not(.dark) .bg-zinc-800.border-zinc-700.text-zinc-400 {
+  background-color: #EDE6D6 !important;
+  border-color: #C4B49A !important;
+  color: #8C7A65 !important;
+}
+/* Active node (unlocked, not boss) */
+html:not(.dark) .bg-zinc-900.border-purple-500 {
+  background-color: #F6F1E6 !important;
+  border-color: #7B52A8 !important;
+}
+/* Boss node — keep red but slightly more muted */
+html:not(.dark) .bg-red-950.border-red-500 {
+  background-color: rgba(180, 60, 50, 0.1) !important;
+  border-color: #C04040 !important;
+}
+/* Tooltip on map nodes */
+html:not(.dark) .bg-zinc-900.border-zinc-700 {
+  background-color: #F6F1E6 !important;
+  border-color: #C4B49A !important;
 }
 
-/* Анімації для Арени */
+/* ---- Foyer modal (task selection popup) ---- */
+html:not(.dark) .bg-black\/60 { background-color: rgba(74, 59, 47, 0.35) !important; }
+html:not(.dark) .bg-black\/80 { background-color: rgba(74, 59, 47, 0.50) !important; }
+html:not(.dark) .bg-black\/90 { background-color: rgba(74, 59, 47, 0.65) !important; }
+
+/* ---- Fixed modals & overlays ---- */
+html:not(.dark) .fixed.inset-0.bg-black\/80 { background-color: rgba(74, 59, 47, 0.50) !important; }
+html:not(.dark) .fixed.inset-0.bg-black\/90 { background-color: rgba(74, 59, 47, 0.65) !important; }
+
+/* ---- Arena header backdrop ---- */
+html:not(.dark) .bg-zinc-900\/90 { background-color: rgba(246, 241, 230, 0.96) !important; }
+
+/* ---- Back button on foyer ---- */
+html:not(.dark) .bg-zinc-900\/80 { background-color: rgba(246, 241, 230, 0.92) !important; }
+
+/* ---- Scrollbar in prose panels ---- */
+html:not(.dark) .overflow-y-auto::-webkit-scrollbar-track { background: #EDE6D6; }
+html:not(.dark) .overflow-y-auto::-webkit-scrollbar-thumb { background: #C4B49A; }
+
+/* ---- Active filter/nav pill ---- */
+html:not(.dark) .bg-zinc-800.border-purple-500 {
+  background-color: #EDE6D6 !important;
+  border-color: #7B52A8 !important;
+}
+
+/* ---- Leaderboard podium rank indicators ---- */
+html:not(.dark) .bg-zinc-950.px-4 {
+  background-color: #EDE6D6 !important;
+}
+
+/* ---- Toast notifications ---- */
+html:not(.dark) .bg-zinc-900.border-zinc-700.text-white {
+  background-color: #F6F1E6 !important;
+  border-color: #C4B49A !important;
+  color: #4A3B2F !important;
+}
+
+/* ============================================================
+   Dark mode scrollbar — original RPG dark style
+   ============================================================ */
+html.dark ::-webkit-scrollbar { width: 10px; }
+html.dark ::-webkit-scrollbar-track {
+  background: #09090b;
+  border-left: 1px solid #27272a;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 8px;
+  border: 2px solid #09090b;
+}
+html.dark ::-webkit-scrollbar-thumb:hover { background: #a855f7; }
+
+/* ============================================================
+   Base scrollbar (fallback, dark-first)
+   ============================================================ */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #09090b; border-left: 1px solid #27272a; }
+::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; border: 2px solid #09090b; }
+::-webkit-scrollbar-thumb:hover { background: #a855f7; }
+
+/* ============================================================
+   Arena Animations
+   ============================================================ */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-10px); }

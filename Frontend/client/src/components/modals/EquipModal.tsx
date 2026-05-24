@@ -132,7 +132,11 @@ export const EquipModal = ({ selectedSlot, inventory, onClose, onEquipped, repla
                     <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
                   ) : (
                     <button
-                      className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black px-3 py-1.5 rounded-lg transition-all shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                      className="flex-shrink-0
+                                 bg-[#7A634B] hover:bg-[#5E4B37] text-[#FBF7F0]
+                                 dark:bg-blue-600 dark:hover:bg-blue-500 dark:text-white
+                                 text-[11px] font-black px-3 py-1.5 rounded-lg transition-all
+                                 shadow-[0_0_6px_rgba(122,99,75,0.25)] dark:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
                       onClick={e => { e.stopPropagation(); handleEquip(entry); }}
                     >
                       Equip

@@ -247,7 +247,13 @@ export const StudentDashboard = () => {
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
           onClick={() => navigate(targetUrl)}
-          className="w-full md:w-auto flex-1 py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-xl text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-3 cursor-pointer"
+          className="w-full md:w-auto flex-1 py-4
+                     bg-[#7A634B] hover:bg-[#5E4B37] text-[#FBF7F0]
+                     dark:bg-blue-600 dark:hover:bg-blue-500 dark:text-white
+                     rounded-2xl font-black text-xl transition-all
+                     shadow-[0_0_12px_rgba(122,99,75,0.30)]
+                     dark:shadow-[0_0_20px_rgba(59,130,246,0.4)]
+                     flex items-center justify-center gap-3 cursor-pointer"
         >
           <Map size={24} /> {buttonText}
         </button>

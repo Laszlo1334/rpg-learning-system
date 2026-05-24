@@ -4,7 +4,7 @@ import { Header } from './Header';
 
 export const MainLayout = () => {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-purple-500/30">
+    <div className="min-h-screen bg-[#FBF7F0] dark:bg-zinc-950 text-[#4A3B2F] dark:text-white font-sans selection:bg-purple-500/30">
       <Header />
       
       <main className="max-w-7xl mx-auto p-6 w-full">
@@ -12,4 +12,4 @@ export const MainLayout = () => {
       </main>
     </div>
   );
-};
+};

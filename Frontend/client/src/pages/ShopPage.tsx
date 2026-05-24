@@ -271,7 +271,9 @@ export const ShopPage = () => {
                                 if (cardAffordable && !isBuying) setItemToBuy(item);
                             }}
                             disabled={!cardAffordable || isBuying}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${cardAffordable ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500'
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:cursor-not-allowed ${cardAffordable
+                                ? 'bg-[#7A634B] hover:bg-[#5E4B37] text-[#FBF7F0] dark:bg-blue-600 dark:hover:bg-blue-500 dark:text-white shadow-[0_0_8px_rgba(122,99,75,0.25)] dark:shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                : 'bg-zinc-800 text-zinc-500'
                                 }`}
                         >
                             {isBuying
@@ -362,7 +364,10 @@ export const ShopPage = () => {
                             </button>
                             <button
                                 onClick={handleConfirmBuy}
-                                className="flex-1 py-2.5 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center justify-center gap-2"
+                                className="flex-1 py-2.5 rounded-xl font-bold
+                                           bg-[#7A634B] hover:bg-[#5E4B37] text-[#FBF7F0]
+                                           dark:bg-blue-600 dark:hover:bg-blue-500 dark:text-white
+                                           transition-colors flex items-center justify-center gap-2"
                             >
                                 <CheckCircle size={16} /> Підтвердити
                             </button>

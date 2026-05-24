@@ -28,7 +28,8 @@ export const InventoryPage = () => {
 
     const handleToggleEquip = async (id: number) => {
         try {
-            await inventoryService.toggleEquip(id);
+            // Use equipItem from the inventory service. It will equip or manage replacement as needed.
+            await inventoryService.equipItem(id);
             await Promise.all([fetchInventory(), refreshUser()]);
         } catch (error) {
             console.error('Не вдалося екіпірувати предмет', error);

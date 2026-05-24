@@ -1,6 +1,11 @@
 import type { Node, Edge } from 'reactflow';
 import type { TaskDto } from '@/types';
 
+// Returns the correct inactive edge colour based on the active theme.
+// Reads the <html> class at call time (inside useMemo, so it stays in sync).
+const inactiveEdgeStroke = () =>
+    document.documentElement.classList.contains('dark') ? '#3f3f46' : '#C4B49A';
+
 export const buildTreeLayout = (tasks: TaskDto[]) => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
@@ -95,7 +100,7 @@ export const buildTreeLayout = (tasks: TaskDto[]) => {
                 type: 'default',
                 animated: isTaskActive, // Animate edge when the dependent task is currently actionable
                 style: {
-                    stroke: isTaskActive ? '#a855f7' : '#3f3f46', // Purple for active, grey for locked/done
+                    stroke: isTaskActive ? '#a855f7' : inactiveEdgeStroke(),
                     strokeWidth: 3
                 },
             });

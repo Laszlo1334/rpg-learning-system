@@ -120,7 +120,7 @@ export const ArenaPage = () => {
                 setTimeout(() => setIsShaking(false), 500);
 
                 if (user?.hasActiveShield) {
-                    showArenaToast('🛡️ Rune of Protection absorbed the blow! No life lost.', 'shield');
+                    showArenaToast('🛡️ Руна захисту поглинула удар! Жодного життя не втрачено.', 'shield');
                     // Burn the shield on the backend without blocking the UI
                     authService.consumeShield()
                         .then(() => refreshUser())
@@ -135,12 +135,12 @@ export const ArenaPage = () => {
                     setFailedQuestionIds(prev => [...prev, currentQuestion.id]);
                     if (result.crystalsAwarded && result.crystalsAwarded > 0) {
                         setEarnedCrystals(prev => prev + result.crystalsAwarded!);
-                        showArenaToast(`Wrong answer — but you earned +${result.crystalsAwarded} 💎 (Productive Failure)!`, 'crystal');
+                        showArenaToast(`Неправильно — але ти отримав +${result.crystalsAwarded} 💎 (Продуктивна помилка)!`, 'crystal');
                     } else {
-                        showArenaToast('Wrong answer. Keep trying!', 'error');
+                        showArenaToast('Неправильно, спробуй ще раз!', 'error');
                     }
                 } else {
-                    showArenaToast('Wrong again. Study the theory carefully!', 'error');
+                    showArenaToast('Знову неправильно. Уважно вивчи теорію!', 'error');
                 }
             }
         } catch (error) {
@@ -201,8 +201,8 @@ export const ArenaPage = () => {
         await refreshUser();
     }, [task, failedQuestionIds, attemptsTaken, hintsUsed, refreshUser]);
 
-    if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-bold">Preparing Arena...</div>;
-    if (!task || !currentQuestion) return <div className="min-h-screen bg-zinc-950 p-8 text-center text-red-400">Task not found.</div>;
+    if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-bold">Підготовка арени...</div>;
+    if (!task || !currentQuestion) return <div className="min-h-screen bg-zinc-950 p-8 text-center text-red-400">Завдання не знайдено.</div>;
 
     const bgClasses = isBoss
         ? "bg-gradient-to-b from-red-950/40 via-zinc-950 to-zinc-950 border-red-900/30"
@@ -235,7 +235,7 @@ export const ArenaPage = () => {
 
                 <header className={`p-4 flex items-center justify-between sticky top-0 z-10 border-b backdrop-blur-md ${isBoss ? 'bg-red-950/20 border-red-900/30' : 'bg-zinc-900/90 border-zinc-800'}`}>
                     <button onClick={() => navigate(task?.courseId ? `/courses/${task.courseId}/foyer` : '/courses')} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-bold">
-                        <Flag size={20} /> Retreat to Map
+                        <Flag size={20} /> Відступити на карту
                     </button>
                     <div className="flex items-center gap-6 md:gap-8">
 
@@ -249,7 +249,7 @@ export const ArenaPage = () => {
                                 className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors border border-zinc-700 text-sm font-bold"
                             >
                                 {isTheoryVisible ? <EyeOff size={16} /> : <BookOpen size={16} />}
-                                <span>{isTheoryVisible ? 'Hide Theory' : 'Show Theory'}</span>
+                                <span>{isTheoryVisible ? 'Приховати теорію' : 'Показати теорію'}</span>
                             </button>
                         )}
 
@@ -284,7 +284,7 @@ export const ArenaPage = () => {
 
                     <div className="w-full max-w-7xl mx-auto mb-6">
                         <div className={`flex items-center gap-4 text-sm font-bold tracking-wider uppercase ${isBoss ? 'text-red-500/70' : 'text-zinc-400'}`}>
-                            <span className="whitespace-nowrap">Step {currentIndex + 1} of {task.questions?.length || 1}</span>
+                            <span className="whitespace-nowrap">Крок {currentIndex + 1} з {task.questions?.length || 1}</span>
                             <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isBoss ? 'bg-red-950/50' : 'bg-zinc-800'}`}>
                                 <div
                                     className={`h-full transition-all duration-500 ease-out ${isBoss ? 'bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-purple-600'}`}
@@ -304,7 +304,7 @@ export const ArenaPage = () => {
                                             <Skull className="text-red-500" size={32} />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-black text-red-500">{task.bossMetadata?.bossName || 'Final Challenge'}</h2>
+                                            <h2 className="text-2xl font-black text-red-500">{task.bossMetadata?.bossName || 'Фінальний виклик'}</h2>
                                             <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1 mt-1"><Flame size={14} /> {task.title}</span>
                                         </div>
                                     </div>
@@ -347,10 +347,18 @@ export const ArenaPage = () => {
                                     })}
                                 </div>
 
-                                {feedback && !feedback.isCorrect && feedback.explanation && (
+                                {feedback && !feedback.isCorrect && (
                                     <div className="mt-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 animate-in fade-in slide-in-from-bottom-4">
-                                        <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Miss! Try again</p>
-                                        <p className="text-sm text-zinc-300">{feedback.explanation}</p>
+                                        <p className="font-bold mb-1 flex items-center gap-2"><Flame size={18} /> Неправильно, спробуй ще раз!</p>
+                                    </div>
+                                )}
+
+                                {feedback && feedback.isCorrect && (
+                                    <div className="mt-6 p-4 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-400 animate-in fade-in slide-in-from-bottom-4">
+                                        <p className="font-bold mb-1 flex items-center gap-2"><Sparkles size={18} /> Правильно!</p>
+                                        {feedback.explanation && (
+                                            <p className="text-sm text-zinc-300 mt-1">{feedback.explanation}</p>
+                                        )}
                                     </div>
                                 )}
 
@@ -359,7 +367,7 @@ export const ArenaPage = () => {
                                         onClick={handleNextStep}
                                         className="mt-8 w-full py-4 rounded-2xl font-black text-xl bg-white text-black hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-300"
                                     >
-                                        Continue <ChevronRight size={24} />
+                                        Продовжити <ChevronRight size={24} />
                                     </button>
                                 )}
                             </div>
@@ -376,7 +384,7 @@ export const ArenaPage = () => {
                                     <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
                                         {isBoss ? <Skull size={40} /> : <Flag size={40} />}
                                     </div>
-                                    <h2 className="text-3xl font-black mb-2">{isBoss ? 'Boss Defeated!' : 'Перемога!'}</h2>
+                                    <h2 className="text-3xl font-black mb-2">{isBoss ? 'Боса переможено!' : 'Перемога!'}</h2>
                                     <p className="text-zinc-400 mb-6">Ви успішно пройшли завдання.</p>
 
                                     {runResult && (

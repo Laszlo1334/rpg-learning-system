@@ -10,9 +10,9 @@ export const CustomTaskNode = ({ data }: any) => {
     if (data.isCompleted) {
         nodeBg = "bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]";
     } else if (data.isLocked) {
-        // Fog of War: blur and dim
-        nodeBg = "bg-zinc-950/40 border-zinc-800/30 text-zinc-700 cursor-not-allowed";
-        fogOfWarClass = "backdrop-blur-sm grayscale opacity-60";
+        // Fog of War: parchment-aware dim in light, original readable colors in dark (restoring readability and removing extreme opacity/grayscale)
+        nodeBg = "bg-[#EDE6D6]/50 dark:bg-zinc-950 border-[#D6CAB4]/40 dark:border-zinc-800/50 text-[#C4B49A] dark:text-zinc-500 cursor-not-allowed";
+        fogOfWarClass = "backdrop-blur-sm grayscale opacity-60 dark:grayscale-0 dark:opacity-80";
     } else if (isBoss) {
         nodeBg = "bg-red-950 border-red-500 text-red-500 shadow-[0_0_20px_rgba(220,38,38,0.4)] animate-pulse";
     } else {
@@ -31,17 +31,17 @@ export const CustomTaskNode = ({ data }: any) => {
             </div>
 
             {/* Tooltip: appears on hover, shows task title and status */}
-            <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 p-4 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-500 z-50 pointer-events-none">
+            <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 p-4 rounded-xl bg-[#F6F1E6] dark:bg-zinc-900 border border-[#D6CAB4] dark:border-zinc-700 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-500 z-50 pointer-events-none">
                 <div className="flex flex-col gap-2">
-                    <h3 className="font-bold text-white text-sm">{data.title}</h3>
+                    <h3 className="font-bold text-[#4A3B2F] dark:text-white text-sm">{data.title}</h3>
 
                     <div className="text-xs font-bold mt-1">
                         {data.isLocked ? (
-                            <span className="text-zinc-500 flex items-center gap-1"><Lock size={12} /> Locked</span>
+                            <span className="text-[#8C7A65] dark:text-zinc-500 flex items-center gap-1"><Lock size={12} /> Locked</span>
                         ) : data.isCompleted ? (
-                            <span className="text-green-400 flex items-center gap-1"><Sparkles size={12} /> Completed</span>
+                            <span className="text-green-500 dark:text-green-400 flex items-center gap-1"><Sparkles size={12} /> Completed</span>
                         ) : (
-                            <span className="text-purple-400 flex items-center gap-1"><Flame size={12} /> Available</span>
+                            <span className="text-[#7B52A8] dark:text-purple-400 flex items-center gap-1"><Flame size={12} /> Available</span>
                         )}
                     </div>
                 </div>

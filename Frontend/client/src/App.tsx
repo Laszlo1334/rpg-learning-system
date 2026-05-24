@@ -6,11 +6,11 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { Login } from '@/pages/Login';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { StudentDashboard } from '@/pages/student/StudentDashboard';
-import { CoursesPage } from '@/pages/student/CoursesPage';
-import { ArenaPage } from '@/pages/student/ArenaPage';
-import { FoyerPage } from '@/pages/student/FoyerPage';
-import { InventoryPage } from '@/pages/student/InventoryPage';
+import { StudentDashboard } from '@/pages/user/StudentDashboard';
+import { CoursesPage } from '@/pages/user/CoursesPage';
+import { ArenaPage } from '@/pages/user/ArenaPage';
+import { FoyerPage } from '@/pages/user/FoyerPage';
+import { InventoryPage } from '@/pages/user/InventoryPage';
 import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { ShopPage } from '@/pages/ShopPage';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
