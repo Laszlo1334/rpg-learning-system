@@ -20,7 +20,7 @@ export const FoyerPage = () => {
     const navigate = useNavigate();
     const energy = useAuthStore(state => state.user?.energy ?? 0);
     const { theme } = useTheme();
-    const isDarkMode = theme === 'dark';
+    const isDarkMode = theme === 'dark' || document.documentElement.classList.contains('dark');
 
     const [tasks, setTasks] = useState<TaskDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -65,12 +65,15 @@ export const FoyerPage = () => {
     const focusNodeId = activeNode ? activeNode.id : (nodes.length > 0 ? nodes[nodes.length - 1].id : undefined);
 
     return (
-        <div className="w-full h-screen bg-[#FBF7F0] dark:bg-zinc-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[#FBF7F0] dark:bg-zinc-950 overflow-hidden">
             {/* ReactFlow CSS overrides — required to suppress default cursor/pointer styles */}
             <style>{`
-                /* Remove grab cursor on the background pane */
+                /* Allow grab cursor on the background pane and grabbing when active */
                 .react-flow__pane {
-                    cursor: default !important;
+                    cursor: grab !important;
+                }
+                .react-flow__pane:active {
+                    cursor: grabbing !important;
                 }
                 /* Disable pointer events on edges so they don't intercept clicks */
                 .react-flow__edge, .react-flow__edge-path, .react-flow__edge-interaction {
@@ -109,11 +112,11 @@ export const FoyerPage = () => {
                 nodesDraggable={false}
                 nodesConnectable={false}
                 elementsSelectable={true}
-                panOnDrag={false}
-                zoomOnScroll={false}
+                panOnDrag={true}
+                zoomOnScroll={true}
+                zoomOnPinch={true}
                 zoomOnDoubleClick={false}
                 panOnScroll={true}
-                panOnScrollMode={PanOnScrollMode.Vertical}
                 proOptions={{ hideAttribution: true }}
             >
                 <Background color={isDarkMode ? "#27272a" : "#D6CAB4"} gap={24} />
