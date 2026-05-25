@@ -123,13 +123,11 @@ public class TaskService {
             // Copy to avoid mutating Hibernate's cached entity collection
             List<Question> allQuestions = new ArrayList<>(task.getQuestions());
 
-
-            int limit = task.getDynamicQuestionCount() != null ? task.getDynamicQuestionCount() : allQuestions.size();
-
-
             java.util.Collections.shuffle(allQuestions);
 
-            // Shuffle, slice to dynamicQuestionCount, and map to a DTO that omits correct answers
+            int limit = (int) Math.ceil(allQuestions.size() * 0.7);
+
+            // Shuffle, slice to 70% limit, and map to a DTO that omits correct answers
             List<QuestionDto> safeQuestions = allQuestions.stream()
                     .limit(limit)
                     .map(q -> {
