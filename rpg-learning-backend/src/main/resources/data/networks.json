@@ -341,7 +341,7 @@
   {
     "id": 104,
     "title": "Міні-бос: Охоронець Основ",
-    "theoryContent": "Перше серйозне випробування! ⚔️ Доведи своє володіння сучасними тенденціями, основами IOS та мережевими моделями. 15 запитань з усіх попередніх тем. Під час битви підказки заборонені!",
+    "theoryContent": "Перше серйозне випробування! ⚔️ Доведи своє володіння сучасними тенденціями, основами IOS та мережевими моделями.",
     "rewardXp": 500,
     "rewardGold": 200,
     "branchName": "Арена",
@@ -3148,6 +3148,169 @@
           "значення конфігураційного регістра (configuration register)"
         ],
         "explanation": "Значення конфігураційного регістра можна перевірити за допомогою команди show version."
+      }
+    ]
+  },
+  {
+    "id": 201,
+    "title": "Основи Wi-Fi",
+    "theoryContent": "Демонстраційна побічна гілка.",
+    "rewardXp": 50,
+    "rewardGold": 15,
+    "branchName": "Бездротові",
+    "orderIndex": 4,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [104],
+    "questions": [
+      {
+        "questionText": "Який стандарт Wi-Fi найновіший (демо)?",
+        "type": "TEST",
+        "options": ["Wi-Fi 4", "Wi-Fi 6"],
+        "correctAnswers": ["Wi-Fi 6"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 202,
+    "title": "Налаштування WPA3 (Тупік)",
+    "theoryContent": "Кінець бездротової гілки. Тупіковий вузол.",
+    "rewardXp": 80,
+    "rewardGold": 25,
+    "branchName": "Бездротові",
+    "orderIndex": 5,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [201],
+    "questions": [
+      {
+        "questionText": "Чи є WPA3 безпечнішим за WPA2?",
+        "type": "TEST",
+        "options": ["Так", "Ні"],
+        "correctAnswers": ["Так"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 203,
+    "title": "Віртуалізація мереж",
+    "theoryContent": "Відгалуження від другого боса.",
+    "rewardXp": 100,
+    "rewardGold": 30,
+    "branchName": "Хмари",
+    "orderIndex": 6,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [108],
+    "questions": [
+      {
+        "questionText": "Що означає SDN?",
+        "type": "TEST",
+        "options": ["Software-Defined Networking", "System Data Node"],
+        "correctAnswers": ["Software-Defined Networking"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 204,
+    "title": "AWS та Azure (Тупік)",
+    "theoryContent": "Глибоке занурення у хмарні провайдери. Тупік.",
+    "rewardXp": 150,
+    "rewardGold": 40,
+    "branchName": "Хмари",
+    "orderIndex": 7,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [203],
+    "questions": [
+      {
+        "questionText": "Кому належить AWS?",
+        "type": "TEST",
+        "options": ["Amazon", "Google"],
+        "correctAnswers": ["Amazon"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 205,
+    "title": "Прикладна Криптографія",
+    "theoryContent": "Початок гілки хакерів.",
+    "rewardXp": 120,
+    "rewardGold": 35,
+    "branchName": "Кібербезпека",
+    "orderIndex": 9,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [112],
+    "questions": [
+      {
+        "questionText": "Який алгоритм шифрування є симетричним?",
+        "type": "TEST",
+        "options": ["AES", "RSA"],
+        "correctAnswers": ["AES"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 206,
+    "title": "Етичний хакінг",
+    "theoryContent": "Друга лінія гілки хакерів.",
+    "rewardXp": 120,
+    "rewardGold": 35,
+    "branchName": "Кібербезпека",
+    "orderIndex": 9,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [112],
+    "questions": [
+      {
+        "questionText": "Що таке Penetration Testing?",
+        "type": "TEST",
+        "options": ["Легальний злом", "Написання вірусів"],
+        "correctAnswers": ["Легальний злом"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 207,
+    "title": "Побічний Бос: Хакерський Синдикат",
+    "theoryContent": "Необов'язковий бос! Злиття двох хакерських гілок в один тупік.",
+    "rewardXp": 1000,
+    "rewardGold": 300,
+    "branchName": "Арена",
+    "orderIndex": 10,
+    "type": "BOSS",
+    "bossName": "Синдикат",
+    "bossAvatarUrl": "/assets/bosses/lich.png",
+    "timeLimitSeconds": 300,
+    "prerequisiteTaskIds": [205, 206],
+    "questions": [
+      {
+        "questionText": "Яка атака перевантажує сервер запитами?",
+        "type": "TEST",
+        "options": ["DDoS", "Phishing"],
+        "correctAnswers": ["DDoS"],
+        "explanation": "Демо-відповідь."
+      }
+    ]
+  },
+  {
+    "id": 208,
+    "title": "Інтернет речей (IoT) (Тупік)",
+    "theoryContent": "Короткий тупік перед фіналом.",
+    "rewardXp": 150,
+    "rewardGold": 50,
+    "branchName": "Архітектура",
+    "orderIndex": 12,
+    "type": "REGULAR",
+    "prerequisiteTaskIds": [116],
+    "questions": [
+      {
+        "questionText": "Що з цього є пристроєм IoT?",
+        "type": "TEST",
+        "options": ["Розумна лампочка", "Звичайний стілець"],
+        "correctAnswers": ["Розумна лампочка"],
+        "explanation": "Демо-відповідь."
       }
     ]
   }
